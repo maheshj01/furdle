@@ -72,7 +72,11 @@ class _KeyBoardViewState extends State<KeyBoardView> {
     Widget buildKeyRow(String string) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: string.buildKeys(bindrr),
+        children: string.buildKeys(bindrr, onPressed: (character) {
+          setState(() {
+            bindrr.character = character;
+          });
+        }),
       );
     }
 
@@ -81,7 +85,11 @@ class _KeyBoardViewState extends State<KeyBoardView> {
         padding: const EdgeInsets.only(left: 120.0),
         child: KeyBuilder(
             keyLabel: 'Space',
-            onPressed: () {},
+            onPressed: (String character) {
+              setState(() {
+                bindrr.character = character;
+              });
+            },
             isPressed:
                 (bindrr.isPressed && bindrr.character == ' ' ? true : false),
             isSpaceKey: true),
@@ -100,8 +108,11 @@ class _KeyBoardViewState extends State<KeyBoardView> {
             bindrr.character = event.character.toString();
           });
         } else if (event is KeyUpEvent) {
-          setState(() {
-            bindrr.isPressed = false;
+          /// Delay for key fade animation
+          Future.delayed(const Duration(milliseconds: 200), () {
+            setState(() {
+              bindrr.isPressed = false;
+            });
           });
         }
       },
@@ -109,9 +120,9 @@ class _KeyBoardViewState extends State<KeyBoardView> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text('Key Pressed: ${bindrr.character}'),
-          buildKeyRow('qwertyuiop'),
-          buildKeyRow('asdfghjkl'),
-          buildKeyRow('zxcvbnm'),
+          buildKeyRow('qwertyuiop[]\\'),
+          buildKeyRow('asdfghjkl;\''),
+          buildKeyRow('zxcvbnm,./'),
           buildSpace()
         ],
       ),
@@ -120,19 +131,21 @@ class _KeyBoardViewState extends State<KeyBoardView> {
 }
 
 extension on String {
-  List<Widget> buildKeys(KeyBindrr keyBindrr) => split('')
-      .map((e) => KeyBuilder(
-            keyLabel: e,
-            isPressed:
-                keyBindrr.character == e && keyBindrr.isPressed ? true : false,
-            onPressed: () {},
-          ))
-      .toList();
+  List<Widget> buildKeys(KeyBindrr keyBindrr, {Function(String)? onPressed}) =>
+      split('')
+          .map((e) => KeyBuilder(
+                keyLabel: e,
+                isPressed: keyBindrr.character == e && keyBindrr.isPressed
+                    ? true
+                    : false,
+                onPressed: (String character) => onPressed!(character),
+              ))
+          .toList();
 }
 
 class KeyBuilder extends StatefulWidget {
   final String keyLabel;
-  final VoidCallback onPressed;
+  final Function(String) onPressed;
   final bool isSpaceKey;
   final bool isPressed;
   const KeyBuilder(
@@ -148,8 +161,6 @@ class KeyBuilder extends StatefulWidget {
 }
 
 class _KeyBuilderState extends State<KeyBuilder> {
-  final double _keySize = 60;
-
   @override
   void didUpdateWidget(covariant KeyBuilder oldWidget) {
     // TODO: implement didUpdateWidget
@@ -159,20 +170,35 @@ class _KeyBuilderState extends State<KeyBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    final double _keySize = 60;
+
+    final color = settingsController.themeMode == ThemeMode.dark
+        ? Theme.of(context).splashColor
+        : Colors.grey.withOpacity(0.5);
+
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
+        splashFactory: InkRipple.splashFactory,
+        splashColor: color,
         borderRadius: BorderRadius.circular(10),
-        onTap: widget.onPressed,
-        child: Container(
+        onTap: () => widget.onPressed(widget.keyLabel),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
           height: _keySize,
+          margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          decoration: BoxDecoration(
+              color: widget.isPressed ? color : null,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all()),
           width: widget.isSpaceKey ? _keySize * 5 : _keySize,
           alignment: Alignment.center,
           child: Text(
             widget.keyLabel.toUpperCase(),
-            style: TextStyle(
-                fontSize: 20,
-                color: widget.isPressed ? Colors.red : Colors.black),
+            textScaleFactor: 0.8,
+            style: const TextStyle(
+              fontSize: 20,
+            ),
           ),
         ),
       ),
