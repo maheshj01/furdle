@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_template/main.dart';
-import 'package:flutter_template/utils/utility.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -33,10 +33,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-        body: Column(
-          children: [KeyBoardView()],
-        ));
+        body: const KeyBoardView());
   }
+}
+
+class KeyBindrr {
+  String character;
+  bool isPressed;
+  KeyBindrr({this.character = '', this.isPressed = false});
 }
 
 class KeyBoardView extends StatefulWidget {
@@ -47,40 +51,80 @@ class KeyBoardView extends StatefulWidget {
 }
 
 class _KeyBoardViewState extends State<KeyBoardView> {
-  final String letters = 'abcdefghijklmnopqrstuvwxyz';
+  final keyboardFocus = FocusNode();
+  late KeyBindrr bindrr;
+
+  @override
+  void dispose() {
+    super.dispose();
+    keyboardFocus.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    bindrr = KeyBindrr(character: '', isPressed: false);
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget buildKeyRow(String string) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: string.buildKeys(),
+        children: string.buildKeys(bindrr),
       );
     }
 
     Widget buildSpace() {
       return Padding(
         padding: const EdgeInsets.only(left: 120.0),
-        child:
-            KeyBuilder(keyLabel: 'Space', onPressed: () {}, isSpaceKey: true),
+        child: KeyBuilder(
+            keyLabel: 'Space',
+            onPressed: () {},
+            isPressed:
+                (bindrr.isPressed && bindrr.character == ' ' ? true : false),
+            isSpaceKey: true),
       );
     }
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        buildKeyRow('qwertyuiop'),
-        buildKeyRow('asdfghjkl'),
-        buildKeyRow('zxcvbnm'),
-        buildSpace()
-      ],
+    FocusScope.of(context).requestFocus(keyboardFocus);
+
+    return KeyboardListener(
+      focusNode: keyboardFocus,
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event is KeyDownEvent) {
+          setState(() {
+            bindrr.isPressed = true;
+            bindrr.character = event.character.toString();
+          });
+        } else if (event is KeyUpEvent) {
+          setState(() {
+            bindrr.isPressed = false;
+          });
+        }
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text('Key Pressed: ${bindrr.character}'),
+          buildKeyRow('qwertyuiop'),
+          buildKeyRow('asdfghjkl'),
+          buildKeyRow('zxcvbnm'),
+          buildSpace()
+        ],
+      ),
     );
   }
 }
 
 extension on String {
-  List<Widget> buildKeys() => split('')
+  List<Widget> buildKeys(KeyBindrr keyBindrr) => split('')
       .map((e) => KeyBuilder(
             keyLabel: e,
+            isPressed:
+                keyBindrr.character == e && keyBindrr.isPressed ? true : false,
             onPressed: () {},
           ))
       .toList();
@@ -90,11 +134,12 @@ class KeyBuilder extends StatefulWidget {
   final String keyLabel;
   final VoidCallback onPressed;
   final bool isSpaceKey;
-
+  final bool isPressed;
   const KeyBuilder(
       {Key? key,
       required this.keyLabel,
       required this.onPressed,
+      required this.isPressed,
       this.isSpaceKey = false})
       : super(key: key);
 
@@ -104,6 +149,14 @@ class KeyBuilder extends StatefulWidget {
 
 class _KeyBuilderState extends State<KeyBuilder> {
   final double _keySize = 60;
+
+  @override
+  void didUpdateWidget(covariant KeyBuilder oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    print('updated');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -117,7 +170,9 @@ class _KeyBuilderState extends State<KeyBuilder> {
           alignment: Alignment.center,
           child: Text(
             widget.keyLabel.toUpperCase(),
-            style: const TextStyle(fontSize: 20),
+            style: TextStyle(
+                fontSize: 20,
+                color: widget.isPressed ? Colors.red : Colors.black),
           ),
         ),
       ),
