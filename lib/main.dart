@@ -59,9 +59,6 @@ class MyApp extends StatelessWidget {
           return MaterialApp.router(
             title: APP_TITLE,
             debugShowCheckedModeBanner: kDebugMode,
-            supportedLocales: const [
-              Locale('en', ''), // English, no country code
-            ],
             theme: ThemeData(),
             darkTheme: ThemeData.dark(),
             themeMode: settingsController.themeMode,

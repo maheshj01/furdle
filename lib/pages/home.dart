@@ -1,7 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_template/main.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_template/utils/utility.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -13,8 +12,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   void _toggleTheme() {
     if (settingsController.themeMode == ThemeMode.dark) {
       settingsController.updateThemeMode(ThemeMode.light);
@@ -28,41 +25,102 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
-        ),
-        body: ListView.builder(
-            itemCount: 50,
-            itemBuilder: (BuildContext context, int id) {
-              return Card(
-                child: SizedBox(
-                  height: 100,
-                  child: ListTile(
-                    title: Center(child: Text('item $id')),
-                    onTap: () {
-                      context.go('/product/$id');
-                      // goTo(context, '/detail/$y');
-                    },
-                  ),
-                ),
-              );
-            }),
-        floatingActionButton: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
+          actions: [
+            IconButton(
               onPressed: _toggleTheme,
-              tooltip: 'Increment',
-              child: const Icon(Icons.dark_mode),
-            ),
-            const SizedBox(width: 10),
-            FloatingActionButton(
-              heroTag: 'something',
-              onPressed: () async {
-                GoRouter.of(context).go('/login');
-              },
-              tooltip: 'Navigate',
-              child: const Icon(Icons.navigate_next),
+              tooltip: 'theme',
+              icon: const Icon(Icons.dark_mode),
             ),
           ],
+        ),
+        body: Column(
+          children: [KeyBoardView()],
         ));
+  }
+}
+
+class KeyBoardView extends StatefulWidget {
+  const KeyBoardView({Key? key}) : super(key: key);
+
+  @override
+  _KeyBoardViewState createState() => _KeyBoardViewState();
+}
+
+class _KeyBoardViewState extends State<KeyBoardView> {
+  final String letters = 'abcdefghijklmnopqrstuvwxyz';
+  @override
+  Widget build(BuildContext context) {
+    Widget buildKeyRow(String string) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: string.buildKeys(),
+      );
+    }
+
+    Widget buildSpace() {
+      return Padding(
+        padding: const EdgeInsets.only(left: 120.0),
+        child:
+            KeyBuilder(keyLabel: 'Space', onPressed: () {}, isSpaceKey: true),
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        buildKeyRow('qwertyuiop'),
+        buildKeyRow('asdfghjkl'),
+        buildKeyRow('zxcvbnm'),
+        buildSpace()
+      ],
+    );
+  }
+}
+
+extension on String {
+  List<Widget> buildKeys() => split('')
+      .map((e) => KeyBuilder(
+            keyLabel: e,
+            onPressed: () {},
+          ))
+      .toList();
+}
+
+class KeyBuilder extends StatefulWidget {
+  final String keyLabel;
+  final VoidCallback onPressed;
+  final bool isSpaceKey;
+
+  const KeyBuilder(
+      {Key? key,
+      required this.keyLabel,
+      required this.onPressed,
+      this.isSpaceKey = false})
+      : super(key: key);
+
+  @override
+  State<KeyBuilder> createState() => _KeyBuilderState();
+}
+
+class _KeyBuilderState extends State<KeyBuilder> {
+  final double _keySize = 60;
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: widget.onPressed,
+        child: Container(
+          height: _keySize,
+          width: widget.isSpaceKey ? _keySize * 5 : _keySize,
+          alignment: Alignment.center,
+          child: Text(
+            widget.keyLabel.toUpperCase(),
+            style: const TextStyle(fontSize: 20),
+          ),
+        ),
+      ),
+    );
   }
 }
