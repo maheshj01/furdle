@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_template/pages/error.dart';
 import 'package:flutter_template/pages/home.dart';
-import 'package:flutter_template/pages/login.dart';
 import 'package:flutter_template/pages/product_detail.dart';
 import 'package:flutter_template/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
@@ -44,13 +43,6 @@ class MyApp extends StatelessWidget {
                 ),
               );
             }),
-        GoRoute(
-          path: '/login',
-          pageBuilder: (context, state) => MaterialPage<void>(
-            key: state.pageKey,
-            child: LoginPage(),
-          ),
-        ),
       ],
       errorPageBuilder: (BuildContext context, GoRouterState state) {
         return MaterialPage<void>(
