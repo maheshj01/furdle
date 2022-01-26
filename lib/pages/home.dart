@@ -38,20 +38,24 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                focusNode: keyboardFocusNode,
-                controller: textController,
-                maxLines: 20,
-              ),
-              KeyBoardView(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            TextField(
+              focusNode: keyboardFocusNode,
+              controller: textController,
+              maxLines: 20,
+            ),
+            Positioned(
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: KeyBoardView(
                 keyboardFocus: keyboardFocusNode,
                 controller: textController,
               ),
-            ],
-          ),
+            ),
+          ],
         ));
   }
 }
@@ -77,7 +81,6 @@ class _KeyBoardViewState extends State<KeyBoardView> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     bindrr = KeyBindrr(character: '', isPressed: false);
     keyboardFocus = widget.keyboardFocus ?? FocusNode();
@@ -94,6 +97,16 @@ class _KeyBoardViewState extends State<KeyBoardView> {
     controller!.text = text.substring(0, text.length - 1);
   }
 
+  bool isCapsLockOn = false;
+
+  bool isKeyPressed(String label) {
+    if (isCapsLockOn && label == 'Caps Lock') {
+      return true;
+    } else {
+      return bindrr.character == label && bindrr.isPressed;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
@@ -102,13 +115,15 @@ class _KeyBoardViewState extends State<KeyBoardView> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final size = constraints.maxWidth / 15;
-        final keysize = size.clamp(20.0, 60.0);
+        final size = constraints.maxWidth / 18;
+        final keysize = size.clamp(20.0, 50.0);
         Size keySize = Size(keysize, keysize);
 
         Widget buildKeyRow(String string,
             {Map<String, SpecialKey>? specialKeys}) {
-          final keys = string.buildKeys(bindrr, keySize: keySize,
+          final _characters =
+              isCapsLockOn ? string.toUpperCase() : string.toLowerCase();
+          final keys = _characters.buildKeys(bindrr, keySize: keySize,
               onPressed: (character) {
             setState(() {
               bindrr.character = character;
@@ -122,9 +137,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                   KeyBuilder(
                       keyLabel: specialKey.character,
                       keySize: specialKey.size,
-                      isPressed: bindrr.character == key && bindrr.isPressed
-                          ? true
-                          : false,
+                      isPressed: isKeyPressed(key),
                       onPressed: (String character) {
                         if (character == 'delete') {
                           delete();
@@ -140,21 +153,17 @@ class _KeyBoardViewState extends State<KeyBoardView> {
         }
 
         Widget buildSpace() {
-          return Padding(
-            padding: const EdgeInsets.only(left: 120.0),
-            child: KeyBuilder(
-                keyLabel: 'Space',
-                keySize: keySize,
-                onPressed: (String character) {
-                  setState(() {
-                    bindrr.character = character;
-                  });
-                },
-                isPressed: (bindrr.isPressed && bindrr.character == ' '
-                    ? true
-                    : false),
-                isSpaceKey: true),
-          );
+          return KeyBuilder(
+              keyLabel: 'Space',
+              keySize: keySize,
+              onPressed: (String character) {
+                setState(() {
+                  bindrr.character = character;
+                });
+              },
+              isPressed:
+                  (bindrr.isPressed && bindrr.character == ' ' ? true : false),
+              isSpaceKey: true);
         }
 
         return KeyboardListener(
@@ -165,6 +174,8 @@ class _KeyBoardViewState extends State<KeyBoardView> {
               final character = event.logicalKey.keyLabel;
               if (character == 'Backspace') {
                 delete();
+              } else if (character == 'Caps Lock') {
+                isCapsLockOn = !isCapsLockOn;
               }
               setState(() {
                 bindrr.isPressed = true;
@@ -301,7 +312,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
           width: widget.isSpaceKey ? _keySize * 5 : _keySize,
           alignment: Alignment.center,
           child: Text(
-            widget.keyLabel.toUpperCase(),
+            widget.keyLabel,
             textScaleFactor: scaleFactor,
             style: TextStyle(
               fontSize: isSpecialKey ? 8 : 20,
