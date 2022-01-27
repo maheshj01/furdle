@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'settings_service.dart';
@@ -21,6 +20,13 @@ class SettingsController with ChangeNotifier {
   // also persisting the changes with the SettingsService.
   ThemeMode? _themeMode;
 
+  bool get isFurdleMode => _settingsService!.isFurdleMode;
+
+  set isFurdleMode(bool value) {
+    _settingsService!.isFurdleMode = value;
+    notifyListeners();
+  }
+
   // Allow Widgets to read the user's preferred ThemeMode.
   ThemeMode? get themeMode => _themeMode;
 
@@ -29,6 +35,7 @@ class SettingsController with ChangeNotifier {
   /// settings from the service.
   Future<void> loadSettings() async {
     await _settingsService!.configTheme();
+    await _settingsService!.loadFurdle();
 
     _themeMode = await _settingsService!.themeMode();
 

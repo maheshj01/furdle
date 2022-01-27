@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_template/pages/error.dart';
+import 'package:flutter_template/pages/furdle.dart';
 import 'package:flutter_template/pages/home.dart';
 import 'package:flutter_template/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
@@ -18,26 +18,18 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
 
-  final _router = GoRouter(
-      initialLocation: '/',
-      routes: [
-        GoRoute(
-          path: '/',
-          name: 'home',
-          pageBuilder: (context, state) => MaterialPage<void>(
-            key: state.pageKey,
-            child: const MyHomePage(
-              title: 'My Home Page',
-            ),
-          ),
+  final _router = GoRouter(initialLocation: '/', routes: [
+    GoRoute(
+      path: '/',
+      name: 'home',
+      pageBuilder: (context, state) => MaterialPage<void>(
+        key: state.pageKey,
+        child: const MyHomePage(
+          title: 'Furdle',
         ),
-      ],
-      errorPageBuilder: (BuildContext context, GoRouterState state) {
-        return MaterialPage<void>(
-          key: state.pageKey,
-          child: ErrorPage(errorMessage: state.error.toString()),
-        );
-      });
+      ),
+    ),
+  ]);
 
   @override
   Widget build(BuildContext context) {

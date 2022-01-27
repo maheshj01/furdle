@@ -1,6 +1,16 @@
-/// 
-/// A utility class containing all the helper functions
-/// to keep your code clean and readable and helping to maintain
-/// the Single responsibility princple
+import 'package:flutter/material.dart';
+import 'package:flutter_template/pages/furdle.dart';
 
-int squareOfNumber(int x) => x * x;
+/// State Color for either furdle or Keyboard
+Color keyStateToColor(KeyState state, {bool isFurdle = false}) {
+  switch (state) {
+    case KeyState.exists:
+      return Colors.green;
+    case KeyState.notExists:
+      return Colors.black;
+    case KeyState.misplaced:
+      return Colors.yellow;
+    default:
+      return isFurdle ? Colors.grey : Colors.white;
+  }
+}
