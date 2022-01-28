@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_template/main.dart';
+import 'package:flutter_template/models/FurdleState.dart';
 import 'package:flutter_template/pages/furdle.dart';
 import 'package:flutter_template/pages/keyboard.dart';
 
@@ -27,6 +28,42 @@ class _MyHomePageState extends State<MyHomePage> {
   void toggle() {
     settingsController.isFurdleMode = !settingsController.isFurdleMode;
     setState(() {});
+  }
+
+  FState fState = FState();
+  late FurdleNotifier furdleNotifier;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    for (int i = 0; i < _size; i++) {
+      fState.addCell(FCellState(character: '', state: KeyState.isDefault));
+    }
+    furdleNotifier = FurdleNotifier(fState);
+  }
+
+  /// grid size
+  int _size = 5;
+
+  String furdle = 'Hello';
+
+  KeyState characterToState(String letter) {
+    int index = containsIndex(letter);
+    if (index < 0) {
+      return KeyState.notExists;
+    } else if (isRightSpot(letter, index)) {
+      return KeyState.exists;
+    } else {
+      return KeyState.misplaced;
+    }
+  }
+
+  bool isRightSpot(String letter, int index) {
+    return furdle[index] == letter;
+  }
+
+  int containsIndex(letter) {
+    return furdle.toLowerCase().indexOf(letter);
   }
 
   @override
@@ -57,9 +94,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 )),
-            Furdle(
-              isDark: settingsController.themeMode == ThemeMode.dark,
-            ),
+            ValueListenableBuilder<FState>(
+                valueListenable: furdleNotifier,
+                builder: (x, y, z) {
+                  return Furdle(
+                    isDark: settingsController.themeMode == ThemeMode.dark,
+                    fState: fState,
+                    size: _size,
+                  );
+                }),
             AnimatedPositioned(
               duration: const Duration(milliseconds: 1000),
               bottom: settingsController.isFurdleMode ? 40.0 : 10.0,
@@ -70,7 +113,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: textController,
                 isFurdleMode: settingsController.isFurdleMode,
                 onKeyEvent: (x) {
-                  print(x);
+                  final character = x.toLowerCase();
+                  if (character == 'enter' && fState.cellSize == _size) {
+                    fState.clear();
+                    fState.row++;
+                  } else if (character == 'delete' ||
+                      character == 'backspace') {
+                    fState.removeCell();
+                  } else {
+                    fState.addCell(FCellState(
+                        character: character,
+                        state: characterToState(character)));
+                  }
+                  furdleNotifier.notify();
                 },
               ),
             ),

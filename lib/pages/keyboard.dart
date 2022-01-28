@@ -62,10 +62,12 @@ class _KeyBoardViewState extends State<KeyBoardView> {
     }
   }
 
+  /// update special Characters
   void updateBindrr(String x) {
     setState(() {
       bindrr.character = x;
     });
+    widget.onKeyEvent(bindrr.character);
   }
 
   @override
@@ -90,7 +92,10 @@ class _KeyBoardViewState extends State<KeyBoardView> {
             setState(() {
               bindrr.character = character;
             });
+            widget.onKeyEvent(bindrr.character);
           });
+
+          /// Special Key Events ![A-z]
           if (specialKeys != null && !widget.isFurdleMode) {
             for (var key in specialKeys.keys) {
               final specialKey = specialKeys[key];
@@ -101,7 +106,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                       keySize: specialKey.size,
                       isPressed: isKeyPressed(key),
                       onPressed: (String character) {
-                        if (character == 'delete') {
+                        if (character == 'delete' && !widget.isFurdleMode) {
                           delete();
                         }
                         updateBindrr(character);
@@ -143,8 +148,6 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                   bindrr.isPressed = false;
                 });
               });
-            }
-            if (widget.isFurdleMode) {
               widget.onKeyEvent(bindrr.character);
             }
           },

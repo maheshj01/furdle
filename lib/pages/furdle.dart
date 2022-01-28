@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template/utils/utility.dart';
+import 'package:flutter_template/models/FurdleState.dart';
 
-enum KeyState { exists, notExists, misplaced, isDefault }
+enum KeyState {
+  /// letter is present in the right spot
+  exists,
+
+  /// letter is not present in any spot
+  notExists,
+
+  /// letter is present in the wrong spot
+  misplaced,
+
+  /// letter is empty
+  isDefault
+}
 
 class Furdle extends StatefulWidget {
+  int? size;
+  Furdle({Key? key, required this.isDark, required this.fState, this.size = 5})
+      : super(key: key);
   final bool isDark;
-
-  const Furdle({Key? key, required this.isDark}) : super(key: key);
+  FState fState;
 
   @override
   State<Furdle> createState() => _FurdleState();
@@ -15,41 +29,48 @@ class Furdle extends StatefulWidget {
 class _FurdleState extends State<Furdle> {
   @override
   Widget build(BuildContext context) {
-    print('isDark  ${widget.isDark}');
     return Column(
       children: [
         const SizedBox(
           height: 100,
         ),
-        FurdleGrid(),
+        FurdleGrid(
+          state: widget.fState,
+          gridSize: widget.size,
+        ),
       ],
     );
   }
 }
 
 class FurdleGrid extends StatelessWidget {
-  FurdleGrid({Key? key, this.size = 5}) : super(key: key);
+  FurdleGrid({Key? key, this.gridSize, required this.state}) : super(key: key);
 
-  final double? size;
+  final FState state;
+  final int? gridSize;
   double cellSize = 80;
+
   @override
   Widget build(BuildContext context) {
-    final kSize = MediaQuery.of(context).size.width / (size! + 1);
+    final kSize = MediaQuery.of(context).size.width / (gridSize! + 1);
     cellSize = kSize.clamp(40, 75);
+    print('${state.cells[0].character}');
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Column(
           children: [
-            for (int i = 0; i < size!; i++)
+            for (int i = 0; i < gridSize!; i++)
               Row(
                 children: [
-                  for (int j = 0; j < size!; j++)
+                  for (int j = 0; j < gridSize!; j++)
                     FurdleCell(
                       i: i,
                       j: j,
                       cellSize: cellSize,
                       color: Colors.grey,
+                      cellState: state.cells[j],
                     ),
                 ],
               ),
@@ -65,22 +86,41 @@ class FurdleCell extends StatelessWidget {
   final int j;
   final double cellSize;
   final Color color;
+  FCellState? cellState;
 
-  const FurdleCell(
+  FurdleCell(
       {Key? key,
       required this.i,
       required this.j,
       required this.color,
+      this.cellState,
       this.cellSize = 80})
       : super(key: key);
 
+  Color stateToColor(KeyState state) {
+    switch (state) {
+      case KeyState.exists:
+        return Colors.green;
+      case KeyState.notExists:
+        return Colors.red;
+      case KeyState.misplaced:
+        return Colors.yellow;
+      case KeyState.isDefault:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    cellState ??= FCellState.defaultState();
     return Container(
-      width: cellSize,
-      height: cellSize,
-      color: color,
-      margin: const EdgeInsets.all(2),
-    );
+        width: cellSize,
+        height: cellSize,
+        color: stateToColor(cellState!.state),
+        margin: const EdgeInsets.all(2),
+        alignment: Alignment.center,
+        child: Text(
+          cellState!.character,
+        ));
   }
 }
