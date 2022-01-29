@@ -69,7 +69,7 @@ class FurdleGrid extends StatelessWidget {
                       j: j,
                       cellSize: cellSize,
                       cellState: state.cells[i][j],
-                      isSubmitted: true, //i < state.row,
+                      isSubmitted: i < state.row,
                     ),
                 ],
               ),

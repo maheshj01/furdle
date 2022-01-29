@@ -154,7 +154,6 @@ class _KeyBoardViewState extends State<KeyBoardView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text('Key Pressed: ${bindrr.character}'),
               widget.isFurdleMode
                   ? const SizedBox()
                   : buildKeyRow('`1234567890-=', specialKeys: {

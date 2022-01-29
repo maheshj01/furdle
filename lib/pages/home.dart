@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_template/main.dart';
 import 'package:flutter_template/models/furdle.dart';
@@ -75,8 +76,61 @@ class _MyHomePageState extends State<MyHomePage> {
     return x.length == 1 && x.codeUnitAt(0) >= 65 && x.codeUnitAt(0) <= 90;
   }
 
+  void showFurdleDialog(BuildContext context) {
+    // showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) => AlertDialog(
+    //           title: const Text('Congratulations!'),
+    //           content: const Text('You solved the puzzle!'),
+    //           actions: <Widget>[
+    //             IconButton(
+    //                 icon: const Icon(Icons.close),
+    //                 onPressed: () {
+    //                   Navigator.pop(context);
+    //                 })
+    //           ],
+    //         ));
+
+    showGeneralDialog(
+        context: context,
+        pageBuilder: (context, anim1, anim2) {
+          return const SizedBox();
+        },
+        barrierDismissible: true,
+        barrierColor: Colors.black.withOpacity(0.4),
+        barrierLabel: '',
+        transitionBuilder: (context, anim1, anim2, child) {
+          return Transform.translate(
+            offset: Offset(0.0, anim1.value * 200),
+            child: Material(
+              child: Container(
+                height: 200,
+                width: 200,
+                alignment: Alignment.center,
+                child: SizedBox(
+                  height: 200,
+                  child: Column(
+                    children: const [
+                      Text('Congratulations!'),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text('You solved the puzzle!'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300));
+  }
+
+  ConfettiController confettiController = ConfettiController();
+  bool isSolved = false;
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -87,6 +141,12 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: const Icon(Icons.dark_mode),
             ),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showFurdleDialog(context);
+          },
+          child: const Icon(Icons.add),
         ),
         body: Stack(
           fit: StackFit.expand,
@@ -103,6 +163,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 )),
+            Positioned(
+              top: -100,
+              left: size.width / 2,
+              child: ConfettiWidget(
+                confettiController: confettiController,
+                blastDirection: 0,
+                blastDirectionality: BlastDirectionality.explosive,
+                particleDrag: 0.05,
+                emissionFrequency: 0.5,
+                minimumSize: const Size(10, 10),
+                maximumSize: const Size(50, 50),
+                numberOfParticles: 5,
+                gravity: 0.2,
+              ),
+            ),
             ValueListenableBuilder<FState>(
                 valueListenable: furdleNotifier,
                 builder: (x, y, z) {
@@ -122,11 +197,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: textController,
                 isFurdleMode: settingsController.isFurdleMode,
                 onKeyEvent: (x) {
+                  if (isSolved) return;
                   final character = x.toLowerCase();
                   if (character == 'enter') {
                     if (fState.isFilled()) {
-                      bool isSolved = fState.submit();
+                      isSolved = fState.submit();
                       print('puzzle solved=$isSolved');
+                      if (isSolved) {
+                        showFurdleDialog(context);
+                        confettiController.play();
+                      }
                     } else {
                       print('word is incomplete ${fState.currentWord()}');
                     }
