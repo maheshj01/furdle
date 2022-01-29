@@ -109,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   ConfettiController confettiController = ConfettiController();
   bool isSolved = false;
+  bool isGameOver = false;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -133,18 +134,6 @@ class _MyHomePageState extends State<MyHomePage> {
           fit: StackFit.expand,
           children: [
             Positioned(
-                top: 20,
-                left: 20,
-                child: Row(
-                  children: [
-                    const Text('Furdle Mode'),
-                    Switch(
-                      value: settingsController.isFurdleMode,
-                      onChanged: (x) => toggle(),
-                    ),
-                  ],
-                )),
-            Positioned(
               top: -100,
               left: size.width / 2,
               child: ConfettiWidget(
@@ -152,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 blastDirection: 0,
                 blastDirectionality: BlastDirectionality.explosive,
                 particleDrag: 0.05,
-                emissionFrequency: 0.5,
+                emissionFrequency: size.width < 400 ? 0.35 : 0.5,
                 minimumSize: const Size(10, 10),
                 maximumSize: const Size(50, 50),
                 numberOfParticles: 5,
@@ -181,20 +170,23 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: KeyBoardView(
                       keyboardFocus: keyboardFocusNode,
                       controller: textController,
-                      isFurdleMode: settingsController.isFurdleMode,
+                      isFurdleMode: true,
                       onKeyEvent: (x) {
-                        if (isSolved) return;
+                        if (isSolved || isGameOver) return;
                         final character = x.toLowerCase();
                         if (character == 'enter') {
-                          if (fState.isFilled()) {
+                          if (fState.canBeSubmitted()) {
                             isSolved = fState.submit();
-                            print('puzzle solved=$isSolved');
                             if (isSolved) {
                               showFurdleDialog(context, isSuccess: true);
                               confettiController.play();
+                              isGameOver = true;
+                            } else {
+                              if (fState.row == _size) {
+                                showFurdleDialog(context, isSuccess: false);
+                                isGameOver = true;
+                              }
                             }
-                          } else if (fState.row == size) {
-                            showFurdleDialog(context, isSuccess: false);
                           } else {
                             print('word is incomplete ${fState.currentWord()}');
                           }

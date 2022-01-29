@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:furdle/pages/home.dart';
 import 'package:furdle/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,9 @@ import 'constants/constants.dart' show APP_TITLE;
 
 late SettingsController settingsController;
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
   settingsController = SettingsController();
   runApp(MyApp());

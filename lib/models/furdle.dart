@@ -34,9 +34,9 @@ class FState extends ChangeNotifier {
     notifyListeners();
   }
 
-  ///. if the word is complete
+  /// if the current row is complete
   /// and can be submitted
-  bool isFilled() {
+  bool canBeSubmitted() {
     /// last letter of current row is Non empty
     return _cells[row][furdleSize - 1].character.isNotEmpty;
   }

@@ -78,7 +78,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final widthFactor = widget.isFurdleMode ? 12 : 18;
+        final widthFactor = widget.isFurdleMode ? 11 : 18;
         final size = constraints.maxWidth / widthFactor;
         final keysize = size.clamp(20.0, 50.0);
         Size keySize = Size(keysize, keysize);
@@ -92,6 +92,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
             setState(() {
               bindrr.character = character;
             });
+            HapticFeedback.heavyImpact();
             widget.onKeyEvent(bindrr.character);
           });
 
@@ -288,7 +289,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
           duration: const Duration(milliseconds: 200),
           height:
               isSpecialKey ? min(widget.keySize.height, _keySize) : _keySize,
-          margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+          margin: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
           decoration: BoxDecoration(
               color: widget.isPressed ? color : null,
               borderRadius: BorderRadius.circular(6),
@@ -299,7 +300,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
             widget.keyLabel,
             textScaleFactor: scaleFactor,
             style: TextStyle(
-              fontSize: isSpecialKey ? 8 : 20,
+              fontSize: isSpecialKey ? 10 : 25,
             ),
           ),
         ),
