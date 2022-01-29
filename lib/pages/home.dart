@@ -138,12 +138,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       icon: const Icon(Icons.speed)),
                 ],
               ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  showFurdleDialog(context);
-                },
-                child: const Icon(Icons.add),
-              ),
+              // floatingActionButton: FloatingActionButton(
+              //   onPressed: () {
+              //     showFurdleDialog(context);
+              //   },
+              //   child: const Icon(Icons.add),
+              // ),
               body: Stack(
                 fit: StackFit.expand,
                 children: [
