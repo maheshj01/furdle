@@ -7,7 +7,6 @@ class FurdleDialog extends StatelessWidget {
   FurdleDialog({Key? key, required this.title, required this.message})
       : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -24,7 +23,10 @@ class FurdleDialog extends StatelessWidget {
               '$title',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Text('$message'),
+            Text(
+              '$message',
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
