@@ -17,7 +17,7 @@ jobs:
           channel: 'stable'
       - run: flutter clean
       - run: flutter pub get
-      - run: flutter build web
+      - run: flutter build web --release
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
