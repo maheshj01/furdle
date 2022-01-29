@@ -193,7 +193,8 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                           keyLabel: 'Enter',
                           onPressed: (x) => updateBindrr(x),
                           isPressed: isKeyPressed('Enter'),
-                          keySize: keySize)
+                          keySize: Size(keySize.width * 1.4, keySize.height),
+                        )
                       : const SizedBox(),
                   buildKeyRow(widget.isFurdleMode ? 'zxcbnm' : 'zxcvbnm,./',
                       specialKeys: {
@@ -213,7 +214,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                           keyLabel: 'delete',
                           onPressed: (x) => updateBindrr(x),
                           isPressed: isKeyPressed('Backspace'),
-                          keySize: keySize)
+                          keySize: Size(keySize.width * 1.4, keySize.height))
                       : const SizedBox(),
                 ],
               ),
