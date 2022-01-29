@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       pageBuilder: (context, state) => MaterialPage<void>(
         key: state.pageKey,
         child: const MyHomePage(
-          title: 'Furdle',
+          title: APP_TITLE,
         ),
       ),
     ),
@@ -41,7 +41,6 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(),
             darkTheme: ThemeData.dark(),
             themeMode: settingsController.themeMode,
-            // home: const MyHomePage(title: 'Flutter Template'),
             routeInformationParser: _router.routeInformationParser,
             routerDelegate: _router.routerDelegate,
           );

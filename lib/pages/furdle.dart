@@ -122,7 +122,8 @@ class FurdleCell extends StatelessWidget {
         margin: const EdgeInsets.all(2),
         alignment: Alignment.center,
         child: Text(
-          cellState!.character,
+          cellState!.character.toUpperCase(),
+          style: TextStyle(fontSize: cellSize * 0.4, color: Colors.white),
         ));
   }
 }

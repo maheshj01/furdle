@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 left: 20,
                 child: Row(
                   children: [
-                    const Text('Furdle'),
+                    const Text('Furdle Mode'),
                     Switch(
                       value: settingsController.isFurdleMode,
                       onChanged: (x) => toggle(),
