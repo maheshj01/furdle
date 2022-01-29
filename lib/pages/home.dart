@@ -1,10 +1,10 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_template/main.dart';
-import 'package:flutter_template/models/furdle.dart';
-import 'package:flutter_template/pages/furdle.dart';
-import 'package:flutter_template/pages/keyboard.dart';
-import 'package:flutter_template/widgets/dialog.dart';
+import 'package:furdle/main.dart';
+import 'package:furdle/models/furdle.dart';
+import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/keyboard.dart';
+import 'package:furdle/widgets/dialog.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);

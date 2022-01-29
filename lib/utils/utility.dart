@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template/pages/furdle.dart';
+import 'package:furdle/pages/furdle.dart';
 
 /// State Color for either furdle or Keyboard
 Color keyStateToColor(KeyState state, {bool isFurdle = false}) {

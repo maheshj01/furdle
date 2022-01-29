@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_template/main.dart';
-import 'package:flutter_template/models/key.dart';
-import 'package:flutter_template/pages/furdle.dart';
+import 'package:furdle/main.dart';
+import 'package:furdle/models/key.dart';
+import 'package:furdle/pages/furdle.dart';
 
 class KeyBoardView extends StatefulWidget {
   final bool isFurdleMode;

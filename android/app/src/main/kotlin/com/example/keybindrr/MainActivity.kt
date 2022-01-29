@@ -1,4 +1,4 @@
-package com.example.keybindrr
+package com.wml.furdle
 
 import io.flutter.embedding.android.FlutterActivity
 

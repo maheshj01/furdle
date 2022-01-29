@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_template/pages/furdle.dart';
+import 'package:furdle/pages/furdle.dart';
 
 class FCellState {
   String character;

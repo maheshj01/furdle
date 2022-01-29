@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template/models/furdle.dart';
+import 'package:furdle/models/furdle.dart';
 
 enum KeyState {
   /// letter is present in the right spot

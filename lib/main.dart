@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_template/pages/home.dart';
-import 'package:flutter_template/utils/settings_controller.dart';
+import 'package:furdle/pages/home.dart';
+import 'package:furdle/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
 import 'constants/constants.dart' show APP_TITLE;
 
