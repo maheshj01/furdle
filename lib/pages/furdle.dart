@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_template/models/FurdleState.dart';
+import 'package:flutter_template/models/furdle.dart';
 
 enum KeyState {
   /// letter is present in the right spot
@@ -54,7 +54,6 @@ class FurdleGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final kSize = MediaQuery.of(context).size.width / (gridSize! + 1);
     cellSize = kSize.clamp(40, 75);
-    print('${state.cells[0].character}');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -69,8 +68,8 @@ class FurdleGrid extends StatelessWidget {
                       i: i,
                       j: j,
                       cellSize: cellSize,
-                      color: Colors.grey,
-                      cellState: state.cells[j],
+                      cellState: state.cells[i][j],
+                      isSubmitted: true, //i < state.row,
                     ),
                 ],
               ),
@@ -85,19 +84,22 @@ class FurdleCell extends StatelessWidget {
   final int i;
   final int j;
   final double cellSize;
-  final Color color;
   FCellState? cellState;
+  bool isSubmitted = false;
 
   FurdleCell(
       {Key? key,
       required this.i,
       required this.j,
-      required this.color,
       this.cellState,
+      this.isSubmitted = false,
       this.cellSize = 80})
       : super(key: key);
 
-  Color stateToColor(KeyState state) {
+  Color stateToColor(KeyState state, bool isSubmitted) {
+    if (!isSubmitted) {
+      return Colors.grey;
+    }
     switch (state) {
       case KeyState.exists:
         return Colors.green;
@@ -116,7 +118,7 @@ class FurdleCell extends StatelessWidget {
     return Container(
         width: cellSize,
         height: cellSize,
-        color: stateToColor(cellState!.state),
+        color: stateToColor(cellState!.state, isSubmitted),
         margin: const EdgeInsets.all(2),
         alignment: Alignment.center,
         child: Text(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_template/main.dart';
-import 'package:flutter_template/models/FurdleState.dart';
+import 'package:flutter_template/models/furdle.dart';
 import 'package:flutter_template/pages/furdle.dart';
 import 'package:flutter_template/pages/keyboard.dart';
 
@@ -34,36 +34,45 @@ class _MyHomePageState extends State<MyHomePage> {
   late FurdleNotifier furdleNotifier;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     for (int i = 0; i < _size; i++) {
-      fState.addCell(FCellState(character: '', state: KeyState.isDefault));
+      List<FCellState> row = [];
+      for (int j = 0; j < _size; j++) {
+        row.add(FCellState.defaultState());
+      }
+      fState.cells.add(row);
     }
+    fState.furdleSize = _size;
+    fState.furdlePuzzle = furdle;
     furdleNotifier = FurdleNotifier(fState);
   }
 
   /// grid size
   int _size = 5;
 
-  String furdle = 'Hello';
+  String furdle = 'hello';
 
   KeyState characterToState(String letter) {
     int index = containsIndex(letter);
     if (index < 0) {
       return KeyState.notExists;
-    } else if (isRightSpot(letter, index)) {
+    } else if (letterExists(index, letter)) {
       return KeyState.exists;
     } else {
       return KeyState.misplaced;
     }
   }
 
-  bool isRightSpot(String letter, int index) {
-    return furdle[index] == letter;
+  bool letterExists(int index, String letter) {
+    return furdle[fState.column] == letter;
   }
 
   int containsIndex(letter) {
     return furdle.toLowerCase().indexOf(letter);
+  }
+
+  bool isLetter(String x) {
+    return x.length == 1 && x.codeUnitAt(0) >= 65 && x.codeUnitAt(0) <= 90;
   }
 
   @override
@@ -114,16 +123,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 isFurdleMode: settingsController.isFurdleMode,
                 onKeyEvent: (x) {
                   final character = x.toLowerCase();
-                  if (character == 'enter' && fState.cellSize == _size) {
-                    fState.clear();
-                    fState.row++;
+                  if (character == 'enter') {
+                    if (fState.isFilled()) {
+                      bool isSolved = fState.submit();
+                      print('puzzle solved=$isSolved');
+                    } else {
+                      print('word is incomplete ${fState.currentWord()}');
+                    }
                   } else if (character == 'delete' ||
                       character == 'backspace') {
                     fState.removeCell();
+                  } else if (isLetter(x.toUpperCase())) {
+                    fState.addCell(
+                      FCellState(
+                          character: character,
+                          state: characterToState(character)),
+                    );
                   } else {
-                    fState.addCell(FCellState(
-                        character: character,
-                        state: characterToState(character)));
+                    print('invalid Key event $character');
                   }
                   furdleNotifier.notify();
                 },
