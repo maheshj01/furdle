@@ -4,6 +4,9 @@ import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
 import 'package:furdle/pages/furdle.dart';
 import 'package:furdle/pages/keyboard.dart';
+import 'package:furdle/pages/settings.dart';
+import 'package:furdle/utils/navigator.dart';
+import 'package:furdle/utils/settings_controller.dart';
 import 'package:furdle/widgets/dialog.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -127,7 +130,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: _toggleTheme,
                     tooltip: 'theme',
                     icon: Icon(!isDark ? Icons.dark_mode : Icons.brightness_4),
-                  )
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        navigate(context, const Settings());
+                      },
+                      icon: const Icon(Icons.speed)),
                 ],
               ),
               floatingActionButton: FloatingActionButton(
@@ -168,6 +176,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                 size: _size,
                               );
                             }),
+                        const SizedBox(
+                          height: 24,
+                        ),
                         AnimatedContainer(
                           margin: EdgeInsets.symmetric(
                               vertical: settingsController.isFurdleMode
@@ -188,11 +199,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                     showFurdleDialog(context, isSuccess: true);
                                     confettiController.play();
                                     isGameOver = true;
+                                    settingsController
+                                        .gameOver(MatchResult.win);
                                   } else {
                                     if (fState.row == _size) {
                                       showFurdleDialog(context,
                                           isSuccess: false);
                                       isGameOver = true;
+                                      settingsController
+                                          .gameOver(MatchResult.lose);
                                     }
                                   }
                                 } else {

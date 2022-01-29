@@ -16,6 +16,16 @@ class SettingsController with ChangeNotifier {
   // Make SettingsService a private variable so it is not used directly.
   SettingsService? _settingsService;
 
+  final _Stats _stats = _Stats.initialStats();
+
+  void gameOver(MatchResult result) {
+    _stats.onMatchPlayed(result);
+    _settingsService!.updateMatchStats(_stats._history);
+    notifyListeners();
+  }
+
+  List<MatchResult> get matchHistory => _settingsService!.matchResults;
+
   // Make ThemeMode a private variable so it is not updated directly without
   // also persisting the changes with the SettingsService.
   ThemeMode? _themeMode;
@@ -36,6 +46,7 @@ class SettingsController with ChangeNotifier {
   Future<void> loadSettings() async {
     await _settingsService!.configTheme();
     await _settingsService!.loadFurdle();
+    await _settingsService!.getStats();
 
     _themeMode = await _settingsService!.themeMode();
 
@@ -57,5 +68,58 @@ class SettingsController with ChangeNotifier {
     // Persist the changes to a local database or the internet using the
     // SettingService.
     await _settingsService!.updateThemeMode(newThemeMode);
+  }
+}
+
+enum MatchResult { win, lose }
+
+class _Stats {
+  late int _played;
+  late int _won;
+  late int _lost;
+  late int _currentStreak;
+  late int _maxStreak;
+  late List<MatchResult> _history;
+
+  _Stats.initialStats() {
+    _played = 0;
+    _won = 0;
+    _lost = 0;
+    _currentStreak = 0;
+    _maxStreak = 0;
+    _history = [];
+  }
+
+  int get played => _played;
+  int get won => _won;
+  int get lost => _lost;
+  int get currentStreak => _currentStreak;
+  int get maxStreak => _maxStreak;
+
+  void onMatchPlayed(MatchResult result) {
+    _played++;
+    _history.add(result);
+    _currentStreak++;
+    if (_currentStreak > _maxStreak) _maxStreak = _currentStreak;
+  }
+
+  set played(int value) {
+    _played = value;
+  }
+
+  set won(int value) {
+    _won = value;
+  }
+
+  set lost(int value) {
+    _lost = value;
+  }
+
+  set currentStreak(int value) {
+    _currentStreak = value;
+  }
+
+  set maxStreak(int value) {
+    _maxStreak = value;
   }
 }

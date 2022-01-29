@@ -5,3 +5,4 @@ const String APP_TITLE = 'Furdle (Flutter + Wordle)';
 /// SharedPreferences Keys
 const String kThemeKey = 'theme';
 const String kFurdleKey = 'furdle';
+const String kMatchHistoryKey = 'kMatchHistoryKey';
