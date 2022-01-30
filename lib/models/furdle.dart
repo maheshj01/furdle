@@ -87,9 +87,9 @@ class FState extends ChangeNotifier {
   }
 
   void removeCell() {
-    _cells[row][column] = FCellState.defaultState();
     if (_column > 0) {
       _column -= 1;
+      _cells[row][column] = FCellState.defaultState();
     }
     notifyListeners();
   }
@@ -108,10 +108,6 @@ class FState extends ChangeNotifier {
 
 class FurdleNotifier extends ValueNotifier<FState> {
   FurdleNotifier(FState state) : super(state);
-
-  // void addCell(FCellState cell) {
-  //   value.addCell(cell);
-  // }
 
   void notify() {
     notifyListeners();
