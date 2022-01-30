@@ -187,60 +187,74 @@ class _MyHomePageState extends State<MyHomePage> {
                         const SizedBox(
                           height: 24,
                         ),
-                        AnimatedContainer(
-                          margin: EdgeInsets.symmetric(
-                              vertical: settingsController.isFurdleMode
-                                  ? 40.0
-                                  : 10.0),
-                          duration: const Duration(milliseconds: 500),
-                          child: KeyBoardView(
-                            keyboardFocus: keyboardFocusNode,
-                            controller: textController,
-                            isFurdleMode: true,
-                            onKeyEvent: (x) {
-                              if (isSolved || isGameOver) return;
-                              final character = x.toLowerCase();
-                              if (character == 'enter') {
-                                if (fState.canBeSubmitted()) {
-                                  isSolved = fState.submit();
-                                  if (isSolved) {
-                                    showFurdleDialog(context, isSuccess: true);
-                                    confettiController.play();
-                                    isGameOver = true;
-                                    puzzle.moves = fState.row;
-                                    puzzle.result = PuzzleResult.win;
-                                    settingsController.gameOver(puzzle);
-                                  } else {
-                                    if (fState.row == _size) {
-                                      showFurdleDialog(context,
-                                          isSuccess: false);
-                                      isGameOver = true;
-                                      puzzle.moves = fState.row;
-                                      puzzle.result = PuzzleResult.lose;
-                                      settingsController.gameOver(puzzle);
-                                    }
-                                  }
-                                } else {
-                                  print(
-                                      'word is incomplete ${fState.currentWord()}');
-                                }
-                              } else if (character == 'delete' ||
-                                  character == 'backspace') {
-                                fState.removeCell();
-                              } else if (isLetter(x.toUpperCase())) {
-                                if (fState.column >= _size) return;
-                                fState.addCell(
-                                  FCellState(
-                                      character: character,
-                                      state: characterToState(character)),
-                                );
-                              } else {
-                                print('invalid Key event $character');
-                              }
-                              furdleNotifier.notify();
-                            },
-                          ),
-                        ),
+                        TweenAnimationBuilder<Offset>(
+                            tween: Tween<Offset>(
+                                begin: const Offset(0, 200),
+                                end: const Offset(0, 0)),
+                            duration: const Duration(milliseconds: 2000),
+                            builder: (BuildContext context, Offset offset,
+                                Widget? child) {
+                              return Transform.translate(
+                                offset: offset,
+                                child: AnimatedContainer(
+                                  margin: EdgeInsets.symmetric(
+                                      vertical: settingsController.isFurdleMode
+                                          ? 40.0
+                                          : 10.0),
+                                  duration: const Duration(milliseconds: 500),
+                                  child: KeyBoardView(
+                                    keyboardFocus: keyboardFocusNode,
+                                    controller: textController,
+                                    isFurdleMode: true,
+                                    onKeyEvent: (x) {
+                                      if (isSolved || isGameOver) return;
+                                      final character = x.toLowerCase();
+                                      if (character == 'enter') {
+                                        if (fState.canBeSubmitted()) {
+                                          isSolved = fState.submit();
+                                          if (isSolved) {
+                                            showFurdleDialog(context,
+                                                isSuccess: true);
+                                            confettiController.play();
+                                            isGameOver = true;
+                                            puzzle.moves = fState.row;
+                                            puzzle.result = PuzzleResult.win;
+                                            settingsController.gameOver(puzzle);
+                                          } else {
+                                            if (fState.row == _size) {
+                                              showFurdleDialog(context,
+                                                  isSuccess: false);
+                                              isGameOver = true;
+                                              puzzle.moves = fState.row;
+                                              puzzle.result = PuzzleResult.lose;
+                                              settingsController
+                                                  .gameOver(puzzle);
+                                            }
+                                          }
+                                        } else {
+                                          print(
+                                              'word is incomplete ${fState.currentWord()}');
+                                        }
+                                      } else if (character == 'delete' ||
+                                          character == 'backspace') {
+                                        fState.removeCell();
+                                      } else if (isLetter(x.toUpperCase())) {
+                                        if (fState.column >= _size) return;
+                                        fState.addCell(
+                                          FCellState(
+                                              character: character,
+                                              state:
+                                                  characterToState(character)),
+                                        );
+                                      } else {
+                                        print('invalid Key event $character');
+                                      }
+                                      furdleNotifier.notify();
+                                    },
+                                  ),
+                                ),
+                              );
+                            }),
                       ],
                     ),
                     // duration: Duration(milliseconds: 500)
