@@ -61,9 +61,17 @@ class FState extends ChangeNotifier {
   List<List<FCellState>> get cells => _cells;
 
   void addCell(FCellState cell) {
-    _cells[row][column] = cell;
-    if (_column < furdleSize - 1) {
+    if (_column < furdleSize) {
+      _cells[row][column] = cell;
       _column++;
+    }
+    notifyListeners();
+  }
+
+  void removeCell() {
+    if (_column > 0) {
+      _column -= 1;
+      _cells[row][column] = FCellState.defaultState();
     }
     notifyListeners();
   }
@@ -80,18 +88,9 @@ class FState extends ChangeNotifier {
   String currentWord() {
     String word = '';
     for (int i = 0; i < furdleSize; i++) {
-      final letter = _cells[row][i].character;
       word += _cells[row][i].character;
     }
     return word;
-  }
-
-  void removeCell() {
-    if (_column > 0) {
-      _column -= 1;
-      _cells[row][column] = FCellState.defaultState();
-    }
-    notifyListeners();
   }
 
   void clear() {

@@ -230,6 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   character == 'backspace') {
                                 fState.removeCell();
                               } else if (isLetter(x.toUpperCase())) {
+                                if (fState.column >= _size) return;
                                 fState.addCell(
                                   FCellState(
                                       character: character,
