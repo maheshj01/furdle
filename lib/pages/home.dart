@@ -55,14 +55,14 @@ class _MyHomePageState extends State<MyHomePage> {
       fState.cells.add(row);
     }
     fState.furdleSize = _size;
-    fState.furdlePuzzle = furdle;
+    puzzle = Puzzle.initialStats(puzzle: 'hello');
+    puzzle.puzzleSize = _size;
+    fState.furdlePuzzle = puzzle.puzzle;
     furdleNotifier = FurdleNotifier(fState);
   }
 
   /// grid size
   int _size = 5;
-
-  String furdle = 'hello';
 
   KeyState characterToState(String letter) {
     int index = containsIndex(letter);
@@ -76,11 +76,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   bool letterExists(int index, String letter) {
-    return furdle[fState.column] == letter;
+    return puzzle.puzzle[fState.column] == letter;
   }
 
   int containsIndex(letter) {
-    return furdle.toLowerCase().indexOf(letter);
+    return puzzle.puzzle.toLowerCase().indexOf(letter);
   }
 
   bool isLetter(String x) {
@@ -115,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ConfettiController confettiController = ConfettiController();
   bool isSolved = false;
   bool isGameOver = false;
+  late Puzzle puzzle;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -199,15 +200,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                     showFurdleDialog(context, isSuccess: true);
                                     confettiController.play();
                                     isGameOver = true;
-                                    settingsController
-                                        .gameOver(MatchResult.win);
+                                    puzzle.moves = fState.row;
+                                    puzzle.result = PuzzleResult.win;
+                                    settingsController.gameOver(puzzle);
                                   } else {
                                     if (fState.row == _size) {
                                       showFurdleDialog(context,
                                           isSuccess: false);
                                       isGameOver = true;
-                                      settingsController
-                                          .gameOver(MatchResult.lose);
+                                      puzzle.moves = fState.row;
+                                      puzzle.result = PuzzleResult.lose;
+                                      settingsController.gameOver(puzzle);
                                     }
                                   }
                                 } else {

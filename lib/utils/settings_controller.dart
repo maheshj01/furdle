@@ -16,15 +16,13 @@ class SettingsController with ChangeNotifier {
   // Make SettingsService a private variable so it is not used directly.
   SettingsService? _settingsService;
 
-  final _Stats _stats = _Stats.initialStats();
 
-  void gameOver(MatchResult result) {
-    _stats.onMatchPlayed(result);
-    _settingsService!.updateMatchStats(_stats._history);
+  void gameOver(Puzzle puzzle) {
+    _settingsService!.updatePuzzleStats(puzzle);
     notifyListeners();
   }
 
-  List<MatchResult> get matchHistory => _settingsService!.matchResults;
+  List<Puzzle> get puzzles => _settingsService!.puzzles;
 
   // Make ThemeMode a private variable so it is not updated directly without
   // also persisting the changes with the SettingsService.
@@ -46,10 +44,7 @@ class SettingsController with ChangeNotifier {
   Future<void> loadSettings() async {
     await _settingsService!.configTheme();
     await _settingsService!.loadFurdle();
-    await _settingsService!.getStats();
-
     _themeMode = await _settingsService!.themeMode();
-
     // Important! Inform listeners a change has occurred.
     notifyListeners();
   }
@@ -71,55 +66,95 @@ class SettingsController with ChangeNotifier {
   }
 }
 
-enum MatchResult { win, lose }
+enum PuzzleResult { win, lose }
 
-class _Stats {
-  late int _played;
-  late int _won;
-  late int _lost;
-  late int _currentStreak;
-  late int _maxStreak;
-  late List<MatchResult> _history;
+class Puzzle {
+  late String _puzzle;
+  late PuzzleResult _result;
+  late int _moves;
+  late int _puzzleSize;
+  late DateTime _date;
 
-  _Stats.initialStats() {
-    _played = 0;
-    _won = 0;
-    _lost = 0;
-    _currentStreak = 0;
-    _maxStreak = 0;
-    _history = [];
+  Puzzle.initialStats({String puzzle = ''}) {
+    _puzzle = puzzle;
+    _result = PuzzleResult.lose;
+    _moves = 0;
+    _puzzleSize = 0;
+    _date = DateTime.now();
   }
 
-  int get played => _played;
-  int get won => _won;
-  int get lost => _lost;
-  int get currentStreak => _currentStreak;
-  int get maxStreak => _maxStreak;
-
-  void onMatchPlayed(MatchResult result) {
-    _played++;
-    _history.add(result);
-    _currentStreak++;
-    if (_currentStreak > _maxStreak) _maxStreak = _currentStreak;
+  Puzzle.fromStats(String puzzle, PuzzleResult result, int moves,
+      int puzzleSize, DateTime date) {
+    _puzzle = puzzle;
+    _result = result;
+    _moves = moves;
+    _puzzleSize = puzzleSize;
+    _date = date;
   }
 
-  set played(int value) {
-    _played = value;
+  Puzzle(
+      {required String puzzle,
+      required PuzzleResult result,
+      required int moves,
+      required int puzzleSize,
+      required DateTime date}) {
+    _puzzle = puzzle;
+    _result = result;
+    _moves = moves;
+    _puzzleSize = puzzleSize;
+    _date = DateTime.now();
   }
 
-  set won(int value) {
-    _won = value;
+  String get puzzle => _puzzle;
+  PuzzleResult get result => _result;
+  int get moves => _moves;
+  int get puzzleSize => _puzzleSize;
+  DateTime get date => _date;
+
+  set moves(int value) {
+    _moves = value;
   }
 
-  set lost(int value) {
-    _lost = value;
+  set puzzleSize(int value) {
+    _puzzleSize = value;
   }
 
-  set currentStreak(int value) {
-    _currentStreak = value;
+  set puzzle(String value) {
+    _puzzle = value;
   }
 
-  set maxStreak(int value) {
-    _maxStreak = value;
+  set result(PuzzleResult value) {
+    _result = value;
+  }
+
+  set date(DateTime value) {
+    _date = value;
+  }
+
+  void onMatchPlayed(Puzzle puzzle) {
+    _result = puzzle.result;
+    _moves = puzzle.moves;
+    _puzzleSize = puzzle.puzzleSize;
+    _date = DateTime.now();
+  }
+
+  Map<String, Object> toJson() {
+    return {
+      'puzzle': _puzzle,
+      'result': _result.name,
+      'moves': _moves,
+      'size': _puzzleSize,
+      'date': _date.toString(),
+    };
+  }
+
+  factory Puzzle.fromJson(Map<String, dynamic> json) {
+    return Puzzle(
+      puzzle: json['puzzle'] as String,
+      result: json['result'] == 'win' ? PuzzleResult.win : PuzzleResult.lose,
+      moves: json['moves'] as int,
+      puzzleSize: json['size'] as int,
+      date: DateTime.parse(json['date'] as String),
+    );
   }
 }

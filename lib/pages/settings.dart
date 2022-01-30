@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/main.dart';
+import 'package:furdle/utils/settings_controller.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -11,30 +12,34 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getStats();
   }
 
   Future<void> getStats() async {
     print('fetchind stats');
-    final history = settingsController.matchHistory;
-    played = history.length;
-    win = history.where((element) => element.name == "win").length;
+    // final SharedPreferences _prefs = await SharedPreferences.getInstance();
+    final puzzles = settingsController.puzzles;
+    print(puzzles);
+    played = puzzles.length;
+    win = puzzles
+        .where((element) => element.result == PuzzleResult.win)
+        .toList()
+        .length;
     lose = played - win;
     print('$played = $win + $lose');
     setState(() {});
   }
 
-  late int played;
-  late int win;
-  late int lose;
+  int played = 0;
+  int win = 0;
+  int lose = 0;
 
   @override
   Widget build(BuildContext context) {
     Widget _stats(String key, String value) {
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(children: [
           Text(
             '$key',
