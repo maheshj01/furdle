@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
 import 'package:furdle/models/puzzle.dart';
@@ -7,7 +10,7 @@ import 'package:furdle/pages/furdle.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
-import 'package:furdle/utils/settings_controller.dart';
+import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -56,7 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
       fState.cells.add(row);
     }
     fState.furdleSize = _size;
-    puzzle = Puzzle.initialStats(puzzle: 'world');
+    final furdleIndex = Random().nextInt(maxWords);
+    final word = furdleList[furdleIndex];
+    print('$word');
+    puzzle = Puzzle.initialStats(puzzle: word);
     fState.furdlePuzzle = puzzle.puzzle;
     puzzle.puzzleSize = _size;
     furdleNotifier = FurdleNotifier(fState);
