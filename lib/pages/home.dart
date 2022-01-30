@@ -165,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       blastDirection: 0,
                       blastDirectionality: BlastDirectionality.explosive,
                       particleDrag: 0.05,
-                      emissionFrequency: size.width < 400 ? 0.35 : 0.5,
+                      emissionFrequency: size.width < 400 ? 0.35 : 0.4,
                       minimumSize: const Size(10, 10),
                       maximumSize: const Size(50, 50),
                       numberOfParticles: 5,
