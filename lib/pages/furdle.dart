@@ -17,8 +17,7 @@ enum KeyState {
 
 class Furdle extends StatefulWidget {
   int? size;
-  Furdle({Key? key, required this.fState, this.size = 5})
-      : super(key: key);
+  Furdle({Key? key, required this.fState, this.size = 5}) : super(key: key);
   FState fState;
 
   @override
@@ -78,7 +77,7 @@ class FurdleGrid extends StatelessWidget {
   }
 }
 
-class FurdleCell extends StatelessWidget {
+class FurdleCell extends StatefulWidget {
   final int i;
   final int j;
   final double cellSize;
@@ -94,6 +93,12 @@ class FurdleCell extends StatelessWidget {
       this.cellSize = 80})
       : super(key: key);
 
+  @override
+  State<FurdleCell> createState() => _FurdleCellState();
+}
+
+class _FurdleCellState extends State<FurdleCell>
+    with SingleTickerProviderStateMixin {
   Color stateToColor(KeyState state, bool isSubmitted) {
     if (!isSubmitted) {
       return Colors.grey;
@@ -110,18 +115,58 @@ class FurdleCell extends StatelessWidget {
     }
   }
 
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+
+    _animation = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.bounceIn,
+    ));
+  }
+
+  @override
+  void didUpdateWidget(covariant FurdleCell oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+    if (widget.cellState != oldWidget.cellState) {
+      _controller.reset();
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    cellState ??= FCellState.defaultState();
-    return Container(
-        width: cellSize,
-        height: cellSize,
-        color: stateToColor(cellState!.state, isSubmitted),
-        margin: const EdgeInsets.all(2),
-        alignment: Alignment.center,
-        child: Text(
-          cellState!.character.toUpperCase(),
-          style: TextStyle(fontSize: cellSize * 0.4, color: Colors.white),
-        ));
+    widget.cellState ??= FCellState.defaultState();
+    return AnimatedBuilder(
+        animation: _controller,
+        builder: (BuildContext context, Widget? child) {
+          return Container(
+              width: widget.cellSize,
+              height: widget.cellSize,
+              color: stateToColor(widget.cellState!.state, widget.isSubmitted),
+              margin: const EdgeInsets.all(2),
+              alignment: Alignment.center,
+              child: Text(
+                widget.cellState!.character.toUpperCase(),
+                style: TextStyle(
+                    fontSize: widget.cellSize * 0.4 * _animation.value,
+                    color: Colors.white),
+              ));
+        });
   }
 }
