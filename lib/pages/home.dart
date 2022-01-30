@@ -56,14 +56,25 @@ class _MyHomePageState extends State<MyHomePage> {
       fState.cells.add(row);
     }
     fState.furdleSize = _size;
-    puzzle = Puzzle.initialStats(puzzle: 'hello');
-    puzzle.puzzleSize = _size;
+    puzzle = Puzzle.initialStats(puzzle: 'world');
     fState.furdlePuzzle = puzzle.puzzle;
+    puzzle.puzzleSize = _size;
     furdleNotifier = FurdleNotifier(fState);
   }
 
+  int difficultyToGridSize(Difficulty difficulty) {
+    switch (difficulty) {
+      case Difficulty.easy:
+        return 4;
+      case Difficulty.medium:
+        return 5;
+      case Difficulty.hard:
+        return 6;
+    }
+  }
+
   /// grid size
-  int _size = 5;
+  final int _size = 5;
 
   KeyState characterToState(String letter) {
     int index = containsIndex(letter);
@@ -120,32 +131,25 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    print('Difficulty = ${settingsController.difficulty}');
     return AnimatedBuilder(
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {
-          final isDark = settingsController.themeMode == ThemeMode.dark;
           return Scaffold(
               appBar: AppBar(
-                title: Text(widget.title),
+                centerTitle: true,
+                title: Text(
+                  widget.title,
+                  style: const TextStyle(letterSpacing: 2),
+                ),
                 actions: [
-                  IconButton(
-                    onPressed: _toggleTheme,
-                    tooltip: 'theme',
-                    icon: Icon(!isDark ? Icons.dark_mode : Icons.brightness_4),
-                  ),
                   IconButton(
                       onPressed: () {
                         navigate(context, const Settings());
                       },
-                      icon: const Icon(Icons.speed)),
+                      icon: const Icon(Icons.settings)),
                 ],
               ),
-              // floatingActionButton: FloatingActionButton(
-              //   onPressed: () {
-              //     showFurdleDialog(context);
-              //   },
-              //   child: const Icon(Icons.add),
-              // ),
               body: Stack(
                 fit: StackFit.expand,
                 children: [
@@ -172,8 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             valueListenable: furdleNotifier,
                             builder: (x, y, z) {
                               return Furdle(
-                                isDark: settingsController.themeMode ==
-                                    ThemeMode.dark,
                                 fState: fState,
                                 size: _size,
                               );

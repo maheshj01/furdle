@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/models/puzzle.dart';
-
+import 'package:furdle/models/models.dart';
 import 'settings_service.dart';
 
 /// A class that many Widgets can interact with to read user settings, update
@@ -17,17 +16,23 @@ class SettingsController with ChangeNotifier {
   // Make SettingsService a private variable so it is not used directly.
   SettingsService? _settingsService;
 
-
   void gameOver(Puzzle puzzle) {
     _settingsService!.updatePuzzleStats(puzzle);
     notifyListeners();
   }
 
-  List<Puzzle> get puzzles => _settingsService!.stats.puzzles;
+  Stats get stats => _settingsService!.stats;
 
   // Make ThemeMode a private variable so it is not updated directly without
   // also persisting the changes with the SettingsService.
   ThemeMode? _themeMode;
+
+  Difficulty get difficulty => _settingsService!.difficulty;
+
+  set difficulty(Difficulty value) {
+    _settingsService!.difficulty = value;
+    notifyListeners();
+  }
 
   bool get isFurdleMode => _settingsService!.isFurdleMode;
 

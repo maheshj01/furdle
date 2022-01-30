@@ -27,6 +27,15 @@ class SettingsService {
 
   late Stats _stats;
 
+  Difficulty _difficulty = Difficulty.medium;
+
+  Difficulty get difficulty => _difficulty;
+
+  set difficulty(Difficulty value) {
+    _difficulty = value;
+    _sharedPreferences.setString(kDifficultyKey, value.name);
+  }
+
   Stats get stats => _stats;
 
   set stats(Stats value) {
@@ -53,6 +62,17 @@ class SettingsService {
     _isFurdleMode = _sharedPreferences.getBool(kFurdleKey) ?? false;
     _stats = Stats.initialStats();
     _stats = await getStats();
+    _difficulty = await getDifficulty();
+  }
+
+  Future<Difficulty> getDifficulty() async {
+    String difficulty =
+        _sharedPreferences.getString(kDifficultyKey) ?? 'medium';
+    return _difficulty = difficulty.toLowerCase() == 'easy'
+        ? Difficulty.easy
+        : difficulty.toLowerCase() == 'medium'
+            ? Difficulty.medium
+            : Difficulty.hard;
   }
 
   Future<Stats> getStats() async {

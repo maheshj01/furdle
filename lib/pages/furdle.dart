@@ -17,9 +17,8 @@ enum KeyState {
 
 class Furdle extends StatefulWidget {
   int? size;
-  Furdle({Key? key, required this.isDark, required this.fState, this.size = 5})
+  Furdle({Key? key, required this.fState, this.size = 5})
       : super(key: key);
-  final bool isDark;
   FState fState;
 
   @override
