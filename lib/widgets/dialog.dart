@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class FurdleDialog extends StatelessWidget {
+  const FurdleDialog({Key? key, required this.title, required this.message})
+      : super(key: key);
+
   final String title;
   final String message;
-
-  FurdleDialog({Key? key, required this.title, required this.message})
-      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +20,11 @@ class FurdleDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Text(
-              '$title',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              title,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
-              '$message',
+              message,
               textAlign: TextAlign.center,
             ),
           ],

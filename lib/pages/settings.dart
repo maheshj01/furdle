@@ -29,11 +29,11 @@ class _SettingsState extends State<Settings> {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: ListTile(
             title: Text(
-              '$key',
+              key,
               style: const TextStyle(fontSize: 18),
             ),
             trailing: Text(
-              '$value',
+              value,
               style: const TextStyle(fontSize: 18),
             ),
           ));

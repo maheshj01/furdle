@@ -61,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
     fState.furdleSize = _size;
     final furdleIndex = Random().nextInt(maxWords);
     final word = furdleList[furdleIndex];
-    print('$word');
     puzzle = Puzzle.initialStats(puzzle: word);
     fState.furdlePuzzle = puzzle.puzzle;
     puzzle.puzzleSize = _size;
@@ -137,7 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    print('Difficulty = ${settingsController.difficulty}');
     return AnimatedBuilder(
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {

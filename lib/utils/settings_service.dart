@@ -84,7 +84,6 @@ class SettingsService {
       }).toList();
       return _stats;
     } catch (_) {
-      print('caught error $_ $json');
       return Stats.initialStats();
     }
   }
@@ -105,6 +104,5 @@ class SettingsService {
     final puzzleMapList =
         _stats.puzzles.map((e) => json.encode(e.toJson())).toList();
     _sharedPreferences.setStringList(kMatchHistoryKey, puzzleMapList);
-    print(_stats.puzzles);
   }
 }
