@@ -2,6 +2,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
+import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/pages/furdle.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';

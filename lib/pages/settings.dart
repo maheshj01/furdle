@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/main.dart';
-import 'package:furdle/utils/settings_controller.dart';
+import 'package:furdle/models/puzzle.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);

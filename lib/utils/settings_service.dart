@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/utils/settings_controller.dart';
+import 'package:furdle/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A service that stores and retrieves user settings.
@@ -25,12 +25,12 @@ class SettingsService {
 
   late SharedPreferences _sharedPreferences;
 
-  late List<Puzzle> _puzzles;
+  late Stats _stats;
 
-  List<Puzzle> get puzzles => _puzzles;
+  Stats get stats => _stats;
 
-  set puzzles(List<Puzzle> value) {
-    _puzzles = value;
+  set stats(Stats value) {
+    _stats = value;
   }
 
   Future<ThemeMode> themeMode() async {
@@ -51,20 +51,21 @@ class SettingsService {
 
   Future<void> loadFurdle() async {
     _isFurdleMode = _sharedPreferences.getBool(kFurdleKey) ?? false;
-    getStats();
+    _stats = Stats.initialStats();
+    _stats = await getStats();
   }
 
-  Future<List<Puzzle>> getStats() async {
+  Future<Stats> getStats() async {
     try {
       final list = _sharedPreferences.getStringList(kMatchHistoryKey) ?? [];
-      _puzzles = list.map((e) {
+      _stats.puzzles = list.map((e) {
         final puzzle = Puzzle.fromJson(jsonDecode(e) as Map<String, dynamic>);
         return puzzle;
       }).toList();
-      return _puzzles;
+      return _stats;
     } catch (_) {
       print('caught error $_ $json');
-      return [];
+      return Stats.initialStats();
     }
   }
 
@@ -80,9 +81,10 @@ class SettingsService {
   }
 
   Future<void> updatePuzzleStats(Puzzle puzzle) async {
-    _puzzles.add(puzzle);
-    final puzzleMapList = puzzles.map((e) => json.encode(e.toJson())).toList();
+    _stats.puzzles.add(puzzle);
+    final puzzleMapList =
+        _stats.puzzles.map((e) => json.encode(e.toJson())).toList();
     _sharedPreferences.setStringList(kMatchHistoryKey, puzzleMapList);
-    print(_puzzles);
+    print(_stats.puzzles);
   }
 }
