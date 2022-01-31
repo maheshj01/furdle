@@ -51,16 +51,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    for (int i = 0; i < _size; i++) {
+    for (int i = 0; i < _size.height; i++) {
       List<FCellState> row = [];
-      for (int j = 0; j < _size; j++) {
+      for (int j = 0; j < _size.width; j++) {
         row.add(FCellState.defaultState());
       }
       fState.cells.add(row);
     }
     fState.furdleSize = _size;
     final furdleIndex = Random().nextInt(maxWords);
-    final word = furdleList[furdleIndex];
+    const word = 'haste'; //furdleList[furdleIndex];
     puzzle = Puzzle.initialStats(puzzle: word);
     fState.furdlePuzzle = puzzle.puzzle;
     puzzle.puzzleSize = _size;
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// grid size
-  final int _size = 5;
+  final Size _size = defaultSize;
 
   KeyState characterToState(String letter) {
     int index = containsIndex(letter);
@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             tween: Tween<Offset>(
                                 begin: const Offset(0, 200),
                                 end: const Offset(0, 0)),
-                            duration: const Duration(milliseconds: 2000),
+                            duration: const Duration(milliseconds: 1000),
                             builder: (BuildContext context, Offset offset,
                                 Widget? child) {
                               return Transform.translate(
@@ -210,9 +210,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                       if (isSolved || isGameOver) return;
                                       final character = x.toLowerCase();
                                       if (character == 'enter') {
+                                        /// check if word is complete
+                                        /// TODO: check if word is valid 5 letter word
                                         if (fState.canBeSubmitted()) {
                                           isSolved = fState.submit();
                                           if (isSolved) {
+                                            /// User cracked the puzzle
                                             showFurdleDialog(context,
                                                 isSuccess: true);
                                             confettiController.play();
@@ -221,7 +224,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                             puzzle.result = PuzzleResult.win;
                                             settingsController.gameOver(puzzle);
                                           } else {
-                                            if (fState.row == _size) {
+                                            /// User failed to crack the puzzle
+                                            if (fState.row == _size.height) {
                                               showFurdleDialog(context,
                                                   isSuccess: false);
                                               isGameOver = true;
@@ -239,7 +243,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                           character == 'backspace') {
                                         fState.removeCell();
                                       } else if (isLetter(x.toUpperCase())) {
-                                        if (fState.column >= _size) return;
+                                        if (fState.column >= _size.width)
+                                          return;
                                         fState.addCell(
                                           FCellState(
                                               character: character,

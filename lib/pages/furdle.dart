@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/models/furdle.dart';
 
 enum KeyState {
@@ -16,8 +17,9 @@ enum KeyState {
 }
 
 class Furdle extends StatefulWidget {
-  int? size;
-  Furdle({Key? key, required this.fState, this.size = 5}) : super(key: key);
+  Size? size;
+  Furdle({Key? key, required this.fState, this.size = defaultSize})
+      : super(key: key);
   FState fState;
 
   @override
@@ -45,22 +47,22 @@ class FurdleGrid extends StatelessWidget {
   FurdleGrid({Key? key, this.gridSize, required this.state}) : super(key: key);
 
   final FState state;
-  final int? gridSize;
+  final Size? gridSize;
   double cellSize = 80;
 
   @override
   Widget build(BuildContext context) {
-    final kSize = MediaQuery.of(context).size.width / (gridSize! + 1);
+    final kSize = MediaQuery.of(context).size.width / (gridSize!.width + 1);
     cellSize = kSize.clamp(20, 75);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Column(
           children: [
-            for (int i = 0; i < gridSize!; i++)
+            for (int i = 0; i < gridSize!.height; i++)
               Row(
                 children: [
-                  for (int j = 0; j < gridSize!; j++)
+                  for (int j = 0; j < gridSize!.width; j++)
                     FurdleCell(
                       i: i,
                       j: j,

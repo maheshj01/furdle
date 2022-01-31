@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/pages/furdle.dart';
 
 class FCellState {
@@ -21,9 +22,9 @@ class FState extends ChangeNotifier {
 
   int get column => _column;
 
-  int _furdleSize = 5;
+  Size _furdleSize = defaultSize;
 
-  int get furdleSize => _furdleSize;
+  Size get furdleSize => _furdleSize;
 
   String _furdlePuzzle = '';
 
@@ -38,10 +39,10 @@ class FState extends ChangeNotifier {
   /// and can be submitted
   bool canBeSubmitted() {
     /// last letter of current row is Non empty
-    return _cells[row][furdleSize - 1].character.isNotEmpty;
+    return _cells[row][furdleSize.width.toInt() - 1].character.isNotEmpty;
   }
 
-  set furdleSize(int value) {
+  set furdleSize(Size value) {
     _furdleSize = value;
     notifyListeners();
   }
@@ -61,7 +62,7 @@ class FState extends ChangeNotifier {
   List<List<FCellState>> get cells => _cells;
 
   void addCell(FCellState cell) {
-    if (_column < furdleSize) {
+    if (_column < furdleSize.width) {
       _cells[row][column] = cell;
       _column++;
     }
@@ -87,7 +88,7 @@ class FState extends ChangeNotifier {
   /// unsubmitted word in thr current row
   String currentWord() {
     String word = '';
-    for (int i = 0; i < furdleSize; i++) {
+    for (int i = 0; i < furdleSize.width; i++) {
       word += _cells[row][i].character;
     }
     return word;
