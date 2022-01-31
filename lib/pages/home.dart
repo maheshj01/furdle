@@ -12,6 +12,7 @@ import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
@@ -24,7 +25,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-
   final keyboardFocusNode = FocusNode();
   final textController = TextEditingController();
 
@@ -125,7 +125,10 @@ class _MyHomePageState extends State<MyHomePage>
 
   SnackBar _snackBar({required String message}) {
     return SnackBar(
-      content: Text(message),
+      content: Text(
+        message,
+        textAlign: TextAlign.center,
+      ),
       behavior: SnackBarBehavior.floating,
       duration: const Duration(milliseconds: 1500),
       margin: EdgeInsets.only(
@@ -153,6 +156,20 @@ class _MyHomePageState extends State<MyHomePage>
                   style: const TextStyle(letterSpacing: 2),
                 ),
                 actions: [
+                  IconButton(
+                      onPressed: () {
+                        if (isSolved || isGameOver) {
+                          fState.generateFurdleGrid();
+                          final furdleScoreShareMessage =
+                              'Hi check my F U R D L E score \n ${fState.shareFurdle}';
+                          Share.share(furdleScoreShareMessage);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(_snackBar(
+                              message:
+                                  'You can\'t share a furdle that hasn\'t been solved yet!'));
+                        }
+                      },
+                      icon: const Icon(Icons.share)),
                   IconButton(
                       onPressed: () {
                         navigate(context, const Settings());
@@ -251,8 +268,9 @@ class _MyHomePageState extends State<MyHomePage>
                                           character == 'backspace') {
                                         fState.removeCell();
                                       } else if (isLetter(x.toUpperCase())) {
-                                        if (fState.column >= _size.width)
+                                        if (fState.column >= _size.width) {
                                           return;
+                                        }
                                         fState.addCell(
                                           FCellState(
                                               character: character,

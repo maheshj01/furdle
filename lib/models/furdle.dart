@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:furdle/constants/const.dart';
+import 'package:furdle/main.dart';
 import 'package:furdle/pages/furdle.dart';
 
 class FCellState {
@@ -29,6 +30,10 @@ class FState extends ChangeNotifier {
   String _furdlePuzzle = '';
 
   String get furdlePuzzle => _furdlePuzzle;
+
+  String _shareFurdle = '';
+
+  String get shareFurdle => _shareFurdle;
 
   set furdlePuzzle(String value) {
     _furdlePuzzle = value;
@@ -79,14 +84,49 @@ class FState extends ChangeNotifier {
 
   bool submit() {
     _column = 0;
-    notifyListeners();
     final word = currentWord();
     _row++;
+    notifyListeners();
     return word == furdlePuzzle;
+  }
+
+  String stateToGrid(KeyState state) {
+    switch (state) {
+      case KeyState.isDefault:
+        return '⬜️';
+      case KeyState.misplaced:
+        return '🟨';
+      case KeyState.exists:
+        return '🟩';
+      case KeyState.notExists:
+        return '🟥';
+    }
+  }
+
+  void generateFurdleGrid() {
+    bool isSuccess = currentWord() == furdlePuzzle;
+    int attempts = isSuccess ? row : 0;
+    String generatedFurdle =
+        '\n #${settingsController.stats.total} $attempts/${furdleSize.height.toInt()}\n';
+    for (int i = 0; i < _furdleSize.height; i++) {
+      String currentRow = '';
+      for (int j = 0; j < _furdleSize.width; j++) {
+        currentRow += stateToGrid(_cells[i][j].state);
+      }
+      currentRow += '\n';
+      generatedFurdle += currentRow;
+    }
+    _shareFurdle = generatedFurdle;
+    notifyListeners();
   }
 
   /// unsubmitted word in thr current row
   String currentWord() {
+    /// prevent overflow of row
+    /// which happens in [submiit()]
+    if (row >= _furdleSize.height) {
+      row = furdleSize.height.toInt() - 1;
+    }
     String word = '';
     for (int i = 0; i < furdleSize.width; i++) {
       word += _cells[row][i].character;
