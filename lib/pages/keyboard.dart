@@ -142,6 +142,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                 bindrr.isPressed = true;
                 bindrr.character = character;
               });
+              widget.onKeyEvent(bindrr.character);
             } else if (event is KeyUpEvent) {
               /// Delay for key fade animation
               Future.delayed(const Duration(milliseconds: 200), () {
@@ -149,7 +150,6 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                   bindrr.isPressed = false;
                 });
               });
-              widget.onKeyEvent(bindrr.character);
             }
           },
           child: Column(
