@@ -22,14 +22,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  void _toggleTheme() {
-    if (settingsController.themeMode == ThemeMode.dark) {
-      settingsController.updateThemeMode(ThemeMode.light);
-    } else {
-      settingsController.updateThemeMode(ThemeMode.dark);
-    }
-  }
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
 
   final keyboardFocusNode = FocusNode();
   final textController = TextEditingController();
@@ -127,6 +121,18 @@ class _MyHomePageState extends State<MyHomePage> {
         pageBuilder: (context, animation1, animation2) {
           return Container();
         });
+  }
+
+  SnackBar _snackBar({required String message}) {
+    return SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(milliseconds: 1500),
+      margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height - 100,
+          right: 20,
+          left: 20),
+    );
   }
 
   ConfettiController confettiController = ConfettiController();
@@ -236,8 +242,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                             }
                                           }
                                         } else {
-                                          print(
-                                              'word is incomplete ${fState.currentWord()}');
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(_snackBar(
+                                                  message:
+                                                      'word is incomplete / invalid'));
                                         }
                                       } else if (character == 'delete' ||
                                           character == 'backspace') {
