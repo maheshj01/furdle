@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/models/furdle.dart';
@@ -29,16 +31,9 @@ class Furdle extends StatefulWidget {
 class _FurdleState extends State<Furdle> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(
-          height: 100,
-        ),
-        FurdleGrid(
-          state: widget.fState,
-          gridSize: widget.size,
-        ),
-      ],
+    return FurdleGrid(
+      state: widget.fState,
+      gridSize: widget.size,
     );
   }
 }
@@ -52,8 +47,9 @@ class FurdleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final kSize = MediaQuery.of(context).size.width / (gridSize!.width + 1);
-    cellSize = kSize.clamp(20, 75);
+    final _size = MediaQuery.of(context).size;
+    final kSize = _size.height / (gridSize!.height * 2);
+    cellSize = kSize;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -154,6 +150,7 @@ class _FurdleCellState extends State<FurdleCell>
   @override
   Widget build(BuildContext context) {
     widget.cellState ??= FCellState.defaultState();
+    print('cellSize= ${widget.cellSize}');
     return AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {

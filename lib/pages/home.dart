@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage>
     }
     fState.furdleSize = _size;
     final furdleIndex = Random().nextInt(maxWords);
-    const word = 'haste'; //furdleList[furdleIndex];
+    final word = furdleList[furdleIndex];
     puzzle = Puzzle.initialStats(puzzle: word);
     fState.furdlePuzzle = puzzle.puzzle;
     puzzle.puzzleSize = _size;
@@ -198,6 +198,7 @@ class _MyHomePageState extends State<MyHomePage>
                   Align(
                     alignment: Alignment.center,
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ValueListenableBuilder<FState>(
                             valueListenable: furdleNotifier,
