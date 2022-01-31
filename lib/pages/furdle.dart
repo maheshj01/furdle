@@ -150,7 +150,6 @@ class _FurdleCellState extends State<FurdleCell>
   @override
   Widget build(BuildContext context) {
     widget.cellState ??= FCellState.defaultState();
-    print('cellSize= ${widget.cellSize}');
     return AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
