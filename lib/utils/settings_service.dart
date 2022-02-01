@@ -104,5 +104,6 @@ class SettingsService {
     final puzzleMapList =
         _stats.puzzles.map((e) => json.encode(e.toJson())).toList();
     _sharedPreferences.setStringList(kMatchHistoryKey, puzzleMapList);
+    _stats = await getStats();
   }
 }
