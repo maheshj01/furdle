@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
@@ -138,6 +141,10 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
+  void showMessage(context, message) {
+    ScaffoldMessenger.of(context).showSnackBar(_snackBar(message: '$message'));
+  }
+
   ConfettiController confettiController = ConfettiController();
   bool isSolved = false;
   bool isGameOver = false;
@@ -161,12 +168,17 @@ class _MyHomePageState extends State<MyHomePage>
                         if (isSolved || isGameOver) {
                           fState.generateFurdleGrid();
                           final furdleScoreShareMessage =
-                              'Hi check my F U R D L E score \n ${fState.shareFurdle}';
-                          Share.share(furdleScoreShareMessage);
+                              'FURDLE ${fState.shareFurdle}';
+                          if (Platform.isIOS || Platform.isAndroid) {
+                            Share.share(furdleScoreShareMessage);
+                          } else {
+                            Clipboard.setData(
+                                ClipboardData(text: furdleScoreShareMessage));
+                            showMessage(context, 'Score copied to clipboard');
+                          }
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(_snackBar(
-                              message:
-                                  'You can\'t share a furdle that hasn\'t been solved yet!'));
+                          showMessage(context,
+                              'You can\'t share a furdle that hasn\'t been solved yet!');
                         }
                       },
                       icon: const Icon(Icons.share)),
@@ -260,10 +272,8 @@ class _MyHomePageState extends State<MyHomePage>
                                             }
                                           }
                                         } else {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(_snackBar(
-                                                  message:
-                                                      'word is incomplete / invalid'));
+                                          showMessage(context,
+                                              'word is incomplete / invalid');
                                         }
                                       } else if (character == 'delete' ||
                                           character == 'backspace') {

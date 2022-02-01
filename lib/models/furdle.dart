@@ -107,7 +107,7 @@ class FState extends ChangeNotifier {
     bool isSuccess = currentWord() == furdlePuzzle;
     int attempts = isSuccess ? row : 0;
     String generatedFurdle =
-        '\n #${settingsController.stats.total} $attempts/${furdleSize.height.toInt()}\n';
+        '#${settingsController.stats.total} $attempts/${furdleSize.height.toInt()}\n\n';
     for (int i = 0; i < _furdleSize.height; i++) {
       String currentRow = '';
       for (int j = 0; j < _furdleSize.width; j++) {
