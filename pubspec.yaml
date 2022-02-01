@@ -30,6 +30,8 @@ dependencies:
   confetti: ^0.6.0
   shared_preferences: ^2.0.12
   share_plus: ^3.0.4
+  cloud_functions: 3.2.6
+  firebase_core: 1.10.0
 
 dev_dependencies:
   flutter_test:

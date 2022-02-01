@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:furdle/firebase_options.dart';
 import 'package:furdle/pages/home.dart';
 import 'package:furdle/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
@@ -9,8 +11,11 @@ import 'constants/constants.dart' show APP_TITLE;
 /// Settings are exposed globally to access from anywhere
 
 late SettingsController settingsController;
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
