@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/constants/const.dart';
@@ -42,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage>
   void dispose() {
     keyboardFocusNode.dispose();
     textController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
@@ -62,6 +62,17 @@ class _MyHomePageState extends State<MyHomePage>
     fState.furdlePuzzle = puzzle.puzzle;
     puzzle.puzzleSize = _size;
     furdleNotifier = FurdleNotifier(fState);
+
+    _shakeController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    _shakeAnimation = Tween(begin: 0.0, end: 24.0)
+        .chain(CurveTween(curve: Curves.elasticIn))
+        .animate(_shakeController)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _shakeController.reverse();
+        }
+      });
   }
 
   int difficultyToGridSize(Difficulty difficulty) {
@@ -74,9 +85,6 @@ class _MyHomePageState extends State<MyHomePage>
         return 6;
     }
   }
-
-  /// grid size
-  final Size _size = defaultSize;
 
   KeyState characterToState(String letter) {
     int index = containsIndex(letter);
@@ -135,16 +143,23 @@ class _MyHomePageState extends State<MyHomePage>
       behavior: SnackBarBehavior.floating,
       duration: const Duration(milliseconds: 1500),
       margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 100,
+          bottom: MediaQuery.of(context).size.height * 0.9 - 100,
           right: 20,
           left: 20),
     );
   }
 
   void showMessage(context, message) {
+    _shakeController.reset();
+    _shakeController.forward();
     ScaffoldMessenger.of(context).showSnackBar(_snackBar(message: '$message'));
   }
 
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeAnimation;
+
+  /// grid size
+  final Size _size = defaultSize;
   ConfettiController confettiController = ConfettiController();
   bool isSolved = false;
   bool isGameOver = false;
@@ -215,10 +230,20 @@ class _MyHomePageState extends State<MyHomePage>
                         ValueListenableBuilder<FState>(
                             valueListenable: furdleNotifier,
                             builder: (x, y, z) {
-                              return Furdle(
-                                fState: fState,
-                                size: _size,
-                              );
+                              return AnimatedBuilder(
+                                  animation: _shakeAnimation,
+                                  builder:
+                                      (BuildContext context, Widget? child) {
+                                    return Container(
+                                        padding: EdgeInsets.only(
+                                            left: _shakeAnimation.value + 24.0,
+                                            right:
+                                                24.0 - _shakeAnimation.value),
+                                        child: Furdle(
+                                          fState: fState,
+                                          size: _size,
+                                        ));
+                                  });
                             }),
                         const SizedBox(
                           height: 24,

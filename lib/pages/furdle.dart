@@ -48,7 +48,8 @@ class FurdleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    final kSize = _size.height / (gridSize!.height * 2);
+    final divideFactor = _size.width < 400 ? 2.4 : 2.0;
+    final kSize = _size.height / (gridSize!.height * divideFactor);
     cellSize = kSize;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
