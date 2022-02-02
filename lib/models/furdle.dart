@@ -99,7 +99,7 @@ class FState extends ChangeNotifier {
       case KeyState.exists:
         return '🟩';
       case KeyState.notExists:
-        return '🟥';
+        return '⬛️';
     }
   }
 

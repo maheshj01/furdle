@@ -106,9 +106,9 @@ class _FurdleCellState extends State<FurdleCell>
       case KeyState.exists:
         return Colors.green;
       case KeyState.notExists:
-        return Colors.red;
+        return Colors.black;
       case KeyState.misplaced:
-        return Colors.yellow;
+        return Colors.yellow[800]!;
       case KeyState.isDefault:
         return Colors.grey;
     }
