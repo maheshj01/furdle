@@ -30,6 +30,31 @@ class Furdle extends StatefulWidget {
 
 class _FurdleState extends State<Furdle> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _initGrid();
+  }
+
+  @override
+  void didUpdateWidget(covariant Furdle oldWidget) {
+    // TODO: implement didUpdateWidget
+    if (oldWidget.size != widget.size || oldWidget.fState != widget.fState) {
+      super.didUpdateWidget(oldWidget);
+    }
+  }
+
+  void _initGrid() {
+    for (int i = 0; i < widget.size!.height; i++) {
+      List<FCellState> row = [];
+      for (int j = 0; j < widget.size!.width; j++) {
+        row.add(FCellState.defaultState());
+      }
+      widget.fState.cells.add(row);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FurdleGrid(
       state: widget.fState,
@@ -106,7 +131,7 @@ class _FurdleCellState extends State<FurdleCell>
       case KeyState.exists:
         return Colors.green;
       case KeyState.notExists:
-        return Colors.black;
+        return Colors.black87;
       case KeyState.misplaced:
         return Colors.yellow[800]!;
       case KeyState.isDefault:
@@ -157,9 +182,12 @@ class _FurdleCellState extends State<FurdleCell>
           return Container(
               width: widget.cellSize,
               height: widget.cellSize,
-              color: stateToColor(widget.cellState!.state, widget.isSubmitted),
               margin: const EdgeInsets.all(2),
               alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color:
+                      stateToColor(widget.cellState!.state, widget.isSubmitted),
+                  borderRadius: BorderRadius.circular(6)),
               child: Text(
                 widget.cellState!.character.toUpperCase(),
                 style: TextStyle(

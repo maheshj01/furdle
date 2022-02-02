@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:furdle/constants/const.dart';
+import 'package:furdle/constants/constants.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
 import 'package:furdle/models/puzzle.dart';
@@ -46,24 +45,7 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    for (int i = 0; i < _size.height; i++) {
-      List<FCellState> row = [];
-      for (int j = 0; j < _size.width; j++) {
-        row.add(FCellState.defaultState());
-      }
-      fState.cells.add(row);
-    }
-    fState.furdleSize = _size;
-    final furdleIndex = Random().nextInt(maxWords);
-    final word = furdleList[furdleIndex];
-    puzzle = Puzzle.initialStats(puzzle: word);
-    fState.furdlePuzzle = puzzle.puzzle;
-    puzzle.puzzleSize = _size;
-    furdleNotifier = FurdleNotifier(fState);
-
+  void _initAnimation() {
     _shakeController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
     _shakeAnimation = Tween(begin: 0.0, end: 24.0)
@@ -99,11 +81,11 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   bool letterExists(int index, String letter) {
-    return puzzle.puzzle[fState.column] == letter;
+    return furdle.puzzle[fState.column] == letter;
   }
 
   int containsIndex(letter) {
-    return puzzle.puzzle.toLowerCase().indexOf(letter);
+    return furdle.puzzle.toLowerCase().indexOf(letter);
   }
 
   bool isLetter(String x) {
@@ -121,9 +103,7 @@ class _MyHomePageState extends State<MyHomePage>
                 title: isSuccess
                     ? 'Congratulations! 🎉'
                     : '${fState.furdlePuzzle} 😞',
-                message: isSuccess
-                    ? 'You cracked the Furdle of the Day!'
-                    : 'You couldn\'t crack the Furdle of the Day!\nDon\'t let this happen again.\nBetter luck next time!',
+                message: isSuccess ? furdleCracked : failedToCrackFurdle,
               ));
         },
         transitionDuration: const Duration(milliseconds: 300),
@@ -158,6 +138,19 @@ class _MyHomePageState extends State<MyHomePage>
     ScaffoldMessenger.of(context).showSnackBar(_snackBar(message: '$message'));
   }
 
+  @override
+  void initState() {
+    super.initState();
+    fState.furdleSize = _size;
+    fState.furdlePuzzle = furdle.puzzle;
+    final furdleIndex = Random().nextInt(maxWords);
+    final word = furdleList[furdleIndex];
+    furdle = Puzzle.initialStats(puzzle: word);
+    furdle.puzzleSize = _size;
+    furdleNotifier = FurdleNotifier(fState);
+    _initAnimation();
+  }
+
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
 
@@ -166,7 +159,8 @@ class _MyHomePageState extends State<MyHomePage>
   ConfettiController confettiController = ConfettiController();
   bool isSolved = false;
   bool isGameOver = false;
-  late Puzzle puzzle;
+  late Puzzle furdle;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -192,12 +186,11 @@ class _MyHomePageState extends State<MyHomePage>
                           } else {
                             await Clipboard.setData(
                                 ClipboardData(text: furdleScoreShareMessage));
-                            showMessage(context, 'Score copied to clipboard',
+                            showMessage(context, copiedToClipBoard,
                                 isError: false);
                           }
                         } else {
-                          showMessage(context,
-                              'You can\'t share a furdle that hasn\'t been solved yet!');
+                          showMessage(context, shareIncomplete);
                         }
                       },
                       icon: const Icon(Icons.share)),
@@ -285,19 +278,19 @@ class _MyHomePageState extends State<MyHomePage>
                                                 isSuccess: true);
                                             confettiController.play();
                                             isGameOver = true;
-                                            puzzle.moves = fState.row;
-                                            puzzle.result = PuzzleResult.win;
-                                            settingsController.gameOver(puzzle);
+                                            furdle.moves = fState.row;
+                                            furdle.result = PuzzleResult.win;
+                                            settingsController.gameOver(furdle);
                                           } else {
-                                            /// User failed to crack the puzzle
+                                            /// User failed to crack the furdle
                                             if (fState.row == _size.height) {
                                               showFurdleDialog(context,
                                                   isSuccess: false);
                                               isGameOver = true;
-                                              puzzle.moves = fState.row;
-                                              puzzle.result = PuzzleResult.lose;
+                                              furdle.moves = fState.row;
+                                              furdle.result = PuzzleResult.lose;
                                               settingsController
-                                                  .gameOver(puzzle);
+                                                  .gameOver(furdle);
                                             }
                                           }
                                         } else {
