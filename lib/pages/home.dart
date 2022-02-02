@@ -141,11 +141,11 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-    fState.furdleSize = _size;
-    fState.furdlePuzzle = furdle.puzzle;
     final furdleIndex = Random().nextInt(maxWords);
     final word = furdleList[furdleIndex];
     furdle = Puzzle.initialStats(puzzle: word);
+    fState.furdleSize = _size;
+    fState.furdlePuzzle = furdle.puzzle;
     furdle.puzzleSize = _size;
     furdleNotifier = FurdleNotifier(fState);
     _initAnimation();

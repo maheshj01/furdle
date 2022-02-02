@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:furdle/constants/colors.dart';
 import 'package:furdle/firebase_options.dart';
 import 'package:furdle/pages/home.dart';
 import 'package:furdle/utils/settings_controller.dart';
@@ -47,7 +48,11 @@ class MyApp extends StatelessWidget {
           return MaterialApp.router(
             title: APP_TITLE,
             debugShowCheckedModeBanner: kDebugMode,
-            theme: ThemeData(),
+            theme: ThemeData(
+              primaryColor: primaryBlue,
+              colorScheme:
+                  const ColorScheme.light().copyWith(primary: primaryBlue),
+            ),
             darkTheme: ThemeData.dark(),
             themeMode: settingsController.themeMode,
             routeInformationParser: _router.routeInformationParser,
