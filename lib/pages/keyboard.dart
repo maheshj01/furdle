@@ -196,7 +196,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                           keySize: Size(keySize.width * 1.4, keySize.height),
                         )
                       : const SizedBox(),
-                  buildKeyRow(widget.isFurdleMode ? 'zxcbnm' : 'zxcvbnm,./',
+                  buildKeyRow(widget.isFurdleMode ? 'zxcvbnm' : 'zxcvbnm,./',
                       specialKeys: {
                         'Shift Left': SpecialKey(
                           character: 'Shift',
