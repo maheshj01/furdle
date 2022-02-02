@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/constants/const.dart';
@@ -149,9 +150,11 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  void showMessage(context, message) {
-    _shakeController.reset();
-    _shakeController.forward();
+  void showMessage(context, message, {bool isError = true}) {
+    if (isError) {
+      _shakeController.reset();
+      _shakeController.forward();
+    }
     ScaffoldMessenger.of(context).showSnackBar(_snackBar(message: '$message'));
   }
 
@@ -179,17 +182,18 @@ class _MyHomePageState extends State<MyHomePage>
                 ),
                 actions: [
                   IconButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (isSolved || isGameOver) {
                           fState.generateFurdleGrid();
                           final furdleScoreShareMessage =
                               'FURDLE ${fState.shareFurdle}';
-                          if (Platform.isIOS || Platform.isAndroid) {
-                            Share.share(furdleScoreShareMessage);
+                          if (!kIsWeb) {
+                            await Share.share(furdleScoreShareMessage);
                           } else {
-                            Clipboard.setData(
+                            await Clipboard.setData(
                                 ClipboardData(text: furdleScoreShareMessage));
-                            showMessage(context, 'Score copied to clipboard');
+                            showMessage(context, 'Score copied to clipboard',
+                                isError: false);
                           }
                         } else {
                           showMessage(context,
