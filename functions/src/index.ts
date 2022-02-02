@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
+import {wordList} from "./word";
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
 
