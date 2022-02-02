@@ -10,17 +10,6 @@ import * as functions from "firebase-functions";
 
 admin.initializeApp(functions.config().firebase);
 
-const wordList:string[] = [
-  "diver",
-  "dizzy",
-  "dodge",
-  "dodgy",
-  "dogma",
-  "doing",
-  "dolly",
-  "donor",
-];
-
 function randomWord(arr:string[]) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
