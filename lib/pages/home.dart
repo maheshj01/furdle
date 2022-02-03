@@ -175,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage>
             furdle.date.difference(_lastPlayedPuzzle.date) +
                 const Duration(hours: 24);
         settingsController.timeLeft = durationLeft;
+        settingsController.stats.number = furdle.number;
         if (_lastPlayedPuzzle.number == furdle.number) {
           furdleNotifier.isLoading = false;
           fState.furdlePuzzle = furdle.puzzle;

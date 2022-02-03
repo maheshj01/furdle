@@ -2,6 +2,8 @@ import 'package:furdle/models/puzzle.dart';
 
 class Stats {
   List<Puzzle> _puzzles;
+  /// furdle number
+  int _number;
   int _total;
   int _won;
   int _lost;
@@ -9,12 +11,19 @@ class Stats {
 
   Stats.initialStats()
       : _won = 0,
+        _number = 0,
         _puzzles = [],
         _lost = 0,
         _total = 0,
         _averageTime = 0;
 
   int get averageTime => _averageTime;
+
+  int get number => _number;
+
+  set number(int value) {
+    _number = value;
+  }
 
   set averageTime(int value) {
     _averageTime = value;

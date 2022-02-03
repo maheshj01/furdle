@@ -116,7 +116,7 @@ class FState extends ChangeNotifier {
   void generateFurdleGrid() {
     int attempts = _isPuzzleSolved ? row : 0;
     String generatedFurdle =
-        '#${settingsController.stats.total} $attempts/${furdleSize.height.toInt()}\n\n';
+        '#${settingsController.stats.number} $attempts/${furdleSize.height.toInt()}\n\n';
     for (int i = 0; i < _furdleSize.height; i++) {
       String currentRow = '';
       for (int j = 0; j < _furdleSize.width; j++) {
