@@ -7,7 +7,7 @@ import 'package:furdle/pages/furdle.dart';
 
 class KeyBoardView extends StatefulWidget {
   final bool isFurdleMode;
-  final Function(String) onKeyEvent;
+  final Function(String,bool) onKeyEvent;
   final Map<String, KeyState> keyStates;
   final FocusNode? keyboardFocus;
   const KeyBoardView(
@@ -67,7 +67,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
     setState(() {
       bindrr.character = x;
     });
-    widget.onKeyEvent(bindrr.character);
+    widget.onKeyEvent(bindrr.character,false);
   }
 
   @override
@@ -93,7 +93,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
               bindrr.character = character;
             });
             HapticFeedback.heavyImpact();
-            widget.onKeyEvent(bindrr.character);
+            widget.onKeyEvent(bindrr.character,false);
           });
 
           /// Special Key Events ![A-z]
@@ -142,7 +142,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                 bindrr.isPressed = true;
                 bindrr.character = character;
               });
-              widget.onKeyEvent(bindrr.character);
+              widget.onKeyEvent(bindrr.character,true);
             } else if (event is KeyUpEvent) {
               /// Delay for key fade animation
               Future.delayed(const Duration(milliseconds: 200), () {
