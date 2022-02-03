@@ -14,3 +14,23 @@ Color keyStateToColor(KeyState state, {bool isFurdle = false}) {
       return isFurdle ? Colors.grey : Colors.white;
   }
 }
+
+extension DateOnlyCompare on DateTime {
+  bool isSameDate(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
+}
+
+
+extension TimeLeft on Duration{
+  String timeLeftAsString(){
+    int hours = inHours;
+    int minutes = inMinutes;
+    final seconds = inSeconds;
+    if (minutes > 60) {
+      hours = minutes ~/ 60;
+      minutes = (minutes - hours * 60) % 60;
+    }
+    return '$hours hrs $minutes mins';
+  }
+}

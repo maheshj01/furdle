@@ -13,6 +13,7 @@ import 'package:furdle/pages/furdle.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
 import 'package:share_plus/share_plus.dart';
@@ -93,7 +94,10 @@ class _MyHomePageState extends State<MyHomePage>
     return x.length == 1 && x.codeUnitAt(0) >= 65 && x.codeUnitAt(0) <= 90;
   }
 
-  void showFurdleDialog(BuildContext context, {bool isSuccess = false}) {
+  void showFurdleDialog(
+      {String? title, String? message, bool isSuccess = false}) {
+    title ??= isSuccess ? 'Congratulations! 🎉' : '${fState.furdlePuzzle} 😞';
+    message ??= isSuccess ? furdleCracked : failedToCrackFurdle;
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
         transitionBuilder: (context, a1, a2, widget) {
@@ -101,10 +105,8 @@ class _MyHomePageState extends State<MyHomePage>
               offset: Offset(0, 50 * a1.value),
               // scale: a1.value,
               child: FurdleDialog(
-                title: isSuccess
-                    ? 'Congratulations! 🎉'
-                    : '${fState.furdlePuzzle} 😞',
-                message: isSuccess ? furdleCracked : failedToCrackFurdle,
+                title: title!,
+                message: message!,
               ));
         },
         transitionDuration: const Duration(milliseconds: 300),
@@ -116,14 +118,16 @@ class _MyHomePageState extends State<MyHomePage>
         });
   }
 
-  SnackBar _snackBar({required String message}) {
+  SnackBar _snackBar(
+      {required String message,
+      Duration duration = const Duration(milliseconds: 1500)}) {
     return SnackBar(
       content: Text(
         message,
         textAlign: TextAlign.center,
       ),
       behavior: SnackBarBehavior.floating,
-      duration: const Duration(milliseconds: 1500),
+      duration: duration,
       margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).size.height * 0.9 - 100,
           right: 20,
@@ -131,12 +135,14 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 
-  void showMessage(context, message, {bool isError = true}) {
+  void showMessage(context, message,
+      {bool isError = true, Duration? duration}) {
     if (isError) {
       _shakeController.reset();
       _shakeController.forward();
     }
-    ScaffoldMessenger.of(context).showSnackBar(_snackBar(message: '$message'));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(_snackBar(message: '$message', duration: duration!));
   }
 
   @override
@@ -156,14 +162,36 @@ class _MyHomePageState extends State<MyHomePage>
         firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
     _docRef.get().then((firestore.DocumentSnapshot snapshot) {
       String word = '';
+      Puzzle _lastPlayedPuzzle = Puzzle.initialStats();
       if (snapshot.exists) {
         word = snapshot['word'];
         furdle.number = snapshot['number'];
         furdle.date = (snapshot['date'] as firestore.Timestamp).toDate();
         furdle.puzzle = word;
+        final puzzles = settingsController.stats.puzzles;
+        if (puzzles.isNotEmpty) {
+          _lastPlayedPuzzle = puzzles.last;
+        }
+        final Duration durationLeft =
+            furdle.date.difference(_lastPlayedPuzzle.date) +
+                const Duration(hours: 24);
+        settingsController.timeLeft = durationLeft;
+        if (_lastPlayedPuzzle.number == furdle.number) {
+          furdleNotifier.isLoading = false;
+          fState.furdlePuzzle = furdle.puzzle;
+          showFurdleDialog(
+              title: 'You have already played the game',
+              message: 'Next puzzle in \n ${durationLeft.timeLeftAsString()}');
+          settingsController.isAlreadyPlayed = true;
+          return;
+        } else {
+          settingsController.isAlreadyPlayed = false;
+        }
       } else {
         final furdleIndex = Random().nextInt(maxWords);
         word = furdleList[furdleIndex];
+        showMessage(context, 'You are playing in offline mode',
+            duration: const Duration(milliseconds: 2000));
       }
       fState.furdlePuzzle = furdle.puzzle;
       furdleNotifier.isLoading = false;
@@ -292,8 +320,19 @@ class _MyHomePageState extends State<MyHomePage>
                                     keyboardFocus: keyboardFocusNode,
                                     controller: textController,
                                     isFurdleMode: true,
-                                    onKeyEvent: (x) {
-                                      if (isSolved || isGameOver) return;
+                                    onKeyEvent:
+                                        (String x, bool isPhysicalKeyEvent) {
+                                      if (isSolved ||
+                                          isGameOver ||
+                                          settingsController.isAlreadyPlayed) {
+                                        if (isPhysicalKeyEvent) return;
+                                        showFurdleDialog(
+                                            title:
+                                                'You have already played the game',
+                                            message:
+                                                'Next puzzle in \n ${settingsController.timeLeft.timeLeftAsString()}');
+                                        return;
+                                      }
                                       final character = x.toLowerCase();
                                       if (character == 'enter') {
                                         /// check if word is complete
@@ -302,8 +341,7 @@ class _MyHomePageState extends State<MyHomePage>
                                           isSolved = fState.submit();
                                           if (isSolved) {
                                             /// User cracked the puzzle
-                                            showFurdleDialog(context,
-                                                isSuccess: true);
+                                            showFurdleDialog(isSuccess: true);
                                             confettiController.play();
                                             isGameOver = true;
                                             furdle.moves = fState.row;
@@ -312,7 +350,7 @@ class _MyHomePageState extends State<MyHomePage>
                                           } else {
                                             /// User failed to crack the furdle
                                             if (fState.row == _size.height) {
-                                              showFurdleDialog(context,
+                                              showFurdleDialog(
                                                   isSuccess: false);
                                               isGameOver = true;
                                               furdle.moves = fState.row;

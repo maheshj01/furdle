@@ -17,11 +17,28 @@ class SettingsController with ChangeNotifier {
   SettingsService? _settingsService;
 
   void gameOver(Puzzle puzzle) {
+    isAlreadyPlayed = true;
     _settingsService!.updatePuzzleStats(puzzle);
     notifyListeners();
   }
 
+  Duration _timeLeft = Duration.zero;
+
+  Duration get timeLeft => _timeLeft;
+
+  set timeLeft(Duration duration) {
+    _timeLeft = duration;
+    notifyListeners();
+  }
+
   Stats get stats => _settingsService!.stats;
+
+  bool get isAlreadyPlayed => _settingsService!.isAlreadyPlayed;
+
+  set isAlreadyPlayed(bool value) {
+    _settingsService!.isAlreadyPlayed = value;
+    notifyListeners();
+  }
 
   // Make ThemeMode a private variable so it is not updated directly without
   // also persisting the changes with the SettingsService.
@@ -69,5 +86,9 @@ class SettingsController with ChangeNotifier {
     // Persist the changes to a local database or the internet using the
     // SettingService.
     await _settingsService!.updateThemeMode(newThemeMode);
+  }
+
+  Future<void> clear() async{
+    _settingsService!.clear();
   }
 }

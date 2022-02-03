@@ -21,6 +21,7 @@ class FurdleDialog extends StatelessWidget {
           children: [
             Text(
               title,
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(

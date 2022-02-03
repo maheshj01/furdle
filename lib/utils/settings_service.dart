@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/strings.dart';
 import 'package:furdle/models/models.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A service that stores and retrieves user settings.
@@ -27,6 +28,8 @@ class SettingsService {
 
   late Stats _stats;
 
+  late bool _isAlreadyPlayed = false;
+
   Difficulty _difficulty = Difficulty.medium;
 
   Difficulty get difficulty => _difficulty;
@@ -37,6 +40,12 @@ class SettingsService {
   }
 
   Stats get stats => _stats;
+
+  bool get isAlreadyPlayed => _isAlreadyPlayed;
+
+  set isAlreadyPlayed(bool value) {
+    _isAlreadyPlayed = value;
+  }
 
   set stats(Stats value) {
     _stats = value;
@@ -63,6 +72,16 @@ class SettingsService {
     _stats = Stats.initialStats();
     _stats = await getStats();
     _difficulty = await getDifficulty();
+    _isAlreadyPlayed = isSameDate();
+  }
+
+  bool isSameDate() {
+    final now = DateTime.now();
+    if (_stats != null && _stats.total > 0) {
+      bool isSame = _stats.puzzles.last.date.isSameDate(now);
+      return isSame;
+    }
+    return false;
   }
 
   Future<Difficulty> getDifficulty() async {
@@ -105,5 +124,9 @@ class SettingsService {
         _stats.puzzles.map((e) => json.encode(e.toJson())).toList();
     _sharedPreferences.setStringList(kMatchHistoryKey, puzzleMapList);
     _stats = await getStats();
+  }
+
+  Future<void> clear() async {
+    _sharedPreferences.clear();
   }
 }
