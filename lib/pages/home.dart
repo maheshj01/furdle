@@ -118,9 +118,7 @@ class _MyHomePageState extends State<MyHomePage>
         });
   }
 
-  SnackBar _snackBar(
-      {required String message,
-      Duration duration = const Duration(milliseconds: 1500)}) {
+  SnackBar _snackBar({required String message, required Duration duration}) {
     return SnackBar(
       content: Text(
         message,
@@ -136,7 +134,8 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void showMessage(context, message,
-      {bool isError = true, Duration? duration}) {
+      {bool isError = true,
+      Duration? duration = const Duration(milliseconds: 1500)}) {
     if (isError) {
       _shakeController.reset();
       _shakeController.forward();
