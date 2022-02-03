@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 const baseUrl = 'www.staging.example.com';
 // const BASE_URL = 'www.production.example.com';
+/// length of words in list
 int maxWords = 2334;
 
 const defaultSize = Size(5, 6);

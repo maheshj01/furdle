@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:confetti/confetti.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -141,14 +142,34 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
-    final furdleIndex = Random().nextInt(maxWords);
-    final word = furdleList[furdleIndex];
-    furdle = Puzzle.initialStats(puzzle: word);
+    furdle = Puzzle.initialStats(puzzle: '');
     fState.furdleSize = _size;
     fState.furdlePuzzle = furdle.puzzle;
     furdle.puzzleSize = _size;
     furdleNotifier = FurdleNotifier(fState);
     _initAnimation();
+    getWord();
+  }
+
+  Future<void> getWord() async {
+    firestore.DocumentReference<Map<String, dynamic>> _docRef =
+        firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
+    _docRef.get().then((firestore.DocumentSnapshot snapshot) {
+      String word = '';
+      if (snapshot.exists) {
+        word = snapshot['word'];
+        furdle.number = snapshot['number'];
+        furdle.date = (snapshot['date'] as firestore.Timestamp).toDate();
+        furdle.puzzle = word;
+      } else {
+        final furdleIndex = Random().nextInt(maxWords);
+        word = furdleList[furdleIndex];
+      }
+      fState.furdlePuzzle = furdle.puzzle;
+      furdleNotifier.isLoading = false;
+      // Future.delayed(const Duration(seconds: 2), () {
+      // });
+    });
   }
 
   late final AnimationController _shakeController;
@@ -226,7 +247,14 @@ class _MyHomePageState extends State<MyHomePage>
                       children: [
                         ValueListenableBuilder<FState>(
                             valueListenable: furdleNotifier,
-                            builder: (x, y, z) {
+                            builder: (x, FState state, z) {
+                              if (furdleNotifier.isLoading) {
+                                return Container(
+                                  height: 200,
+                                  alignment: Alignment.center,
+                                  child: const CircularProgressIndicator(),
+                                );
+                              }
                               return AnimatedBuilder(
                                   animation: _shakeAnimation,
                                   builder:

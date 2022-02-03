@@ -158,6 +158,15 @@ class FState extends ChangeNotifier {
 class FurdleNotifier extends ValueNotifier<FState> {
   FurdleNotifier(FState state) : super(state);
 
+  bool _isLoading = true;
+
+  bool get isLoading => _isLoading;
+
+  set isLoading(bool value) {
+    _isLoading = value;
+    notify();
+  }
+
   void notify() {
     notifyListeners();
   }

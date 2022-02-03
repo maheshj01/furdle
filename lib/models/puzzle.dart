@@ -5,6 +5,7 @@ enum PuzzleResult { win, lose }
 enum Difficulty { easy, medium, hard }
 
 class Puzzle {
+  late int _number;
   late String _puzzle;
   late PuzzleResult _result;
   late int _moves;
@@ -13,6 +14,7 @@ class Puzzle {
   late Difficulty _difficulty;
 
   Puzzle.initialStats({String puzzle = ''}) {
+    _number = 0;
     _puzzle = puzzle;
     _result = PuzzleResult.lose;
     _moves = 0;
@@ -22,7 +24,8 @@ class Puzzle {
   }
 
   Puzzle.fromStats(String puzzle, PuzzleResult result, int moves,
-      Size puzzleSize, DateTime date, Difficulty difficulty) {
+      Size puzzleSize, DateTime date, Difficulty difficulty, int number) {
+    _number = number;
     _puzzle = puzzle;
     _result = result;
     _moves = moves;
@@ -37,7 +40,9 @@ class Puzzle {
       required int moves,
       required Size puzzleSize,
       required DateTime date,
-      required Difficulty difficulty}) {
+      required Difficulty difficulty,
+      required int number}) {
+    _number = number;
     _puzzle = puzzle;
     _result = result;
     _moves = moves;
@@ -57,6 +62,12 @@ class Puzzle {
   DateTime get date => _date;
 
   Difficulty get difficulty => _difficulty;
+
+  int get number => _number;
+
+  set number(int value) {
+    _number = value;
+  }
 
   set moves(int value) {
     _moves = value;
@@ -92,6 +103,7 @@ class Puzzle {
 
   Map<String, Object> toJson() {
     return {
+      'number': _number,
       'puzzle': _puzzle,
       'result': _result.name,
       'moves': _moves,
@@ -104,6 +116,7 @@ class Puzzle {
   factory Puzzle.fromJson(Map<String, dynamic> json) {
     final listSize = json['size'].toString().split('x').toList();
     return Puzzle(
+        number: json['number'] as int,
         puzzle: json['puzzle'] as String,
         result: json['result'] == 'win' ? PuzzleResult.win : PuzzleResult.lose,
         moves: json['moves'] as int,
