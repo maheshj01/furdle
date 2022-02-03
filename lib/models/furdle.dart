@@ -23,6 +23,10 @@ class FState extends ChangeNotifier {
 
   int get column => _column;
 
+  bool _isPuzzleSolved = false;
+
+  bool get isPuzzleSolved => _isPuzzleSolved;
+
   Size _furdleSize = defaultSize;
 
   Size get furdleSize => _furdleSize;
@@ -37,6 +41,11 @@ class FState extends ChangeNotifier {
 
   set furdlePuzzle(String value) {
     _furdlePuzzle = value;
+    notifyListeners();
+  }
+
+  set isPuzzleSolved(bool value) {
+    _isPuzzleSolved = value;
     notifyListeners();
   }
 
@@ -86,8 +95,9 @@ class FState extends ChangeNotifier {
     _column = 0;
     final word = currentWord();
     _row++;
+    isPuzzleSolved = word == furdlePuzzle;
     notifyListeners();
-    return word == furdlePuzzle;
+    return _isPuzzleSolved;
   }
 
   String stateToGrid(KeyState state) {
@@ -104,8 +114,7 @@ class FState extends ChangeNotifier {
   }
 
   void generateFurdleGrid() {
-    bool isSuccess = currentWord() == furdlePuzzle;
-    int attempts = isSuccess ? row : 0;
+    int attempts = _isPuzzleSolved ? row : 0;
     String generatedFurdle =
         '#${settingsController.stats.total} $attempts/${furdleSize.height.toInt()}\n\n';
     for (int i = 0; i < _furdleSize.height; i++) {
@@ -122,7 +131,7 @@ class FState extends ChangeNotifier {
 
   /// unsubmitted word in thr current row
   String currentWord() {
-    /// prevent overflow of row
+    ///TODO: prevent overflow of row
     /// which happens in [submiit()]
     if (row >= _furdleSize.height) {
       row = furdleSize.height.toInt() - 1;
