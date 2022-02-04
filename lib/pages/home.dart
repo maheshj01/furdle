@@ -156,6 +156,17 @@ class _MyHomePageState extends State<MyHomePage>
     getWord();
   }
 
+  Size difficultyToSize(Difficulty difficulty) {
+    switch (difficulty) {
+      case Difficulty.easy:
+        return const Size(5.0, 7.0);
+      case Difficulty.medium:
+        return const Size(5.0, 6.0);
+      case Difficulty.hard:
+        return const Size(5.0, 5.0);
+    }
+  }
+
   Future<void> getWord() async {
     firestore.DocumentReference<Map<String, dynamic>> _docRef =
         firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
@@ -176,7 +187,10 @@ class _MyHomePageState extends State<MyHomePage>
                 const Duration(hours: 24);
         settingsController.timeLeft = durationLeft;
         settingsController.stats.number = furdle.number;
-        if (_lastPlayedPuzzle.number == furdle.number) {
+        bool isPlayed = _lastPlayedPuzzle.number == furdle.number;
+        _size = difficultyToSize(settingsController.difficulty);
+        furdle.puzzleSize = _size;
+        if (isPlayed) {
           furdleNotifier.isLoading = false;
           fState.furdlePuzzle = furdle.puzzle;
           showFurdleDialog(
@@ -204,7 +218,7 @@ class _MyHomePageState extends State<MyHomePage>
   late final Animation<double> _shakeAnimation;
 
   /// grid size
-  final Size _size = defaultSize;
+  Size _size = defaultSize;
   ConfettiController confettiController = ConfettiController();
   bool isSolved = false;
   bool isGameOver = false;
@@ -213,6 +227,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return AnimatedBuilder(
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {
