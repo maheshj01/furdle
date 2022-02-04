@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/const.dart';
+import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
+import 'package:furdle/models/puzzle.dart';
 
 enum KeyState {
   /// letter is present in the right spot
@@ -70,10 +72,21 @@ class FurdleGrid extends StatelessWidget {
   final Size? gridSize;
   double cellSize = 80;
 
+  double difficultyToDivideFactor() {
+    switch (settingsController.difficulty) {
+      case Difficulty.easy:
+        return 2.4;
+      case Difficulty.medium:
+        return 2.4;
+      case Difficulty.hard:
+        return 2.5;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    final divideFactor = _size.width < 400 ? 2.4 : 2.0;
+    double divideFactor = _size.width < 400 ? difficultyToDivideFactor() : 2.0;
     final kSize = _size.height / (gridSize!.height * divideFactor);
     cellSize = kSize;
     return Row(
