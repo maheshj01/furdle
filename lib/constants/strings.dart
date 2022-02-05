@@ -1,6 +1,7 @@
 /// app string constants  from the UI go here in this page
 /// e.g
-const String APP_TITLE = 'FURDLE';
+const String appTitle = 'FURDLE';
+const String settingsTitle = 'Settings';
 
 /// SharedPreferences Keys
 const String kThemeKey = 'theme';

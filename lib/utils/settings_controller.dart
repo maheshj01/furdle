@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/models/models.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'settings_service.dart';
 
 /// A class that many Widgets can interact with to read user settings, update
@@ -23,6 +24,15 @@ class SettingsController with ChangeNotifier {
   }
 
   Duration _timeLeft = Duration.zero;
+
+  String _version = '';
+
+  String get version => _version;
+
+  set version(String value) {
+    _version = value;
+    notifyListeners();
+  }
 
   Duration get timeLeft => _timeLeft;
 
@@ -68,6 +78,8 @@ class SettingsController with ChangeNotifier {
     await _settingsService!.configTheme();
     await _settingsService!.loadFurdle();
     _themeMode = await _settingsService!.themeMode();
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    version = packageInfo.version;
     // Important! Inform listeners a change has occurred.
     notifyListeners();
   }
@@ -88,7 +100,7 @@ class SettingsController with ChangeNotifier {
     await _settingsService!.updateThemeMode(newThemeMode);
   }
 
-  Future<void> clear() async{
+  Future<void> clear() async {
     _settingsService!.clear();
   }
 }

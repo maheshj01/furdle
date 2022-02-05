@@ -2,12 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:furdle/constants/colors.dart';
 import 'package:furdle/firebase_options.dart';
 import 'package:furdle/pages/home.dart';
 import 'package:furdle/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
-import 'constants/constants.dart' show APP_TITLE;
+import 'constants/constants.dart';
+import 'pages/settings.dart';
 
 /// Settings are exposed globally to access from anywhere
 
@@ -34,8 +34,16 @@ class MyApp extends StatelessWidget {
       pageBuilder: (context, state) => MaterialPage<void>(
         key: state.pageKey,
         child: const MyHomePage(
-          title: APP_TITLE,
+          title: appTitle,
         ),
+      ),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      pageBuilder: (context, state) => MaterialPage<void>(
+        key: state.pageKey,
+        child: const Settings(),
       ),
     ),
   ]);
@@ -46,7 +54,7 @@ class MyApp extends StatelessWidget {
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {
           return MaterialApp.router(
-            title: APP_TITLE,
+            title: appTitle,
             debugShowCheckedModeBanner: kDebugMode,
             theme: ThemeData(
               primaryColor: primaryBlue,

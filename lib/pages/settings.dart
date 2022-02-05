@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
 
+import '../constants/strings.dart';
+
 class Settings extends StatefulWidget {
+  final String title = settingsTitle;
+
   const Settings({Key? key}) : super(key: key);
 
   @override
@@ -48,7 +52,7 @@ class _SettingsState extends State<Settings> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(widget.title),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -119,6 +123,13 @@ class _SettingsState extends State<Settings> {
             _stats('Win', '${stats.won}'),
             _stats('Lose', '${stats.lost}'),
             const Divider(),
+            const Expanded(child: SizedBox()),
+            SizedBox(
+              height: 50,
+              child: Align(
+                  alignment: Alignment.center,
+                  child: Text('v${settingsController.version}')),
+            )
           ],
         ),
       ),
