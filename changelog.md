@@ -20,4 +20,6 @@
 - show furdle state on keyboard
 - update furdle every 6 hours
 - show app version info
+- submit words only if valid (present in list)
+- show time remaining counter in realtime
 

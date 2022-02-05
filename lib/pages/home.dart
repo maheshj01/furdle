@@ -88,6 +88,13 @@ class _MyHomePageState extends State<MyHomePage>
               child: FurdleDialog(
                 title: title!,
                 message: message!,
+                onTimerComplete: () async {
+                  isSolved = false;
+                  isGameOver = false;
+                  settingsController.isAlreadyPlayed = false;
+                  await getWord();
+                  popView(context);
+                },
               ));
         },
         transitionDuration: const Duration(milliseconds: 300),
@@ -138,6 +145,7 @@ class _MyHomePageState extends State<MyHomePage>
     getWord();
   }
 
+  /// Get the firdle grid Size
   Size difficultyToSize(Difficulty difficulty) {
     switch (difficulty) {
       case Difficulty.easy:
@@ -150,6 +158,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   Future<void> getWord() async {
+    furdleNotifier.isLoading = true;
     firestore.DocumentReference<Map<String, dynamic>> _docRef =
         firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
     _docRef.get().then((firestore.DocumentSnapshot snapshot) {
@@ -181,8 +190,9 @@ class _MyHomePageState extends State<MyHomePage>
           furdleNotifier.isLoading = false;
           fState.furdlePuzzle = furdle.puzzle;
           showFurdleDialog(
-              title: 'You have already played the game',
-              message: 'Next puzzle in \n ${durationLeft.timeLeftAsString()}');
+            title: gameAlreadyPlayed,
+            message: 'Next puzzle in}',
+          );
           settingsController.isAlreadyPlayed = true;
           return;
         } else {
@@ -196,8 +206,29 @@ class _MyHomePageState extends State<MyHomePage>
       }
       fState.furdlePuzzle = furdle.puzzle;
       furdleNotifier.isLoading = false;
-      // Future.delayed(const Duration(seconds: 2), () {
-      // });
+    });
+  }
+
+  void updateTimer() {
+    firestore.DocumentReference<Map<String, dynamic>> _docRef =
+        firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
+    _docRef.get().then((firestore.DocumentSnapshot snapshot) {
+      if (snapshot.exists) {
+        furdle.number = snapshot['number'];
+        furdle.date = (snapshot['date'] as firestore.Timestamp).toDate();
+        String word = '';
+        furdle.puzzle = word;
+        final DateTime nextFurdleTime =
+            furdle.date.add(const Duration(hours: hoursUntilNextFurdle));
+        final now = DateTime.now();
+        final durationLeft = nextFurdleTime.difference(now);
+        if (now.isAfter(nextFurdleTime)) {
+          settingsController.timeLeft = Duration.zero;
+        } else {
+          settingsController.timeLeft = durationLeft;
+        }
+        settingsController.stats.number = furdle.number;
+      }
     });
   }
 
@@ -328,10 +359,10 @@ class _MyHomePageState extends State<MyHomePage>
                                           isGameOver ||
                                           settingsController.isAlreadyPlayed) {
                                         if (isPhysicalKeyEvent) return;
+                                        updateTimer();
                                         showFurdleDialog(
                                             title: gameAlreadyPlayed,
-                                            message:
-                                                'Next puzzle in \n ${settingsController.timeLeft.timeLeftAsString()}');
+                                            message: 'Next puzzle in');
                                         return;
                                       }
                                       final character = x.toLowerCase();

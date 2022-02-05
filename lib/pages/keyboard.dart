@@ -283,7 +283,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
       case KeyState.exists:
         return Colors.green;
       case KeyState.notExists:
-        return Colors.black87.withOpacity(0.8);
+        return Colors.black87;
       case KeyState.misplaced:
         return Colors.yellow[800]!;
       case KeyState.isDefault:
@@ -298,12 +298,13 @@ class _KeyBuilderState extends State<KeyBuilder> {
     final color =
         isDark ? Theme.of(context).splashColor : Colors.grey.withOpacity(0.5);
     double scaleFactor = _keySize / 60;
-    bool isSpecialKey = widget.keyLabel.length > 2;
+    bool isSpecialKey = widget.keyLabel.length > 1;
     FState state = FState();
     final keyState =
         state.kState.keyboardState[widget.keyLabel.toLowerCase()] ??
             KeyState.isDefault;
     final keyColor = stateToColor(keyState);
+
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
@@ -326,8 +327,8 @@ class _KeyBuilderState extends State<KeyBuilder> {
             widget.keyLabel,
             textScaleFactor: scaleFactor,
             style: TextStyle(
-              fontSize: isSpecialKey ? 10 : 25,
-            ),
+                fontSize: isSpecialKey ? 10 : 25,
+                color: keyState == KeyState.notExists ? Colors.white : null),
           ),
         ),
       ),
