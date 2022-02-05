@@ -3,6 +3,8 @@ import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/pages/furdle.dart';
 
+import '../constants/strings.dart';
+
 class FCellState {
   String character;
   KeyState state;
@@ -38,6 +40,15 @@ class FState extends ChangeNotifier {
   String _shareFurdle = '';
 
   String get shareFurdle => _shareFurdle;
+
+  static final _KState _kState = _KState.initialize();
+
+  _KState get kState => _kState;
+
+  void updateKeyState(FCellState cellState) {
+    _kState.updateKey(cellState);
+    notifyListeners();
+  }
 
   set furdlePuzzle(String value) {
     _furdlePuzzle = value;
@@ -75,11 +86,33 @@ class FState extends ChangeNotifier {
 
   List<List<FCellState>> get cells => _cells;
 
-  void addCell(FCellState cell) {
+  KeyState characterToState(String letter) {
+    int index = indexOf(letter);
+    if (index < 0) {
+      return KeyState.notExists;
+    } else if (letterExists(index, letter)) {
+      return KeyState.exists;
+    } else {
+      return KeyState.misplaced;
+    }
+  }
+
+  bool letterExists(int index, String letter) {
+    return furdlePuzzle[column] == letter;
+  }
+
+  int indexOf(letter) {
+    return furdlePuzzle.toLowerCase().indexOf(letter);
+  }
+
+  void addCell(String character) {
+    FCellState cell =
+        FCellState(character: character, state: characterToState(character));
     if (_column < furdleSize.width) {
       _cells[row][column] = cell;
       _column++;
     }
+    print('${cell.character} : ${cell.state}');
     notifyListeners();
   }
 
@@ -138,9 +171,29 @@ class FState extends ChangeNotifier {
     }
     String word = '';
     for (int i = 0; i < furdleSize.width; i++) {
-      word += _cells[row][i].character;
+      final _character = _cells[row][i].character;
+      word += _character;
+      final furdleState = _cells[row][i].state;
+      final keyState = kState.keyboardState[_character];
+
+      /// if Key is misplaced or is not enetered
+      if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
+        //   final state = characterToKeyboardState(_character, currentState);
+        kState.keyboardState[_character] = furdleState;
+      }
     }
     return word;
+  }
+
+  KeyState characterToKeyboardState(String letter, KeyState? currentState) {
+    int index = indexOf(letter);
+    if (index < 0) {
+      return KeyState.notExists;
+    } else if (letterExists(index, letter)) {
+      return KeyState.exists;
+    } else {
+      return KeyState.misplaced;
+    }
   }
 
   void clear() {
@@ -152,6 +205,23 @@ class FState extends ChangeNotifier {
     _cells.clear();
     _cells.addAll(cells);
     notifyListeners();
+  }
+}
+
+class _KState {
+  final Map<String, KeyState> _keyboardState = {};
+
+  Map<String, KeyState> get keyboardState => _keyboardState;
+
+  _KState.initialize() {
+    alphabets.split('').toList().forEach((element) {
+      final state = FCellState(character: element, state: KeyState.isDefault);
+      updateKey(state);
+    });
+  }
+
+  void updateKey(FCellState key) {
+    _keyboardState[key.character] = key.state;
   }
 }
 

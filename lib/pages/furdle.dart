@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';

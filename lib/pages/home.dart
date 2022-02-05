@@ -71,25 +71,6 @@ class _MyHomePageState extends State<MyHomePage>
     }
   }
 
-  KeyState characterToState(String letter) {
-    int index = containsIndex(letter);
-    if (index < 0) {
-      return KeyState.notExists;
-    } else if (letterExists(index, letter)) {
-      return KeyState.exists;
-    } else {
-      return KeyState.misplaced;
-    }
-  }
-
-  bool letterExists(int index, String letter) {
-    return furdle.puzzle[fState.column] == letter;
-  }
-
-  int containsIndex(letter) {
-    return furdle.puzzle.toLowerCase().indexOf(letter);
-  }
-
   bool isLetter(String x) {
     return x.length == 1 && x.codeUnitAt(0) >= 65 && x.codeUnitAt(0) <= 90;
   }
@@ -227,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
+    // settingsController.clear();
     return AnimatedBuilder(
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {
@@ -342,8 +323,7 @@ class _MyHomePageState extends State<MyHomePage>
                                           settingsController.isAlreadyPlayed) {
                                         if (isPhysicalKeyEvent) return;
                                         showFurdleDialog(
-                                            title:
-                                                'You have already played the game',
+                                            title: gameAlreadyPlayed,
                                             message:
                                                 'Next puzzle in \n ${settingsController.timeLeft.timeLeftAsString()}');
                                         return;
@@ -385,12 +365,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         if (fState.column >= _size.width) {
                                           return;
                                         }
-                                        fState.addCell(
-                                          FCellState(
-                                              character: character,
-                                              state:
-                                                  characterToState(character)),
-                                        );
+                                        fState.addCell(character);
                                       } else {
                                         print('invalid Key event $character');
                                       }
