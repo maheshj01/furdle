@@ -287,7 +287,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
       case KeyState.misplaced:
         return Colors.yellow[800]!;
       case KeyState.isDefault:
-        return Colors.grey;
+        return Colors.transparent;
     }
   }
 
@@ -317,7 +317,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
               isSpecialKey ? min(widget.keySize.height, _keySize) : _keySize,
           margin: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
           decoration: BoxDecoration(
-              color: widget.isPressed ? keyColor.withOpacity(0.2) : keyColor,
+              color: widget.isPressed ? Colors.grey[600] : keyColor,
               borderRadius: BorderRadius.circular(6),
               border: Border.all()),
           width: widget.isSpaceKey ? _keySize * 5 : _keySize,
@@ -326,8 +326,8 @@ class _KeyBuilderState extends State<KeyBuilder> {
             widget.keyLabel,
             textScaleFactor: scaleFactor,
             style: TextStyle(
-                fontSize: isSpecialKey ? 10 : 25,
-                color: isDark ? Colors.white : Colors.black),
+              fontSize: isSpecialKey ? 10 : 25,
+            ),
           ),
         ),
       ),
