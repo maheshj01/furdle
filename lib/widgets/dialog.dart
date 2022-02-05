@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:furdle/constants/colors.dart';
 import 'package:furdle/main.dart';
 
 class FurdleDialog extends StatelessWidget {
@@ -55,28 +56,37 @@ class FurdleDialog extends StatelessWidget {
                     },
                     builder:
                         (BuildContext context, Duration value, Widget? child) {
-                      final minutes = value.inMinutes;
+                      int hours = value.inHours;
+                      int minutes = value.inMinutes;
                       final seconds = value.inSeconds % 60;
+                      if (minutes > 60) {
+                        minutes = (minutes - hours * 60) % 60;
+                      }
                       return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 5),
                           child: RichText(
                               text: TextSpan(
                             style: const TextStyle(
-                                color: Colors.black,
+                                color: primaryBlue,
                                 fontWeight: FontWeight.bold),
                             children: <TextSpan>[
                               const TextSpan(
                                 text: '⏰ ',
-                                style: TextStyle(fontSize: 24),
+                                style: TextStyle(fontSize: 20),
                               ),
                               TextSpan(
+                                text: toTimer(hours),
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const TextSpan(text: 'hrs '),
+                              TextSpan(
                                 text: toTimer(minutes),
-                                style: const TextStyle(fontSize: 24),
+                                style: const TextStyle(fontSize: 20),
                               ),
                               const TextSpan(text: 'mins '),
                               TextSpan(
                                 text: toTimer(seconds),
-                                style: const TextStyle(fontSize: 24),
+                                style: const TextStyle(fontSize: 20),
                               ),
                               const TextSpan(text: 'secs'),
                             ],

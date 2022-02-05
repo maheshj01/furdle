@@ -392,7 +392,6 @@ class _MyHomePageState extends State<MyHomePage>
                                             case Word.valid:
 
                                               /// User failed to crack the furdle
-                                              print('word is valid');
                                               if (fState.row == _size.height) {
                                                 showFurdleDialog(
                                                     isSuccess: false);

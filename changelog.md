@@ -22,4 +22,5 @@
 - show app version info
 - submit words only if valid (present in list)
 - show time remaining counter in realtime
+- improve keyboard colors for dark mode
 

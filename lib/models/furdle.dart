@@ -145,7 +145,6 @@ class FState extends ChangeNotifier {
       _column++;
       addToWord(character);
     }
-    print('${cell.character} : ${cell.state}');
     notifyListeners();
   }
 
