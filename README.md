@@ -2,12 +2,13 @@
 
 
 
-A Word puzzle built with flutter. The puzzle is available once in 24 hours.
+A Word puzzle built with flutter. A new puzzle is available every 6 hours.
 
 - Supports physical keyboard input
 - Saves Game stats
 - Works completely offline
 - Supports Dark mode
+- Share puzzle results
 - Runs on all platforms
 
 ### Android v0.2.0

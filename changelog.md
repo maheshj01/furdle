@@ -11,3 +11,9 @@
 - Add shake animations for error
 - fix puzzle stats not updated on gameOver 
 
+### v0.2.1 [Feb 4, 2021]
+- play furdle once in 24 hours
+- fix: last row was getting erased on opening share menu
+- show timeleft for next furdle
+- show furdle state on keyboard
+
