@@ -15,8 +15,9 @@ function randomWord(arr:string[]) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+// Runs every 6 hours IST
 exports.scheduledFunction = functions.pubsub
-    .schedule("0 0 * * *")
+    .schedule("0 */6 * * *")
     .timeZone("Asia/Kolkata")
     .onRun(async () => {
       const docRef = await admin.firestore().collection("furdle").doc("stats");

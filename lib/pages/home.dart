@@ -164,10 +164,15 @@ class _MyHomePageState extends State<MyHomePage>
         if (puzzles.isNotEmpty) {
           _lastPlayedPuzzle = puzzles.last;
         }
-        final Duration durationLeft =
-            furdle.date.difference(_lastPlayedPuzzle.date) +
-                const Duration(hours: 24);
-        settingsController.timeLeft = durationLeft;
+        final DateTime nextFurdleTime =
+            furdle.date.add(const Duration(hours: hoursUntilNextFurdle));
+        final now = DateTime.now();
+        final durationLeft = nextFurdleTime.difference(now);
+        if (now.isAfter(nextFurdleTime)) {
+          settingsController.timeLeft = Duration.zero;
+        } else {
+          settingsController.timeLeft = durationLeft;
+        }
         settingsController.stats.number = furdle.number;
         bool isPlayed = _lastPlayedPuzzle.number == furdle.number;
         _size = difficultyToSize(settingsController.difficulty);

@@ -21,11 +21,13 @@ extension DateOnlyCompare on DateTime {
   }
 }
 
-
-extension TimeLeft on Duration{
-  String timeLeftAsString(){
+extension TimeLeft on Duration {
+  String timeLeftAsString() {
     int hours = inHours;
     int minutes = inMinutes;
+    if (minutes < 0 || hours < 0) {
+      return "0 hrs 0 mins";
+    }
     final seconds = inSeconds;
     if (minutes > 60) {
       hours = minutes ~/ 60;

@@ -8,3 +8,5 @@ const baseUrl = 'www.staging.example.com';
 int maxWords = 2334;
 
 const defaultSize = Size(5, 6);
+
+const int hoursUntilNextFurdle = 6;
