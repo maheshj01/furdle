@@ -100,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   SnackBar _snackBar({required String message, required Duration duration}) {
+    final double margin = screenSize.width / 3;
     return SnackBar(
       content: Text(
         message,
@@ -108,9 +109,9 @@ class _MyHomePageState extends State<MyHomePage>
       behavior: SnackBarBehavior.floating,
       duration: duration,
       margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height * 0.9 - 100,
-          right: 20,
-          left: 20),
+          bottom: screenSize.height * 0.9 - kToolbarHeight,
+          right: screenSize.width < 500 ? 20 : margin,
+          left: screenSize.width < 500 ? 20 : margin),
     );
   }
 
@@ -204,10 +205,10 @@ class _MyHomePageState extends State<MyHomePage>
   bool isSolved = false;
   bool isGameOver = false;
   late Puzzle furdle;
-
+  late Size screenSize;
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    screenSize = MediaQuery.of(context).size;
     // settingsController.clear();
     return AnimatedBuilder(
         animation: settingsController,
@@ -251,13 +252,13 @@ class _MyHomePageState extends State<MyHomePage>
                 children: [
                   Positioned(
                     top: -100,
-                    left: size.width / 2,
+                    left: screenSize.width / 2,
                     child: ConfettiWidget(
                       confettiController: confettiController,
                       blastDirection: 0,
                       blastDirectionality: BlastDirectionality.explosive,
                       particleDrag: 0.05,
-                      emissionFrequency: size.width < 400 ? 0.35 : 0.4,
+                      emissionFrequency: screenSize.width < 400 ? 0.35 : 0.4,
                       minimumSize: const Size(10, 10),
                       maximumSize: const Size(50, 50),
                       numberOfParticles: 5,
