@@ -38,14 +38,6 @@ class MyApp extends StatelessWidget {
         ),
       ),
     ),
-    GoRoute(
-      path: '/settings',
-      name: 'settings',
-      pageBuilder: (context, state) => MaterialPage<void>(
-        key: state.pageKey,
-        child: const Settings(),
-      ),
-    ),
   ]);
 
   @override
