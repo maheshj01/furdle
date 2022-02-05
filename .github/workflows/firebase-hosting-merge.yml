@@ -26,3 +26,13 @@ jobs:
           projectId: furdle
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v1
+        with:
+          name: release-apk
+          path: build/app/outputs/apk/release/app-release.apk     
+      - run: flutter build appbundle
+      - uses: actions/upload-artifact@v1
+        with:
+          name: appbundle
+          path: build/app/outputs/bundle/release/app-release.aab     
