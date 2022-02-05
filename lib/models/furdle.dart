@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/utils/word.dart';
 
 import '../constants/strings.dart';
 
@@ -14,6 +15,20 @@ class FCellState {
   FCellState.defaultState()
       : character = '',
         state = KeyState.isDefault;
+}
+
+enum Word {
+  /// length is less than 5
+  valid,
+
+  /// word is incomplete, length is less than 5
+  incomplete,
+
+  /// word not in list
+  invalid,
+
+  /// word matches the puzzle
+  match
 }
 
 class FState extends ChangeNotifier {
@@ -36,6 +51,23 @@ class FState extends ChangeNotifier {
   String _furdlePuzzle = '';
 
   String get furdlePuzzle => _furdlePuzzle;
+
+  /// word in a current row
+  String _currentWord = '';
+
+  String get currentWord => _currentWord;
+
+  /// add a letter to current word
+  void addToWord(String letter) {
+    _currentWord += letter;
+  }
+
+  /// removes last letter from current word
+  void removeFromWord() {
+    if (_currentWord.isNotEmpty) {
+      _currentWord = _currentWord.substring(0, _currentWord.length - 1);
+    }
+  }
 
   String _shareFurdle = '';
 
@@ -62,7 +94,7 @@ class FState extends ChangeNotifier {
 
   /// if the current row is complete
   /// and can be submitted
-  bool canBeSubmitted() {
+  bool isWordComplete() {
     /// last letter of current row is Non empty
     return _cells[row][furdleSize.width.toInt() - 1].character.isNotEmpty;
   }
@@ -111,6 +143,7 @@ class FState extends ChangeNotifier {
     if (_column < furdleSize.width) {
       _cells[row][column] = cell;
       _column++;
+      addToWord(character);
     }
     print('${cell.character} : ${cell.state}');
     notifyListeners();
@@ -120,17 +153,29 @@ class FState extends ChangeNotifier {
     if (_column > 0) {
       _column -= 1;
       _cells[row][column] = FCellState.defaultState();
+      removeFromWord();
     }
     notifyListeners();
   }
 
-  bool submit() {
-    _column = 0;
-    final word = currentWord();
-    _row++;
-    isPuzzleSolved = word == furdlePuzzle;
-    notifyListeners();
-    return _isPuzzleSolved;
+  /// check if word is valid and present in list of words
+  Word validate() {
+    final isComplete = isWordComplete();
+    if (!isComplete) {
+      return Word.incomplete;
+    } else {
+      final word = currentWord;
+      if (!furdleList.contains(word)) {
+        return Word.invalid;
+      }
+      updateKeyBoardState();
+      _currentWord = '';
+      _column = 0;
+      _row++;
+      isPuzzleSolved = word == furdlePuzzle;
+      notifyListeners();
+      return isPuzzleSolved ? Word.match : Word.valid;
+    }
   }
 
   String stateToGrid(KeyState state) {
@@ -163,26 +208,25 @@ class FState extends ChangeNotifier {
   }
 
   /// unsubmitted word in thr current row
-  String currentWord() {
-    ///TODO: prevent overflow of row
-    /// which happens in [submiit()]
+  void updateKeyBoardState() {
     if (row >= _furdleSize.height) {
       row = furdleSize.height.toInt() - 1;
     }
     String word = '';
     for (int i = 0; i < furdleSize.width; i++) {
-      final _character = _cells[row][i].character;
-      word += _character;
-      final furdleState = _cells[row][i].state;
-      final keyState = kState.keyboardState[_character];
+      final letter = cells[row][i].character;
+      word += letter;
+      final furdleState = cells[row][i].state;
+      final keyState = kState.keyboardState[letter];
 
       /// if Key is misplaced or is not enetered
       if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
-        //   final state = characterToKeyboardState(_character, currentState);
-        kState.keyboardState[_character] = furdleState;
+        //   final state = characterToKeyboardState(letter, currentState);
+        kState.keyboardState[letter] = furdleState;
       }
     }
-    return word;
+    notifyListeners();
+    // print('update keyboard state\n ${kState.keyboardState}');
   }
 
   KeyState characterToKeyboardState(String letter, KeyState? currentState) {

@@ -338,31 +338,45 @@ class _MyHomePageState extends State<MyHomePage>
                                       if (character == 'enter') {
                                         /// check if word is complete
                                         /// TODO: check if word is valid 5 letter word
-                                        if (fState.canBeSubmitted()) {
-                                          isSolved = fState.submit();
-                                          if (isSolved) {
-                                            /// User cracked the puzzle
-                                            showFurdleDialog(isSuccess: true);
-                                            confettiController.play();
-                                            isGameOver = true;
-                                            furdle.moves = fState.row;
-                                            furdle.result = PuzzleResult.win;
-                                            settingsController.gameOver(furdle);
-                                          } else {
-                                            /// User failed to crack the furdle
-                                            if (fState.row == _size.height) {
-                                              showFurdleDialog(
-                                                  isSuccess: false);
-                                              isGameOver = true;
-                                              furdle.moves = fState.row;
-                                              furdle.result = PuzzleResult.lose;
-                                              settingsController
-                                                  .gameOver(furdle);
-                                            }
-                                          }
+                                        final wordState = fState.validate();
+                                        if (wordState == Word.match) {
+                                          isSolved = true;
+                                          showFurdleDialog(isSuccess: true);
+                                          confettiController.play();
+                                          isGameOver = true;
+                                          furdle.moves = fState.row;
+                                          furdle.result = PuzzleResult.win;
+                                          settingsController.gameOver(furdle);
                                         } else {
-                                          showMessage(context,
-                                              'word is incomplete / invalid');
+                                          isSolved = false;
+                                          switch (wordState) {
+                                            case Word.incomplete:
+                                              showMessage(context,
+                                                  'Word is incomplete!');
+                                              break;
+                                            case Word.invalid:
+                                              showMessage(
+                                                  context, 'Word not in list!');
+                                              break;
+                                            case Word.valid:
+
+                                              /// User failed to crack the furdle
+                                              print('word is valid');
+                                              if (fState.row == _size.height) {
+                                                showFurdleDialog(
+                                                    isSuccess: false);
+                                                isGameOver = true;
+                                                furdle.moves = fState.row;
+                                                furdle.result =
+                                                    PuzzleResult.lose;
+                                                settingsController
+                                                    .gameOver(furdle);
+                                              } else {
+                                                print('not the target word');
+                                              }
+                                              break;
+                                            default:
+                                          }
                                         }
                                       } else if (character == 'delete' ||
                                           character == 'backspace') {
