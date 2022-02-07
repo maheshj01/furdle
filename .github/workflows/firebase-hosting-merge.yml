@@ -15,9 +15,10 @@ jobs:
         with:
           flutter-version: '2.10.0'
           channel: 'stable'
-      - run: echo $FIREBASEOPTIONS | base64 -d > lib/firebase_options.dart
+      - run: echo $FIREBASE_OPTIONS | base64 -d > lib/firebase_options.dart
         env:
-          SECRETS_FILE_CONTENT: ${{ secrets.FIREBASEOPTIONS }}
+          SECRETS_FILE_CONTENT: ${{ secrets.FIREBASE_OPTIONS }}
+      - name: Build web     
       - run: flutter clean
       - run: flutter pub get
       - run: flutter build web --release --web-renderer html
