@@ -5,7 +5,6 @@ An open sourced wordle built with flutter. A new puzzle is available every 6 hou
 
 - Supports physical keyboard input
 - Saves Game stats
-- Works completely offline
 - Supports Dark mode
 - Share puzzle results
 - Runs on all platforms
