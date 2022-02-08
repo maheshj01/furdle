@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/const.dart';
+import 'package:furdle/exports.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
 import 'package:furdle/models/puzzle.dart';
@@ -31,26 +32,30 @@ class Furdle extends StatefulWidget {
 class _FurdleState extends State<Furdle> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _initGrid();
   }
 
   @override
   void didUpdateWidget(covariant Furdle oldWidget) {
-    // TODO: implement didUpdateWidget
     if (oldWidget.size != widget.size || oldWidget.fState != widget.fState) {
       super.didUpdateWidget(oldWidget);
     }
   }
 
   void _initGrid() {
-    for (int i = 0; i < widget.size!.height; i++) {
-      List<FCellState> row = [];
-      for (int j = 0; j < widget.size!.width; j++) {
-        row.add(FCellState.defaultState());
+    Puzzle lastFurdle = settingsController.stats.puzzle;
+    if (lastFurdle.moves > 0) {
+      widget.fState.cells.clear();
+      widget.fState.cells = lastFurdle.cells;
+    } else {
+      for (int i = 0; i < widget.size!.height; i++) {
+        List<FCellState> row = [];
+        for (int j = 0; j < widget.size!.width; j++) {
+          row.add(FCellState.defaultState());
+        }
+        widget.fState.cells.add(row);
       }
-      widget.fState.cells.add(row);
     }
   }
 
@@ -86,6 +91,7 @@ class FurdleGrid extends StatelessWidget {
     final _size = MediaQuery.of(context).size;
     double divideFactor = _size.width < 400 ? difficultyToDivideFactor() : 2.0;
     final kSize = _size.height / (gridSize!.height * divideFactor);
+    bool isPlayed = state.puzzle.moves > 0;
     cellSize = kSize;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -102,6 +108,7 @@ class FurdleGrid extends StatelessWidget {
                       cellSize: cellSize,
                       cellState: state.cells[i][j],
                       isSubmitted: i < state.row,
+                      isAlreadyPlayed: isPlayed,
                     ),
                 ],
               ),
@@ -118,6 +125,7 @@ class FurdleCell extends StatefulWidget {
   final double cellSize;
   FCellState? cellState;
   bool isSubmitted = false;
+  bool isAlreadyPlayed = false;
 
   FurdleCell(
       {Key? key,
@@ -125,6 +133,7 @@ class FurdleCell extends StatefulWidget {
       required this.j,
       this.cellState,
       this.isSubmitted = false,
+      this.isAlreadyPlayed = false,
       this.cellSize = 80})
       : super(key: key);
 
@@ -165,6 +174,9 @@ class _FurdleCellState extends State<FurdleCell>
       parent: _controller,
       curve: Curves.bounceIn,
     ));
+    if (widget.isAlreadyPlayed) {
+      _controller.forward();
+    }
   }
 
   @override

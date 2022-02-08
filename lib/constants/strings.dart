@@ -9,6 +9,7 @@ const String kFurdleKey = 'furdle';
 const String isAlreadyPlayeKey = 'isAlreadyPlayed';
 const String kMatchHistoryKey = 'kMatchHistoryKey';
 const String kDifficultyKey = 'kDifficultyKey';
+const String kPuzzleState = 'kPuzzleState';
 
 const String shareIncomplete =
     'You can\'t share a furdle that hasn\'t been solved yet!';
