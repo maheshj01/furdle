@@ -191,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage>
           fState.furdlePuzzle = furdle.puzzle;
           showFurdleDialog(
             title: gameAlreadyPlayed,
-            message: 'Next puzzle in}',
+            message: 'Next puzzle in',
           );
           settingsController.isAlreadyPlayed = true;
           return;
