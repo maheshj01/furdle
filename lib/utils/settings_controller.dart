@@ -100,6 +100,11 @@ class SettingsController with ChangeNotifier {
     await _settingsService!.updateThemeMode(newThemeMode);
   }
 
+  Future<void> saveFurdleState(Puzzle puzzle) async {
+    _settingsService!.saveCurrentFurdle(puzzle);
+    notifyListeners();
+  }
+
   Future<void> clear() async {
     _settingsService!.clear();
   }

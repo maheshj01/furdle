@@ -77,11 +77,31 @@ class SettingsService {
 
   bool isSameDate() {
     final now = DateTime.now();
-    if (_stats != null && _stats.total > 0) {
+    if (_stats.total > 0) {
       bool isSame = _stats.puzzles.last.date.isSameDate(now);
       return isSame;
     }
     return false;
+  }
+
+  Future<void> saveCurrentFurdle(Puzzle puzzle) async {
+    final map = json.encode(puzzle.toJson());
+    _sharedPreferences.setString(kPuzzleState, map);
+  }
+
+  Future<Puzzle> getSavedPuzzle() async {
+    final String savedPuzzle = _sharedPreferences.getString(kPuzzleState) ?? '';
+    if (savedPuzzle.isEmpty) {
+      return Puzzle.initialize();
+    }
+    final decodedMap = jsonDecode(savedPuzzle) as Map<String, dynamic>;
+    final puzzle = Puzzle.fromJson(decodedMap);
+    return puzzle;
+  }
+
+  // we shouldn't clear Last played Puzzle anytime
+  Future<void> clearSavedPuzzle() async {
+    _sharedPreferences.remove(kPuzzleState);
   }
 
   Future<Difficulty> getDifficulty() async {
@@ -95,12 +115,16 @@ class SettingsService {
   }
 
   Future<Stats> getStats() async {
+    final savedPuzzle = await getSavedPuzzle();
     try {
       final list = _sharedPreferences.getStringList(kMatchHistoryKey) ?? [];
       _stats.puzzles = list.map((e) {
         final puzzle = Puzzle.fromJson(jsonDecode(e) as Map<String, dynamic>);
         return puzzle;
       }).toList();
+      if (savedPuzzle.cells.isNotEmpty && savedPuzzle.moves > 0) {
+        _stats.puzzle = savedPuzzle;
+      }
       return _stats;
     } catch (_) {
       return Stats.initialStats();
@@ -118,12 +142,14 @@ class SettingsService {
             : ThemeMode.light;
   }
 
+  /// Update stats on Game over
   Future<void> updatePuzzleStats(Puzzle puzzle) async {
     _stats.puzzles.add(puzzle);
     final puzzleMapList =
         _stats.puzzles.map((e) => json.encode(e.toJson())).toList();
     _sharedPreferences.setStringList(kMatchHistoryKey, puzzleMapList);
     _stats = await getStats();
+    saveCurrentFurdle(puzzle);
   }
 
   Future<void> clear() async {

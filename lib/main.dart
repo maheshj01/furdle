@@ -7,7 +7,6 @@ import 'package:furdle/pages/home.dart';
 import 'package:furdle/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
 import 'constants/constants.dart';
-import 'pages/settings.dart';
 
 /// Settings are exposed globally to access from anywhere
 

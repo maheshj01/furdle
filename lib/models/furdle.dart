@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
+import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/pages/furdle.dart';
 import 'package:furdle/utils/word.dart';
-
 import '../constants/strings.dart';
 
 class FCellState {
@@ -15,6 +15,35 @@ class FCellState {
   FCellState.defaultState()
       : character = '',
         state = KeyState.isDefault;
+
+  Map<String, String> toJson() {
+    return {'character': character, 'state': state.name};
+  }
+
+  factory FCellState.fromJson(Map<String, dynamic> json) {
+    KeyState state = KeyState.isDefault;
+    switch (json['state']) {
+      case 'isDefault':
+        state = KeyState.isDefault;
+        break;
+      case 'exists':
+        state = KeyState.exists;
+        break;
+      case 'misplaced':
+        state = KeyState.misplaced;
+        break;
+      case 'notExists':
+        state = KeyState.notExists;
+        break;
+      default:
+        state = KeyState.notExists;
+        break;
+    }
+    return FCellState(
+      character: json['character'],
+      state: state,
+    );
+  }
 }
 
 enum Word {
@@ -51,6 +80,18 @@ class FState extends ChangeNotifier {
   String _furdlePuzzle = '';
 
   String get furdlePuzzle => _furdlePuzzle;
+
+  Puzzle _puzzle = Puzzle.initialize();
+
+  /// current Puzzle
+  Puzzle get puzzle => _puzzle;
+
+  /// current Puzzle
+  /// to save and retrieve incomplete puzzle
+  set puzzle(Puzzle value) {
+    _puzzle = value;
+    notifyListeners();
+  }
 
   /// word in a current row
   String _currentWord = '';
@@ -114,9 +155,15 @@ class FState extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<List<FCellState>> _cells = [];
+  List<List<FCellState>> _cells = [];
 
   List<List<FCellState>> get cells => _cells;
+
+  set cells(List<List<FCellState>> cells) {
+    _cells.clear();
+    _cells.addAll(cells);
+    notifyListeners();
+  }
 
   KeyState characterToState(String letter) {
     int index = indexOf(letter);
@@ -172,9 +219,21 @@ class FState extends ChangeNotifier {
       _column = 0;
       _row++;
       isPuzzleSolved = word == furdlePuzzle;
+
+      /// saves rows-1 times
+      /// last row is saved on game over
+      if (row < furdleSize.height) {
+        saveFurdleState();
+      }
       notifyListeners();
       return isPuzzleSolved ? Word.match : Word.valid;
     }
+  }
+
+  void saveFurdleState() {
+    puzzle.cells = _cells;
+    puzzle.moves = row;
+    settingsController.saveFurdleState(puzzle);
   }
 
   String stateToGrid(KeyState state) {
@@ -241,12 +300,6 @@ class FState extends ChangeNotifier {
 
   void clear() {
     _cells.clear();
-    notifyListeners();
-  }
-
-  set cells(List<List<FCellState>> cells) {
-    _cells.clear();
-    _cells.addAll(cells);
     notifyListeners();
   }
 }
