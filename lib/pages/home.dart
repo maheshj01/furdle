@@ -88,7 +88,6 @@ class _MyHomePageState extends State<MyHomePage>
                 title: title!,
                 message: message!,
                 onTimerComplete: () async {
-                  isSolved = false;
                   isGameOver = false;
                   settingsController.isAlreadyPlayed = false;
                   await getWord();
@@ -205,12 +204,10 @@ class _MyHomePageState extends State<MyHomePage>
               message: 'Next puzzle in',
             );
             settingsController.isAlreadyPlayed = true;
-            isSolved = true;
             isGameOver = true;
             return;
           } else {
             fState.puzzle = challenge;
-            isSolved = false;
             isGameOver = false;
             settingsController.isAlreadyPlayed = false;
             settingsController.stats.puzzle = Puzzle.initialize();
@@ -265,7 +262,6 @@ class _MyHomePageState extends State<MyHomePage>
   /// grid size
   Size _size = defaultSize;
   ConfettiController confettiController = ConfettiController();
-  bool isSolved = false;
   bool isGameOver = false;
   late Puzzle challenge;
   late Size screenSize;
@@ -286,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage>
                 actions: [
                   IconButton(
                       onPressed: () async {
-                        if (isSolved || isGameOver) {
+                        if (isGameOver) {
                           fState.generateFurdleGrid();
                           final furdleScoreShareMessage =
                               'FURDLE ${fState.shareFurdle}';
@@ -383,8 +379,7 @@ class _MyHomePageState extends State<MyHomePage>
                                     isFurdleMode: true,
                                     onKeyEvent:
                                         (String x, bool isPhysicalKeyEvent) {
-                                      if (isSolved ||
-                                          isGameOver ||
+                                      if (isGameOver ||
                                           settingsController.isAlreadyPlayed) {
                                         if (isPhysicalKeyEvent) return;
                                         updateTimer();
@@ -400,7 +395,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         final wordState = fState.validate();
                                         challenge.cells = fState.cells;
                                         if (wordState == Word.match) {
-                                          isSolved = true;
+                                          isGameOver = true;
                                           updateTimer();
                                           showFurdleDialog(isSuccess: true);
                                           confettiController.play();
@@ -410,7 +405,7 @@ class _MyHomePageState extends State<MyHomePage>
                                           settingsController
                                               .gameOver(challenge);
                                         } else {
-                                          isSolved = false;
+                                          isGameOver = false;
                                           switch (wordState) {
                                             case Word.incomplete:
                                               showMessage(context,
