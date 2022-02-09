@@ -20,7 +20,7 @@ jobs:
           FIREBASE_OPTIONS: ${{ secrets.FIREBASE_OPTIONS }}
       - run: flutter clean
       - run: flutter pub get
-      - run: flutter build web --release --web-renderer html
+      - run: flutter build web --release --web-renderer canvaskit
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
