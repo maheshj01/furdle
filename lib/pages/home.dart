@@ -401,6 +401,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         challenge.cells = fState.cells;
                                         if (wordState == Word.match) {
                                           isSolved = true;
+                                          updateTimer();
                                           showFurdleDialog(isSuccess: true);
                                           confettiController.play();
                                           isGameOver = true;
@@ -423,6 +424,7 @@ class _MyHomePageState extends State<MyHomePage>
 
                                               /// User failed to crack the furdle
                                               if (fState.row == _size.height) {
+                                                updateTimer();
                                                 showFurdleDialog(
                                                     isSuccess: false);
                                                 isGameOver = true;
