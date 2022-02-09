@@ -174,24 +174,30 @@ class _MyHomePageState extends State<MyHomePage>
             challenge.date.add(const Duration(hours: hoursUntilNextFurdle));
         final now = DateTime.now();
         final durationLeft = nextFurdleTime.difference(now);
-        if (now.isAfter(nextFurdleTime)) {
+        Puzzle _lastPlayedPuzzle = lastPuzzle();
+
+        if (now.isAfter(nextFurdleTime) ||
+            _lastPlayedPuzzle.number < challenge.number) {
           settingsController.timeLeft = Duration.zero;
         } else {
           settingsController.timeLeft = durationLeft;
         }
         settingsController.stats.number = challenge.number;
 
-        Puzzle _lastPlayedPuzzle = lastPuzzle();
         bool isGameInProgress =
             _lastPlayedPuzzle.result == PuzzleResult.inprogress &&
                 _lastPlayedPuzzle.moves > 0;
         if (isGameInProgress) {
+          fState.row = _lastPlayedPuzzle.moves;
+          fState.column = 0;
           fState.puzzle = _lastPlayedPuzzle;
         } else {
           bool isPuzzleAlreadyPlayed =
-              _lastPlayedPuzzle.number <= challenge.number &&
+              _lastPlayedPuzzle.number == challenge.number &&
                   _lastPlayedPuzzle.puzzle == challenge.puzzle;
           if (isPuzzleAlreadyPlayed) {
+            fState.row = _lastPlayedPuzzle.moves;
+            fState.column = 0;
             fState.puzzle = _lastPlayedPuzzle;
             furdleNotifier.isLoading = false;
             showFurdleDialog(
@@ -207,6 +213,7 @@ class _MyHomePageState extends State<MyHomePage>
             isSolved = false;
             isGameOver = false;
             settingsController.isAlreadyPlayed = false;
+            settingsController.stats.puzzle = Puzzle.initialize();
           }
         }
       } else {
@@ -226,8 +233,6 @@ class _MyHomePageState extends State<MyHomePage>
     final lastPlayedPuzzle = settingsController.stats.puzzle;
     // if (lastPlayedPuzzle.moves > 0 &&
     //     lastPlayedPuzzle.result == PuzzleResult.inprogress) {
-    fState.row = lastPlayedPuzzle.moves;
-    fState.column = 0;
     // }
     return lastPlayedPuzzle;
   }

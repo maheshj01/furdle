@@ -65,6 +65,7 @@ class Puzzle {
 
   Size get puzzleSize => _puzzleSize;
 
+  /// DateTime when the furdle was created on the server
   DateTime get date => _date;
 
   Difficulty get difficulty => _difficulty;
