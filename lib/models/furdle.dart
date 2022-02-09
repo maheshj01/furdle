@@ -162,6 +162,7 @@ class FState extends ChangeNotifier {
   set cells(List<List<FCellState>> cells) {
     _cells.clear();
     _cells.addAll(cells);
+    updateKeyBoardState(isUpdate: true);
     notifyListeners();
   }
 
@@ -266,21 +267,39 @@ class FState extends ChangeNotifier {
   }
 
   /// unsubmitted word in thr current row
-  void updateKeyBoardState() {
+  void updateKeyBoardState({bool isUpdate = false}) {
     if (row >= _furdleSize.height) {
       row = furdleSize.height.toInt() - 1;
     }
     String word = '';
-    for (int i = 0; i < furdleSize.width; i++) {
-      final letter = cells[row][i].character;
-      word += letter;
-      final furdleState = cells[row][i].state;
-      final keyState = kState.keyboardState[letter];
+    if (isUpdate) {
+      for (int j = 0; j < furdleSize.height; j++) {
+        for (int i = 0; i < furdleSize.width; i++) {
+          final letter = cells[j][i].character;
+          word += letter;
+          final furdleState = cells[j][i].state;
+          final keyState = kState.keyboardState[letter];
 
-      /// if Key is misplaced or is not enetered
-      if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
-        //   final state = characterToKeyboardState(letter, currentState);
-        kState.keyboardState[letter] = furdleState;
+          /// if Key is misplaced or is not enetered
+          if (keyState == KeyState.misplaced ||
+              keyState == KeyState.isDefault) {
+            //   final state = characterToKeyboardState(letter, currentState);
+            kState.keyboardState[letter] = furdleState;
+          }
+        }
+      }
+    } else {
+      for (int i = 0; i < furdleSize.width; i++) {
+        final letter = cells[row][i].character;
+        word += letter;
+        final furdleState = cells[row][i].state;
+        final keyState = kState.keyboardState[letter];
+
+        /// if Key is misplaced or is not enetered
+        if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
+          //   final state = characterToKeyboardState(letter, currentState);
+          kState.keyboardState[letter] = furdleState;
+        }
       }
     }
     notifyListeners();

@@ -337,7 +337,8 @@ class _MyHomePageState extends State<MyHomePage>
                                 return Container(
                                   height: 200,
                                   alignment: Alignment.center,
-                                  child: const CircularProgressIndicator(),
+                                  child: const CircularProgressIndicator(
+                                      strokeWidth: 2.0, color: primaryBlue),
                                 );
                               }
                               return AnimatedBuilder(
