@@ -48,6 +48,7 @@ class _FurdleState extends State<Furdle> {
     if (lastFurdle.moves > 0) {
       widget.fState.cells.clear();
       widget.fState.cells = lastFurdle.cells;
+      widget.fState.puzzle = lastFurdle;
     } else {
       for (int i = 0; i < widget.size!.height; i++) {
         List<FCellState> row = [];
@@ -92,6 +93,7 @@ class FurdleGrid extends StatelessWidget {
     double divideFactor = _size.width < 400 ? difficultyToDivideFactor() : 2.0;
     final kSize = _size.height / (gridSize!.height * divideFactor);
     bool isPlayed = state.puzzle.moves > 0;
+    bool isGameOver = state.puzzle.result != PuzzleResult.inprogress;
     cellSize = kSize;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -107,7 +109,7 @@ class FurdleGrid extends StatelessWidget {
                       j: j,
                       cellSize: cellSize,
                       cellState: state.cells[i][j],
-                      isSubmitted: i < state.row,
+                      isSubmitted: isGameOver ? i <= state.row : i < state.row,
                       isAlreadyPlayed: isPlayed,
                     ),
                 ],
@@ -124,6 +126,10 @@ class FurdleCell extends StatefulWidget {
   final int j;
   final double cellSize;
   FCellState? cellState;
+
+  /// whether or not a word is submitted
+  /// if true it will show the colors
+  /// of the submitted word
   bool isSubmitted = false;
   bool isAlreadyPlayed = false;
 
