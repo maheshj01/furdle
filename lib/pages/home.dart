@@ -255,8 +255,6 @@ class _MyHomePageState extends State<MyHomePage>
         } else {
           settingsController.timeLeft = durationLeft;
         }
-        settingsController.stats.number = challenge.number;
-        fState.puzzle = challenge;
       }
     });
   }
