@@ -8,6 +8,7 @@ An open sourced wordle built with flutter. A new puzzle is available every 6 hou
 - Supports Dark mode
 - Share puzzle results
 - Runs on all platforms
+- Restore State of the game exactly where you left off
 - Different Difficulty mode (easy, medium ,hard)
 
 ### Try it on the web https://furdle.web.app/
