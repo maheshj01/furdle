@@ -54,6 +54,7 @@ doc/api/
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/app/google-services.json
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -72,6 +73,7 @@ doc/api/
 **/ios/**/profile
 **/ios/**/xcuserdata
 **/ios/.generated/
+**/ios/Runner/GoogleService-Info.plist
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Flutter.framework
