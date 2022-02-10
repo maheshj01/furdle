@@ -284,10 +284,7 @@ class _MyHomePageState extends State<MyHomePage>
           return Scaffold(
               appBar: AppBar(
                 centerTitle: true,
-                title: Text(
-                  widget.title,
-                  style: const TextStyle(letterSpacing: 2),
-                ),
+                title: widget.title.toTitle(),
                 actions: [
                   IconButton(
                       onPressed: () async {
@@ -475,5 +472,69 @@ class _MyHomePageState extends State<MyHomePage>
                 ],
               ));
         });
+  }
+}
+
+extension FurdleTitle on String {
+  Widget toTitle({double boxSize = 25}) {
+    return Material(
+      color: Colors.transparent,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        for (int i = 0; i < length; i++)
+          Container(
+              height: boxSize,
+              width: boxSize,
+              alignment: Alignment.center,
+              margin: const EdgeInsets.symmetric(
+                    horizontal: 2,
+                  ) +
+                  EdgeInsets.only(bottom: i.isOdd ? 8 : 0),
+              child: Text(
+                this[i].toUpperCase(),
+                style: const TextStyle(
+                    height: 1.1,
+                    letterSpacing: 2,
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
+              decoration: BoxDecoration(
+                  boxShadow: const [
+                    BoxShadow(
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        color: black,
+                        offset: Offset(0, 1)),
+                    BoxShadow(
+                        spreadRadius: 1,
+                        blurRadius: 5,
+                        color: black,
+                        offset: Offset(2, -1)),
+                  ],
+                  color: i <= 1
+                      ? green
+                      : i < 4
+                          ? yellow
+                          : primaryBlue))
+      ]),
+    );
+  }
+}
+
+class FurdleAppBar extends StatefulWidget with PreferredSizeWidget {
+  const FurdleAppBar({Key? key}) : super(key: key);
+
+  @override
+  _FurdleAppBarState createState() => _FurdleAppBarState();
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+class _FurdleAppBarState extends State<FurdleAppBar> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
