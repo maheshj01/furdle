@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:confetti/confetti.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,8 +76,13 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void showFurdleDialog(
-      {String? title, String? message, bool isSuccess = false}) {
-    title ??= isSuccess ? 'Congratulations! 🎉' : '${fState.furdlePuzzle} 😞';
+      {String? title,
+      String? message,
+      bool isSuccess = false,
+      bool showTimer = true}) {
+    title ??= isSuccess
+        ? 'Congratulations! 🎉'
+        : '${fState.furdlePuzzle.toUpperCase()} 😞';
     message ??= isSuccess ? furdleCracked : failedToCrackFurdle;
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
@@ -87,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage>
               child: FurdleDialog(
                 title: title!,
                 message: message!,
+                showTimer: showTimer,
                 onTimerComplete: () async {
                   isGameOver = false;
                   settingsController.isAlreadyPlayed = false;
@@ -141,6 +148,7 @@ class _MyHomePageState extends State<MyHomePage>
     furdleNotifier = FurdleNotifier(fState);
     _initAnimation();
     getWord();
+    analytics.setCurrentScreen(screenName: 'Furdle');
   }
 
   // TODO: Get the furdle grid Size
@@ -258,6 +266,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   /// grid size
   Size _size = defaultSize;
@@ -379,10 +388,12 @@ class _MyHomePageState extends State<MyHomePage>
                                     isFurdleMode: true,
                                     onKeyEvent:
                                         (String x, bool isPhysicalKeyEvent) {
+                                      analytics.logEvent(
+                                          name: 'KeyPressed',
+                                          parameters: {'key': '$x'});
                                       if (isGameOver ||
                                           settingsController.isAlreadyPlayed) {
                                         if (isPhysicalKeyEvent) return;
-                                        updateTimer();
                                         showFurdleDialog(
                                             title: gameAlreadyPlayed,
                                             message: 'Next puzzle in');
@@ -397,13 +408,17 @@ class _MyHomePageState extends State<MyHomePage>
                                         if (wordState == Word.match) {
                                           isGameOver = true;
                                           updateTimer();
-                                          showFurdleDialog(isSuccess: true);
                                           confettiController.play();
                                           isGameOver = true;
                                           challenge.moves = fState.row;
                                           challenge.result = PuzzleResult.win;
                                           settingsController
                                               .gameOver(challenge);
+                                          Future.delayed(
+                                              const Duration(milliseconds: 500),
+                                              (() {
+                                            showFurdleDialog(isSuccess: true);
+                                          }));
                                         } else {
                                           isGameOver = false;
                                           switch (wordState) {

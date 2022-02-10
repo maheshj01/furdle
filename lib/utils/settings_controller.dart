@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/models/models.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -20,6 +21,12 @@ class SettingsController with ChangeNotifier {
   void gameOver(Puzzle puzzle) {
     isAlreadyPlayed = true;
     _settingsService!.updatePuzzleStats(puzzle);
+    FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+    analytics.logEvent(
+        name: 'GameOver',
+        parameters: {'result': puzzle.result.name, 'moves': puzzle.moves});
+
     notifyListeners();
   }
 
