@@ -283,204 +283,211 @@ class _MyHomePageState extends State<MyHomePage>
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {
           return Scaffold(
-              appBar: AppBar(
-                centerTitle: true,
-                title: widget.title.toTitle(),
-                leading: IconButton(
-                    onPressed: () {
-                      navigate(
-                        context,
-                        HelpPage(),
-                        type: SlideTransitionType.ltr,
-                      );
-                    },
-                    icon: const Icon(Icons.help)),
-                actions: [
-                  IconButton(
-                      onPressed: () async {
-                        if (isGameOver) {
-                          fState.generateFurdleGrid();
-                          final furdleScoreShareMessage =
-                              'FURDLE ${fState.shareFurdle}';
-                          if (!kIsWeb) {
-                            await Share.share(furdleScoreShareMessage);
-                          } else {
-                            await Clipboard.setData(
-                                ClipboardData(text: furdleScoreShareMessage));
-                            showMessage(context, copiedToClipBoard,
-                                isError: false);
-                          }
-                        } else {
-                          showMessage(context, shareIncomplete);
-                        }
-                      },
-                      icon: const Icon(Icons.share)),
-                  IconButton(
-                      onPressed: () {
-                        navigate(context, const Settings());
-                      },
-                      icon: const Icon(Icons.settings)),
-                ],
-              ),
               body: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned(
-                    top: -100,
-                    left: screenSize.width / 2,
-                    child: ConfettiWidget(
-                      confettiController: confettiController,
-                      blastDirection: 0,
-                      blastDirectionality: BlastDirectionality.explosive,
-                      particleDrag: 0.05,
-                      emissionFrequency: screenSize.width < 400 ? 0.35 : 0.4,
-                      minimumSize: const Size(10, 10),
-                      maximumSize: const Size(50, 50),
-                      numberOfParticles: 5,
-                      gravity: 0.2,
-                    ),
+            fit: StackFit.expand,
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  width: 600,
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            navigate(
+                              context,
+                              HelpPage(),
+                              type: SlideTransitionType.ltr,
+                            );
+                          },
+                          icon: const Icon(Icons.help)),
+                      widget.title.toTitle(),
+                      Row(
+                        children: [
+                          IconButton(
+                              onPressed: () async {
+                                if (isGameOver) {
+                                  fState.generateFurdleGrid();
+                                  final furdleScoreShareMessage =
+                                      'FURDLE ${fState.shareFurdle}';
+                                  if (!kIsWeb) {
+                                    await Share.share(furdleScoreShareMessage);
+                                  } else {
+                                    await Clipboard.setData(ClipboardData(
+                                        text: furdleScoreShareMessage));
+                                    showMessage(context, copiedToClipBoard,
+                                        isError: false);
+                                  }
+                                } else {
+                                  showMessage(context, shareIncomplete);
+                                }
+                              },
+                              icon: const Icon(Icons.share)),
+                          IconButton(
+                              onPressed: () {
+                                navigate(context, const Settings());
+                              },
+                              icon: const Icon(Icons.settings)),
+                        ],
+                      )
+                    ],
                   ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ValueListenableBuilder<FState>(
-                            valueListenable: furdleNotifier,
-                            builder: (x, FState state, z) {
-                              if (furdleNotifier.isLoading) {
+                ),
+              ),
+              Positioned(
+                top: -100,
+                left: screenSize.width / 2,
+                child: ConfettiWidget(
+                  confettiController: confettiController,
+                  blastDirection: 0,
+                  blastDirectionality: BlastDirectionality.explosive,
+                  particleDrag: 0.05,
+                  emissionFrequency: screenSize.width < 400 ? 0.35 : 0.4,
+                  minimumSize: const Size(10, 10),
+                  maximumSize: const Size(50, 50),
+                  numberOfParticles: 5,
+                  gravity: 0.2,
+                ),
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ValueListenableBuilder<FState>(
+                        valueListenable: furdleNotifier,
+                        builder: (x, FState state, z) {
+                          if (furdleNotifier.isLoading) {
+                            return Container(
+                              height: 200,
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2.0, color: primaryBlue),
+                            );
+                          }
+                          return AnimatedBuilder(
+                              animation: _shakeAnimation,
+                              builder: (BuildContext context, Widget? child) {
                                 return Container(
-                                  height: 200,
-                                  alignment: Alignment.center,
-                                  child: const CircularProgressIndicator(
-                                      strokeWidth: 2.0, color: primaryBlue),
-                                );
-                              }
-                              return AnimatedBuilder(
-                                  animation: _shakeAnimation,
-                                  builder:
-                                      (BuildContext context, Widget? child) {
-                                    return Container(
-                                        padding: EdgeInsets.only(
-                                            left: _shakeAnimation.value + 24.0,
-                                            right:
-                                                24.0 - _shakeAnimation.value),
-                                        child: Furdle(
-                                          fState: fState,
-                                          size: _size,
-                                        ));
-                                  });
-                            }),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        TweenAnimationBuilder<Offset>(
-                            tween: Tween<Offset>(
-                                begin: const Offset(0, 200),
-                                end: const Offset(0, 0)),
-                            duration: const Duration(milliseconds: 1000),
-                            builder: (BuildContext context, Offset offset,
-                                Widget? child) {
-                              return Transform.translate(
-                                offset: offset,
-                                child: AnimatedContainer(
-                                  margin: EdgeInsets.symmetric(
-                                      vertical: settingsController.isFurdleMode
-                                          ? 40.0
-                                          : 10.0),
-                                  duration: const Duration(milliseconds: 500),
-                                  child: KeyBoardView(
-                                    keyboardFocus: keyboardFocusNode,
-                                    controller: textController,
-                                    isFurdleMode: true,
-                                    onKeyEvent:
-                                        (String x, bool isPhysicalKeyEvent) {
-                                      analytics.logEvent(
-                                          name: 'KeyPressed',
-                                          parameters: {'key': '$x'});
-                                      if (isGameOver ||
-                                          settingsController.isAlreadyPlayed) {
-                                        if (isPhysicalKeyEvent) return;
-                                        showFurdleDialog(
-                                            title: gameAlreadyPlayed,
-                                            message: 'Next puzzle in');
-                                        return;
-                                      }
-                                      final character = x.toLowerCase();
-                                      if (character == 'enter') {
-                                        /// check if word is complete
-                                        /// TODO: check if word is valid 5 letter word
-                                        final wordState = fState.validate();
-                                        challenge.cells = fState.cells;
-                                        if (wordState == Word.match) {
-                                          isGameOver = true;
-                                          updateTimer();
-                                          confettiController.play();
-                                          isGameOver = true;
-                                          challenge.moves = fState.row;
-                                          challenge.result = PuzzleResult.win;
-                                          settingsController
-                                              .gameOver(challenge);
-                                          Future.delayed(
-                                              const Duration(milliseconds: 500),
-                                              (() {
-                                            showFurdleDialog(isSuccess: true);
-                                          }));
-                                        } else {
-                                          isGameOver = false;
-                                          switch (wordState) {
-                                            case Word.incomplete:
-                                              showMessage(context,
-                                                  'Word is incomplete!');
-                                              break;
-                                            case Word.invalid:
-                                              showMessage(
-                                                  context, 'Word not in list!');
-                                              break;
-                                            case Word.valid:
-
-                                              /// User failed to crack the furdle
-                                              if (fState.row == _size.height) {
-                                                updateTimer();
-                                                showFurdleDialog(
-                                                    isSuccess: false);
-                                                isGameOver = true;
-                                                challenge.moves = fState.row;
-                                                challenge.result =
-                                                    PuzzleResult.lose;
-                                                settingsController
-                                                    .gameOver(challenge);
-                                              } else {
-                                                challenge.result =
-                                                    PuzzleResult.inprogress;
-                                              }
-                                              break;
-                                            default:
-                                          }
-                                        }
-                                      } else if (character == 'delete' ||
-                                          character == 'backspace') {
-                                        fState.removeCell();
-                                      } else if (isLetter(x.toUpperCase())) {
-                                        if (fState.column >= _size.width) {
-                                          return;
-                                        }
-                                        fState.addCell(character);
-                                      } else {
-                                        print('invalid Key event $character');
-                                      }
-                                      furdleNotifier.notify();
-                                    },
-                                  ),
-                                ),
-                              );
-                            }),
-                      ],
+                                    padding: EdgeInsets.only(
+                                        left: _shakeAnimation.value + 24.0,
+                                        right: 24.0 - _shakeAnimation.value),
+                                    child: Furdle(
+                                      fState: fState,
+                                      size: _size,
+                                    ));
+                              });
+                        }),
+                    const SizedBox(
+                      height: 24,
                     ),
-                    // duration: Duration(milliseconds: 500)
-                  )
-                ],
-              ));
+                    TweenAnimationBuilder<Offset>(
+                        tween: Tween<Offset>(
+                            begin: const Offset(0, 200),
+                            end: const Offset(0, 0)),
+                        duration: const Duration(milliseconds: 1000),
+                        builder: (BuildContext context, Offset offset,
+                            Widget? child) {
+                          return Transform.translate(
+                            offset: offset,
+                            child: AnimatedContainer(
+                              margin: EdgeInsets.symmetric(
+                                  vertical: settingsController.isFurdleMode
+                                      ? 40.0
+                                      : 10.0),
+                              duration: const Duration(milliseconds: 500),
+                              child: KeyBoardView(
+                                keyboardFocus: keyboardFocusNode,
+                                controller: textController,
+                                isFurdleMode: true,
+                                onKeyEvent:
+                                    (String x, bool isPhysicalKeyEvent) {
+                                  analytics.logEvent(
+                                      name: 'KeyPressed',
+                                      parameters: {'key': '$x'});
+                                  if (isGameOver ||
+                                      settingsController.isAlreadyPlayed) {
+                                    if (isPhysicalKeyEvent) return;
+                                    showFurdleDialog(
+                                        title: gameAlreadyPlayed,
+                                        message: 'Next puzzle in');
+                                    return;
+                                  }
+                                  final character = x.toLowerCase();
+                                  if (character == 'enter') {
+                                    /// check if word is complete
+                                    /// TODO: check if word is valid 5 letter word
+                                    final wordState = fState.validate();
+                                    challenge.cells = fState.cells;
+                                    if (wordState == Word.match) {
+                                      isGameOver = true;
+                                      updateTimer();
+                                      confettiController.play();
+                                      isGameOver = true;
+                                      challenge.moves = fState.row;
+                                      challenge.result = PuzzleResult.win;
+                                      settingsController.gameOver(challenge);
+                                      Future.delayed(
+                                          const Duration(milliseconds: 500),
+                                          (() {
+                                        showFurdleDialog(isSuccess: true);
+                                      }));
+                                    } else {
+                                      isGameOver = false;
+                                      switch (wordState) {
+                                        case Word.incomplete:
+                                          showMessage(
+                                              context, 'Word is incomplete!');
+                                          break;
+                                        case Word.invalid:
+                                          showMessage(
+                                              context, 'Word not in list!');
+                                          break;
+                                        case Word.valid:
+
+                                          /// User failed to crack the furdle
+                                          if (fState.row == _size.height) {
+                                            updateTimer();
+                                            showFurdleDialog(isSuccess: false);
+                                            isGameOver = true;
+                                            challenge.moves = fState.row;
+                                            challenge.result =
+                                                PuzzleResult.lose;
+                                            settingsController
+                                                .gameOver(challenge);
+                                          } else {
+                                            challenge.result =
+                                                PuzzleResult.inprogress;
+                                          }
+                                          break;
+                                        default:
+                                      }
+                                    }
+                                  } else if (character == 'delete' ||
+                                      character == 'backspace') {
+                                    fState.removeCell();
+                                  } else if (isLetter(x.toUpperCase())) {
+                                    if (fState.column >= _size.width) {
+                                      return;
+                                    }
+                                    fState.addCell(character);
+                                  } else {
+                                    print('invalid Key event $character');
+                                  }
+                                  furdleNotifier.notify();
+                                },
+                              ),
+                            ),
+                          );
+                        }),
+                  ],
+                ),
+                // duration: Duration(milliseconds: 500)
+              )
+            ],
+          ));
         });
   }
 }
