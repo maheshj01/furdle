@@ -11,6 +11,7 @@ import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
 import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
@@ -285,6 +286,15 @@ class _MyHomePageState extends State<MyHomePage>
               appBar: AppBar(
                 centerTitle: true,
                 title: widget.title.toTitle(),
+                leading: IconButton(
+                    onPressed: () {
+                      navigate(
+                        context,
+                        HelpPage(),
+                        type: SlideTransitionType.ltr,
+                      );
+                    },
+                    icon: const Icon(Icons.help)),
                 actions: [
                   IconButton(
                       onPressed: () async {
@@ -518,23 +528,5 @@ extension FurdleTitle on String {
                           : primaryBlue))
       ]),
     );
-  }
-}
-
-class FurdleAppBar extends StatefulWidget with PreferredSizeWidget {
-  const FurdleAppBar({Key? key}) : super(key: key);
-
-  @override
-  _FurdleAppBarState createState() => _FurdleAppBarState();
-
-  @override
-  // TODO: implement preferredSize
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
-}
-
-class _FurdleAppBarState extends State<FurdleAppBar> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }

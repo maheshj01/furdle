@@ -2,6 +2,7 @@
 /// e.g
 const String appTitle = 'FURDLE';
 const String settingsTitle = 'Settings';
+const String helpTitle = 'How to Play';
 
 /// SharedPreferences Keys
 const String kThemeKey = 'theme';
