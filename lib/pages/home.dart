@@ -17,6 +17,7 @@ import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -287,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage>
             fit: StackFit.expand,
             children: [
               Positioned(
-                  top: kToolbarHeight / 2,
+                  top: screenSize.width > 600 ? 0 : kToolbarHeight / 3,
                   // alignment: Alignment.topCenter,
                   child: FurdleBar(
                     title: 'Furdle',
