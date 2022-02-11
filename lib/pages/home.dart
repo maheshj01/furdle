@@ -286,56 +286,47 @@ class _MyHomePageState extends State<MyHomePage>
               body: Stack(
             fit: StackFit.expand,
             children: [
-              Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  width: 600,
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+              Positioned(
+                  top: kToolbarHeight / 2,
+                  // alignment: Alignment.topCenter,
+                  child: FurdleBar(
+                    title: 'Furdle',
+                    leading: IconButton(
+                        onPressed: () {
+                          navigate(
+                            context,
+                            HelpPage(),
+                            type: SlideTransitionType.ltr,
+                          );
+                        },
+                        icon: const Icon(Icons.help)),
+                    actions: [
+                      IconButton(
+                          onPressed: () async {
+                            if (isGameOver) {
+                              fState.generateFurdleGrid();
+                              final furdleScoreShareMessage =
+                                  'FURDLE ${fState.shareFurdle}';
+                              if (!kIsWeb) {
+                                await Share.share(furdleScoreShareMessage);
+                              } else {
+                                await Clipboard.setData(ClipboardData(
+                                    text: furdleScoreShareMessage));
+                                showMessage(context, copiedToClipBoard,
+                                    isError: false);
+                              }
+                            } else {
+                              showMessage(context, shareIncomplete);
+                            }
+                          },
+                          icon: const Icon(Icons.share)),
                       IconButton(
                           onPressed: () {
-                            navigate(
-                              context,
-                              HelpPage(),
-                              type: SlideTransitionType.ltr,
-                            );
+                            navigate(context, const Settings());
                           },
-                          icon: const Icon(Icons.help)),
-                      widget.title.toTitle(),
-                      Row(
-                        children: [
-                          IconButton(
-                              onPressed: () async {
-                                if (isGameOver) {
-                                  fState.generateFurdleGrid();
-                                  final furdleScoreShareMessage =
-                                      'FURDLE ${fState.shareFurdle}';
-                                  if (!kIsWeb) {
-                                    await Share.share(furdleScoreShareMessage);
-                                  } else {
-                                    await Clipboard.setData(ClipboardData(
-                                        text: furdleScoreShareMessage));
-                                    showMessage(context, copiedToClipBoard,
-                                        isError: false);
-                                  }
-                                } else {
-                                  showMessage(context, shareIncomplete);
-                                }
-                              },
-                              icon: const Icon(Icons.share)),
-                          IconButton(
-                              onPressed: () {
-                                navigate(context, const Settings());
-                              },
-                              icon: const Icon(Icons.settings)),
-                        ],
-                      )
+                          icon: const Icon(Icons.settings)),
                     ],
-                  ),
-                ),
-              ),
+                  )),
               Positioned(
                 top: -100,
                 left: screenSize.width / 2,
@@ -356,6 +347,9 @@ class _MyHomePageState extends State<MyHomePage>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(
+                      height: 50,
+                    ),
                     ValueListenableBuilder<FState>(
                         valueListenable: furdleNotifier,
                         builder: (x, FState state, z) {
@@ -489,6 +483,42 @@ class _MyHomePageState extends State<MyHomePage>
             ],
           ));
         });
+  }
+}
+
+class FurdleBar extends StatefulWidget {
+  final Widget? leading;
+  final List<Widget>? actions;
+  final Color backgroundColor;
+  final String title;
+  const FurdleBar(
+      {Key? key,
+      this.leading,
+      this.actions,
+      required this.title,
+      this.backgroundColor = Colors.transparent})
+      : super(key: key);
+
+  @override
+  _FurdleBarState createState() => _FurdleBarState();
+}
+
+class _FurdleBarState extends State<FurdleBar> {
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    return Container(
+      width: screenSize.width,
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          widget.leading!,
+          widget.title.toTitle(),
+          Row(children: widget.actions!)
+        ],
+      ),
+    );
   }
 }
 

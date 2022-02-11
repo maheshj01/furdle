@@ -21,3 +21,6 @@ const String furdleCracked =
 const String failedToCrackFurdle =
     'You couldn\'t crack the Furdle of the Day!\nDon\'t let this happen again.\nBetter luck next time!';
 String alphabets = 'abcdefghijklmnopqrstuvwxyz';
+String playStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.wml.furdle';
+String sourceUrl = 'https://github.com/maheshmnj/furdle';

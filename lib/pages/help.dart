@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
+import 'package:furdle/utils/utility.dart';
 
 class HelpPage extends StatelessWidget {
   HelpPage({Key? key}) : super(key: key);
@@ -36,37 +38,58 @@ class HelpPage extends StatelessWidget {
       );
     }
 
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(description,
-                  style: const TextStyle(
-                    fontSize: 16,
-                  )),
-            ),
-            const Divider(),
-            subTitle('Examples'),
-            subTitle('Case 1', fontSize: 20),
-            "GREAT".toWord(2),
-            subTitle(case1, fontSize: 16),
-            subTitle('Case 2', fontSize: 20),
-            "PLANE".toWord(1, color: yellow),
-            subTitle(case2, fontSize: 16),
-            subTitle('Case 3', fontSize: 20),
-            "DAISY".toWord(4, color: black),
-            subTitle(case3, fontSize: 16),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: screenSize.width < 600
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(description,
+                    style: const TextStyle(
+                      fontSize: 16,
+                    )),
+              ),
+              const Divider(),
+              subTitle('Examples'),
+              subTitle('Case 1', fontSize: 20),
+              "GREAT".toWord(2),
+              subTitle(case1, fontSize: 16),
+              subTitle('Case 2', fontSize: 20),
+              "PLANE".toWord(1, color: yellow),
+              subTitle(case2, fontSize: 16),
+              subTitle('Case 3', fontSize: 20),
+              "DAISY".toWord(4, color: black),
+              subTitle(case3, fontSize: 16),
+              if (kIsWeb)
+                Container(
+                    alignment: Alignment.center,
+                    height: 50,
+                    margin: const EdgeInsets.symmetric(vertical: 20),
+                    child: GestureDetector(
+                      onTap: () {
+                        launchUrl(playStoreUrl);
+                      },
+                      child: Image.network(
+                          'https://github.com/maheshmnj/vocabhub/raw/master/assets/googleplay.png'),
+                    )),
+              const SizedBox(
+                height: 50,
+              )
+            ],
+          ),
         ),
       ),
     );

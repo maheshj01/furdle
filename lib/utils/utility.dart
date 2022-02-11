@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/pages/furdle.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// State Color for either furdle or Keyboard
 Color keyStateToColor(KeyState state, {bool isFurdle = false}) {
@@ -35,4 +36,16 @@ extension TimeLeft on Duration {
     }
     return '$hours hrs $minutes mins';
   }
+}
+
+
+/// TODO: Add canLaunch condition back when this issue is fixed https://github.com/flutter/flutter/issues/74557
+Future<void> launchUrl(String url, {bool isNewTab = true}) async {
+  // await canLaunch(url)
+  // ?
+  await launch(
+    url,
+    webOnlyWindowName: isNewTab ? '_blank' : '_self',
+  );
+  // : throw 'Could not launch $url';
 }
