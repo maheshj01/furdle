@@ -2089,6 +2089,7 @@ export const wordList:string[] = [
   "timer",
   "timid",
   "tipsy",
+  "tired",
   "titan",
   "tithe",
   "title",

@@ -2089,6 +2089,7 @@ const List<String> furdleList = [
   'timer',
   'timid',
   'tipsy',
+  'tired',
   'titan',
   'tithe',
   'title',
