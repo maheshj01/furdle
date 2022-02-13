@@ -288,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage>
             fit: StackFit.expand,
             children: [
               Positioned(
-                  top: screenSize.width > 600 ? 0 : kToolbarHeight / 3,
+                  top: screenSize.width > 600 ? 0 : kToolbarHeight / 2,
                   // alignment: Alignment.topCenter,
                   child: FurdleBar(
                     title: 'Furdle',
