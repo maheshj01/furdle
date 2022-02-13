@@ -17,7 +17,6 @@ import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
-import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -153,7 +152,6 @@ class _MyHomePageState extends State<MyHomePage>
     analytics.setCurrentScreen(screenName: 'Furdle');
   }
 
-  // TODO: Get the furdle grid Size
   Size difficultyToSize(Difficulty difficulty) {
     switch (difficulty) {
       case Difficulty.easy:
@@ -401,7 +399,7 @@ class _MyHomePageState extends State<MyHomePage>
                                     (String x, bool isPhysicalKeyEvent) {
                                   analytics.logEvent(
                                       name: 'KeyPressed',
-                                      parameters: {'key': '$x'});
+                                      parameters: {'key': x});
                                   if (isGameOver ||
                                       settingsController.isAlreadyPlayed) {
                                     if (isPhysicalKeyEvent) return;
@@ -413,7 +411,6 @@ class _MyHomePageState extends State<MyHomePage>
                                   final character = x.toLowerCase();
                                   if (character == 'enter') {
                                     /// check if word is complete
-                                    /// TODO: check if word is valid 5 letter word
                                     final wordState = fState.validate();
                                     challenge.cells = fState.cells;
                                     if (wordState == Word.match) {

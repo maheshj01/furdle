@@ -29,7 +29,6 @@ extension TimeLeft on Duration {
     if (minutes < 0 || hours < 0) {
       return "0 hrs 0 mins";
     }
-    final seconds = inSeconds;
     if (minutes > 60) {
       hours = minutes ~/ 60;
       minutes = (minutes - hours * 60) % 60;
@@ -37,7 +36,6 @@ extension TimeLeft on Duration {
     return '$hours hrs $minutes mins';
   }
 }
-
 
 /// TODO: Add canLaunch condition back when this issue is fixed https://github.com/flutter/flutter/issues/74557
 Future<void> launchUrl(String url, {bool isNewTab = true}) async {

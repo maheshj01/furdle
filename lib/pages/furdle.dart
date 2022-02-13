@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/constants/const.dart';
 import 'package:furdle/exports.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';

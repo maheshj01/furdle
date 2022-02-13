@@ -155,7 +155,7 @@ class FState extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<List<FCellState>> _cells = [];
+  final List<List<FCellState>> _cells = [];
 
   List<List<FCellState>> get cells => _cells;
 

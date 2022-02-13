@@ -4,8 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
 import 'package:furdle/pages/furdle.dart';
-import 'package:furdle/utils/settings_controller.dart';
-
 class KeyBoardView extends StatefulWidget {
   final bool isFurdleMode;
   final Function(String, bool) onKeyEvent;
