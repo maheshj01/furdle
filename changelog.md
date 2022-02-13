@@ -27,3 +27,8 @@
 ### v0.3.0 [Feb 8, 2022]
 
 - Restore state of the game exactly where you left off
+
+### v0.3.1[Feb 8, 2022]
+- Add how to play section
+- change navigation animation
+- minor tweaks in analytics
