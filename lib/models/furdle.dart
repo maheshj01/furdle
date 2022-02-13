@@ -228,8 +228,7 @@ class FState extends ChangeNotifier {
         saveFurdleState();
         FirebaseAnalytics analytics = FirebaseAnalytics.instance;
         analytics.logEvent(
-            name: 'GameOver',
-            parameters: {'result': puzzle.result.name, 'moves': puzzle.moves});
+            name: 'word guessed', parameters: {'word': word, 'moves': row - 1});
       }
       notifyListeners();
       return isPuzzleSolved ? Word.match : Word.valid;
