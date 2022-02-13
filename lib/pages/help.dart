@@ -82,14 +82,42 @@ class HelpPage extends StatelessWidget {
                       onTap: () {
                         launchUrl(playStoreUrl);
                       },
-                      child: Image.network(
-                          'https://github.com/maheshmnj/vocabhub/raw/master/assets/googleplay.png'),
+                      child: Image.asset('assets/googleplay.png'),
                     )),
-              const SizedBox(
-                height: 50,
-              )
+              subTitle('Report a bug', fontSize: 16),
+              Padding(
+                  padding: const EdgeInsets.only(bottom: 50.0),
+                  child: Column(
+                    children: [
+                      'Email'.toLink(onTap: () {
+                        launchUrl(emailSource);
+                      }),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      'Github'.toLink(onTap: () {
+                        launchUrl(sourceUrl);
+                      })
+                    ],
+                  )),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+extension WebLink on String {
+  Widget toLink({Function()? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      child: Text(
+        this,
+        style: const TextStyle(
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
+          // decorationStyle: TextDecorationStyle.solid
         ),
       ),
     );

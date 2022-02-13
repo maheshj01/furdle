@@ -24,3 +24,4 @@ String alphabets = 'abcdefghijklmnopqrstuvwxyz';
 String playStoreUrl =
     'https://play.google.com/store/apps/details?id=com.wml.furdle';
 String sourceUrl = 'https://github.com/maheshmnj/furdle';
+String emailSource = 'mailto:maheshmn121@gmail.com';
