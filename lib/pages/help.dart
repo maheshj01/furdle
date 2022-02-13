@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
+import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/utility.dart';
 
 class HelpPage extends StatelessWidget {
@@ -42,8 +43,15 @@ class HelpPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
-      ),
+          automaticallyImplyLeading: false,
+          title: Text(title),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  popView(context);
+                },
+                icon: const Icon(Icons.close))
+          ]),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: SingleChildScrollView(

@@ -297,7 +297,7 @@ class _MyHomePageState extends State<MyHomePage>
                           navigate(
                             context,
                             HelpPage(),
-                            type: SlideTransitionType.ltr,
+                            type: SlideTransitionType.btt,
                           );
                         },
                         icon: const Icon(Icons.help)),
