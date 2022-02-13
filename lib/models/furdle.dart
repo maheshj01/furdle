@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
@@ -225,6 +226,10 @@ class FState extends ChangeNotifier {
       /// last row is saved on game over
       if (row < furdleSize.height) {
         saveFurdleState();
+        FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+        analytics.logEvent(
+            name: 'GameOver',
+            parameters: {'result': puzzle.result.name, 'moves': puzzle.moves});
       }
       notifyListeners();
       return isPuzzleSolved ? Word.match : Word.valid;
@@ -262,6 +267,7 @@ class FState extends ChangeNotifier {
       currentRow += '\n';
       generatedFurdle += currentRow;
     }
+    generatedFurdle += '\nhttps://furdle.web.app';
     _shareFurdle = generatedFurdle;
     notifyListeners();
   }
