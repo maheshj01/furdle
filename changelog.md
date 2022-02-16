@@ -32,3 +32,6 @@
 - Add how to play section
 - change navigation animation
 - minor tweaks in analytics
+
+### v0.3.2[Feb 16, 2022]
+- fix: duplicate letter incorrect color
