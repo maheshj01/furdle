@@ -421,11 +421,11 @@ class _MyHomePageState extends State<MyHomePage>
                                       challenge.moves = fState.row;
                                       challenge.result = PuzzleResult.win;
                                       settingsController.gameOver(challenge);
-                                      Future.delayed(
-                                          const Duration(milliseconds: 500),
-                                          (() {
-                                        showFurdleDialog(isSuccess: true);
-                                      }));
+                                      // Future.delayed(
+                                      //     const Duration(milliseconds: 500),
+                                      //     (() {
+                                      showFurdleDialog(isSuccess: true);
+                                      // }));
                                     } else {
                                       isGameOver = false;
                                       switch (wordState) {
