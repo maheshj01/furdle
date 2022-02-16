@@ -97,6 +97,7 @@ class FState extends ChangeNotifier {
   /// word in a current row
   String _currentWord = '';
 
+  /// word in a current row
   String get currentWord => _currentWord;
 
   /// add a letter to current word
@@ -167,14 +168,21 @@ class FState extends ChangeNotifier {
     notifyListeners();
   }
 
-  KeyState characterToState(String letter) {
+  KeyState characterToState(String letter, int count) {
     int index = indexOf(letter);
+    final bool hasNoDuplicateLetters =
+        count == 1 && currentWord.contains(letter);
+    print('current word=$_currentWord count = $count');
     if (index < 0) {
       return KeyState.notExists;
     } else if (letterExists(index, letter)) {
       return KeyState.exists;
     } else {
-      return KeyState.misplaced;
+      if (hasNoDuplicateLetters) {
+        return KeyState.notExists;
+      } else {
+        return KeyState.misplaced;
+      }
     }
   }
 
@@ -187,8 +195,9 @@ class FState extends ChangeNotifier {
   }
 
   void addCell(String character) {
-    FCellState cell =
-        FCellState(character: character, state: characterToState(character));
+    final occurence = puzzle.puzzle.split(character).toList().length - 1;
+    FCellState cell = FCellState(
+        character: character, state: characterToState(character, occurence));
     if (_column < furdleSize.width) {
       _cells[row][column] = cell;
       _column++;
