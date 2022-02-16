@@ -172,7 +172,6 @@ class FState extends ChangeNotifier {
     int index = indexOf(letter);
     final bool hasNoDuplicateLetters =
         count == 1 && currentWord.contains(letter);
-    print('current word=$_currentWord count = $count');
     if (index < 0) {
       return KeyState.notExists;
     } else if (letterExists(index, letter)) {
