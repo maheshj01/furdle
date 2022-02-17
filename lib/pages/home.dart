@@ -334,7 +334,7 @@ class _MyHomePageState extends State<MyHomePage>
                   blastDirection: 0,
                   blastDirectionality: BlastDirectionality.explosive,
                   particleDrag: 0.05,
-                  emissionFrequency: screenSize.width < 400 ? 0.35 : 0.4,
+                  emissionFrequency: 0.35,
                   minimumSize: const Size(10, 10),
                   maximumSize: const Size(50, 50),
                   numberOfParticles: 5,
@@ -421,11 +421,11 @@ class _MyHomePageState extends State<MyHomePage>
                                       challenge.moves = fState.row;
                                       challenge.result = PuzzleResult.win;
                                       settingsController.gameOver(challenge);
-                                      // Future.delayed(
-                                      //     const Duration(milliseconds: 500),
-                                      //     (() {
-                                      showFurdleDialog(isSuccess: true);
-                                      // }));
+                                      Future.delayed(
+                                          const Duration(milliseconds: 500),
+                                          (() {
+                                        showFurdleDialog(isSuccess: true);
+                                      }));
                                     } else {
                                       isGameOver = false;
                                       switch (wordState) {
