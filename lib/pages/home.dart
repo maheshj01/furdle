@@ -198,6 +198,7 @@ class _MyHomePageState extends State<MyHomePage>
           fState.row = _lastPlayedPuzzle.moves;
           fState.column = 0;
           fState.puzzle = _lastPlayedPuzzle;
+          isGameOver = false;
         } else {
           bool isPuzzleAlreadyPlayed =
               _lastPlayedPuzzle.number == challenge.number &&
