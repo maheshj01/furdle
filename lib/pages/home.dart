@@ -306,7 +306,7 @@ class _MyHomePageState extends State<MyHomePage>
                             if (isGameOver) {
                               fState.generateFurdleGrid();
                               final furdleScoreShareMessage =
-                                  'FURDLE ${fState.shareFurdle}';
+                                  '#FURDLE ${fState.shareFurdle}';
                               if (!kIsWeb) {
                                 await Share.share(furdleScoreShareMessage);
                               } else {
