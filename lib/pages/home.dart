@@ -265,6 +265,69 @@ class _MyHomePageState extends State<MyHomePage>
     });
   }
 
+  Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
+    analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
+    if (isGameOver || settingsController.isAlreadyPlayed) {
+      if (isPhysicalKeyEvent) return;
+      showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
+      return;
+    }
+    final character = x.toLowerCase();
+    if (character == 'enter') {
+      /// check if word is complete
+      final wordState = fState.validate();
+      challenge.cells = fState.cells;
+      if (wordState == Word.match) {
+        isGameOver = true;
+        updateTimer();
+        confettiController.play();
+        isGameOver = true;
+        challenge.moves = fState.row;
+        challenge.result = PuzzleResult.win;
+        settingsController.gameOver(challenge);
+        Future.delayed(const Duration(milliseconds: 500), (() {
+          showFurdleDialog(isSuccess: true);
+        }));
+      } else {
+        isGameOver = false;
+        switch (wordState) {
+          case Word.incomplete:
+            showMessage(context, 'Word is incomplete!');
+            break;
+          case Word.invalid:
+            showMessage(context, 'Word not in list!');
+            break;
+          case Word.valid:
+
+            /// User failed to crack the furdle
+            if (fState.row == _size.height) {
+              updateTimer();
+              showFurdleDialog(isSuccess: false);
+              isGameOver = true;
+              challenge.moves = fState.row;
+              challenge.result = PuzzleResult.lose;
+              settingsController.gameOver(challenge);
+            } else {
+              challenge.result = PuzzleResult.inprogress;
+              // analytics.logEvent(name: 'word guessed', parameters: {'word': fState.row});
+            }
+            break;
+          default:
+        }
+      }
+    } else if (character == 'delete' || character == 'backspace') {
+      fState.removeCell();
+    } else if (isLetter(x.toUpperCase())) {
+      if (fState.column >= _size.width) {
+        return;
+      }
+      fState.addCell(character);
+    } else {
+      print('invalid Key event $character');
+    }
+    furdleNotifier.notify();
+  }
+
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -397,80 +460,8 @@ class _MyHomePageState extends State<MyHomePage>
                                 controller: textController,
                                 isFurdleMode: true,
                                 onKeyEvent:
-                                    (String x, bool isPhysicalKeyEvent) {
-                                  analytics.logEvent(
-                                      name: 'KeyPressed',
-                                      parameters: {'key': x});
-                                  if (isGameOver ||
-                                      settingsController.isAlreadyPlayed) {
-                                    if (isPhysicalKeyEvent) return;
-                                    showFurdleDialog(
-                                        title: gameAlreadyPlayed,
-                                        message: 'Next puzzle in');
-                                    return;
-                                  }
-                                  final character = x.toLowerCase();
-                                  if (character == 'enter') {
-                                    /// check if word is complete
-                                    final wordState = fState.validate();
-                                    challenge.cells = fState.cells;
-                                    if (wordState == Word.match) {
-                                      isGameOver = true;
-                                      updateTimer();
-                                      confettiController.play();
-                                      isGameOver = true;
-                                      challenge.moves = fState.row;
-                                      challenge.result = PuzzleResult.win;
-                                      settingsController.gameOver(challenge);
-                                      Future.delayed(
-                                          const Duration(milliseconds: 500),
-                                          (() {
-                                        showFurdleDialog(isSuccess: true);
-                                      }));
-                                    } else {
-                                      isGameOver = false;
-                                      switch (wordState) {
-                                        case Word.incomplete:
-                                          showMessage(
-                                              context, 'Word is incomplete!');
-                                          break;
-                                        case Word.invalid:
-                                          showMessage(
-                                              context, 'Word not in list!');
-                                          break;
-                                        case Word.valid:
-
-                                          /// User failed to crack the furdle
-                                          if (fState.row == _size.height) {
-                                            updateTimer();
-                                            showFurdleDialog(isSuccess: false);
-                                            isGameOver = true;
-                                            challenge.moves = fState.row;
-                                            challenge.result =
-                                                PuzzleResult.lose;
-                                            settingsController
-                                                .gameOver(challenge);
-                                          } else {
-                                            challenge.result =
-                                                PuzzleResult.inprogress;
-                                          }
-                                          break;
-                                        default:
-                                      }
-                                    }
-                                  } else if (character == 'delete' ||
-                                      character == 'backspace') {
-                                    fState.removeCell();
-                                  } else if (isLetter(x.toUpperCase())) {
-                                    if (fState.column >= _size.width) {
-                                      return;
-                                    }
-                                    fState.addCell(character);
-                                  } else {
-                                    print('invalid Key event $character');
-                                  }
-                                  furdleNotifier.notify();
-                                },
+                                    (String x, bool isPhysicalKeyEvent) =>
+                                        onKeyEvent(x, isPhysicalKeyEvent),
                               ),
                             ),
                           );
