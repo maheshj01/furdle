@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:furdle/models/models.dart';
 
 /// APP CONSTANTS GO HERE IN THIS FILE
 
@@ -7,6 +8,6 @@ const baseUrl = 'www.staging.example.com';
 /// length of words in list
 int maxWords = 2334;
 
-const defaultSize = Size(5, 6);
+Size defaultSize = Difficulty.easy.toGridSize();
 
 const int hoursUntilNextFurdle = 6;

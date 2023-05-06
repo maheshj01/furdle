@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       name: 'home',
       pageBuilder: (context, state) => MaterialPage<void>(
         key: state.pageKey,
-        child: const MyHomePage(
+        child: const PlayGround(
           title: appTitle,
         ),
       ),

@@ -3,7 +3,41 @@ import 'package:furdle/constants/const.dart';
 import 'package:furdle/models/furdle.dart';
 
 enum PuzzleResult { win, lose, inprogress }
-enum Difficulty { easy, medium, hard }
+
+enum Difficulty {
+  easy(4),
+  medium(5),
+  hard(6);
+
+  final int difficulty;
+  const Difficulty(this.difficulty);
+
+  int toDifficulty() => difficulty;
+
+  Size toGridSize() {
+    switch (this) {
+      case Difficulty.easy:
+        return const Size(5.0, 7.0);
+      case Difficulty.medium:
+        return const Size(5.0, 6.0);
+      case Difficulty.hard:
+        return const Size(5.0, 5.0);
+      default:
+        return const Size(5.0, 7.0);
+    }
+  }
+
+  double factor() {
+    switch (this) {
+      case Difficulty.easy:
+        return 2.4;
+      case Difficulty.medium:
+        return 2.4;
+      case Difficulty.hard:
+        return 2.5;
+    }
+  }
+}
 
 class Puzzle {
   late int _number;

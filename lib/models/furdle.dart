@@ -1,12 +1,15 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:furdle/constants/const.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/pages/furdle.dart';
 import 'package:furdle/utils/word.dart';
+
 import '../constants/strings.dart';
 
+/// Class to represent the state of a cell in the grid
+/// character is the letter in the cell
+/// state is the state of the character entered in the cell
 class FCellState {
   String character;
   KeyState state;
@@ -61,30 +64,21 @@ enum Word {
   match
 }
 
-class FState extends ChangeNotifier {
+class GameState extends ChangeNotifier {
   int _row = 0;
-
   int _column = 0;
+  bool _isPuzzleSolved = false;
+  Puzzle _puzzle = Puzzle.initialize();
 
+  /// current row
   int get row => _row;
 
+  /// current column
   int get column => _column;
-
-  bool _isPuzzleSolved = false;
 
   bool get isPuzzleSolved => _isPuzzleSolved;
 
-  Size _furdleSize = defaultSize;
-
-  Size get furdleSize => _furdleSize;
-
-  String _furdlePuzzle = '';
-
-  String get furdlePuzzle => _furdlePuzzle;
-
-  Puzzle _puzzle = Puzzle.initialize();
-
-  /// current Puzzle
+  /// current Puzzle details
   Puzzle get puzzle => _puzzle;
 
   /// current Puzzle
@@ -126,7 +120,7 @@ class FState extends ChangeNotifier {
   }
 
   set furdlePuzzle(String value) {
-    _furdlePuzzle = value;
+    puzzle.puzzle = value;
     notifyListeners();
   }
 
@@ -139,11 +133,13 @@ class FState extends ChangeNotifier {
   /// and can be submitted
   bool isWordComplete() {
     /// last letter of current row is Non empty
-    return _cells[row][furdleSize.width.toInt() - 1].character.isNotEmpty;
+    return _cells[row][_puzzle.puzzleSize.width.toInt() - 1]
+        .character
+        .isNotEmpty;
   }
 
-  set furdleSize(Size value) {
-    _furdleSize = value;
+  set gridSize(Size value) {
+    _puzzle.puzzleSize = value;
     notifyListeners();
   }
 
@@ -186,18 +182,18 @@ class FState extends ChangeNotifier {
   }
 
   bool letterExists(int index, String letter) {
-    return furdlePuzzle[column] == letter;
+    return puzzle.puzzle[column] == letter;
   }
 
   int indexOf(letter) {
-    return furdlePuzzle.toLowerCase().indexOf(letter);
+    return puzzle.puzzle.toLowerCase().indexOf(letter);
   }
 
   void addCell(String character) {
     final occurence = puzzle.puzzle.split(character).toList().length - 1;
     FCellState cell = FCellState(
         character: character, state: characterToState(character, occurence));
-    if (_column < furdleSize.width) {
+    if (_column < _puzzle.puzzleSize.width) {
       _cells[row][column] = cell;
       _column++;
       addToWord(character);
@@ -228,11 +224,11 @@ class FState extends ChangeNotifier {
       _currentWord = '';
       _column = 0;
       _row++;
-      isPuzzleSolved = word == furdlePuzzle;
+      isPuzzleSolved = word == puzzle.puzzle;
 
       /// saves rows-1 times
       /// last row is saved on game over
-      if (row < furdleSize.height) {
+      if (row < _puzzle.puzzleSize.height) {
         saveFurdleState();
         FirebaseAnalytics analytics = FirebaseAnalytics.instance;
         analytics.logEvent(
@@ -265,10 +261,10 @@ class FState extends ChangeNotifier {
   void generateFurdleGrid() {
     int attempts = _isPuzzleSolved ? row : 0;
     String generatedFurdle =
-        '#${settingsController.stats.number} $attempts/${furdleSize.height.toInt()}\n\n';
-    for (int i = 0; i < _furdleSize.height; i++) {
+        '#${settingsController.stats.number} $attempts/${_puzzle.puzzleSize.height.toInt()}\n\n';
+    for (int i = 0; i < _puzzle.puzzleSize.height; i++) {
       String currentRow = '';
-      for (int j = 0; j < _furdleSize.width; j++) {
+      for (int j = 0; j < _puzzle.puzzleSize.width; j++) {
         currentRow += stateToGrid(_cells[i][j].state);
       }
       currentRow += '\n';
@@ -281,13 +277,13 @@ class FState extends ChangeNotifier {
 
   /// unsubmitted word in thr current row
   void updateKeyBoardState({bool isUpdate = false}) {
-    if (row >= _furdleSize.height) {
-      row = furdleSize.height.toInt() - 1;
+    if (row >= _puzzle.puzzleSize.height) {
+      row = _puzzle.puzzleSize.height.toInt() - 1;
     }
     String word = '';
     if (isUpdate) {
-      for (int j = 0; j < furdleSize.height; j++) {
-        for (int i = 0; i < furdleSize.width; i++) {
+      for (int j = 0; j < _puzzle.puzzleSize.height; j++) {
+        for (int i = 0; i < _puzzle.puzzleSize.width; i++) {
           final letter = cells[j][i].character;
           word += letter;
           final furdleState = cells[j][i].state;
@@ -302,7 +298,7 @@ class FState extends ChangeNotifier {
         }
       }
     } else {
-      for (int i = 0; i < furdleSize.width; i++) {
+      for (int i = 0; i < _puzzle.puzzleSize.width; i++) {
         final letter = cells[row][i].character;
         word += letter;
         final furdleState = cells[row][i].state;
@@ -353,8 +349,8 @@ class _KState {
   }
 }
 
-class FurdleNotifier extends ValueNotifier<FState> {
-  FurdleNotifier(FState state) : super(state);
+class FurdleNotifier extends ValueNotifier<GameState> {
+  FurdleNotifier(GameState state) : super(state);
 
   bool _isLoading = true;
 

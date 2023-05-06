@@ -298,7 +298,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
         isDark ? Theme.of(context).splashColor : Colors.grey.withOpacity(0.5);
     double scaleFactor = _keySize / 60;
     bool isSpecialKey = widget.keyLabel.length > 1;
-    FState state = FState();
+    GameState state = GameState();
     final keyState =
         state.kState.keyboardState[widget.keyLabel.toLowerCase()] ??
             KeyState.isDefault;

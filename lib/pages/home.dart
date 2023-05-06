@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/constants/constants.dart';
+import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/furdle.dart';
 import 'package:furdle/models/puzzle.dart';
@@ -15,20 +16,21 @@ import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
 import 'package:share_plus/share_plus.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class PlayGround extends StatefulWidget {
+  const PlayGround({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _PlayGroundState createState() => _PlayGroundState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class _PlayGroundState extends State<PlayGround>
     with SingleTickerProviderStateMixin {
   final keyboardFocusNode = FocusNode();
   final textController = TextEditingController();
@@ -38,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {});
   }
 
-  FState fState = FState();
+  GameState fState = GameState();
   late FurdleNotifier furdleNotifier;
   @override
   void dispose() {
@@ -62,18 +64,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   int difficultyToGridSize(Difficulty difficulty) {
-    switch (difficulty) {
-      case Difficulty.easy:
-        return 4;
-      case Difficulty.medium:
-        return 5;
-      case Difficulty.hard:
-        return 6;
-    }
-  }
-
-  bool isLetter(String x) {
-    return x.length == 1 && x.codeUnitAt(0) >= 65 && x.codeUnitAt(0) <= 90;
+    return difficulty.toDifficulty();
   }
 
   void showFurdleDialog(
@@ -83,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage>
       bool showTimer = true}) {
     title ??= isSuccess
         ? 'Congratulations! 🎉'
-        : '${fState.furdlePuzzle.toUpperCase()} 😞';
+        : '${fState.puzzle.puzzle.toUpperCase()} 😞';
     message ??= isSuccess ? furdleCracked : failedToCrackFurdle;
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
@@ -112,55 +103,17 @@ class _MyHomePageState extends State<MyHomePage>
         });
   }
 
-  SnackBar _snackBar({required String message, required Duration duration}) {
-    final double margin = screenSize.width / 3;
-    return SnackBar(
-      content: Text(
-        message,
-        textAlign: TextAlign.center,
-      ),
-      behavior: SnackBarBehavior.floating,
-      duration: duration,
-      margin: EdgeInsets.only(
-          bottom: screenSize.height * 0.9 - kToolbarHeight,
-          right: screenSize.width < 500 ? 20 : margin,
-          left: screenSize.width < 500 ? 20 : margin),
-    );
-  }
-
-  void showMessage(context, message,
-      {bool isError = true,
-      Duration? duration = const Duration(milliseconds: 1500)}) {
-    if (isError) {
-      _shakeController.reset();
-      _shakeController.forward();
-    }
-    ScaffoldMessenger.of(context)
-        .showSnackBar(_snackBar(message: '$message', duration: duration!));
-  }
-
   @override
   void initState() {
     super.initState();
     challenge = Puzzle.initialize(puzzle: '');
-    fState.furdleSize = _size;
+    fState.gridSize = defaultSize;
     fState.furdlePuzzle = challenge.puzzle;
-    challenge.puzzleSize = _size;
+    challenge.puzzleSize = defaultSize;
     furdleNotifier = FurdleNotifier(fState);
     _initAnimation();
     getWord();
     analytics.setCurrentScreen(screenName: 'Furdle');
-  }
-
-  Size difficultyToSize(Difficulty difficulty) {
-    switch (difficulty) {
-      case Difficulty.easy:
-        return const Size(5.0, 7.0);
-      case Difficulty.medium:
-        return const Size(5.0, 6.0);
-      case Difficulty.hard:
-        return const Size(5.0, 5.0);
-    }
   }
 
   Future<void> getWord() async {
@@ -174,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage>
         challenge.number = snapshot['number'];
         challenge.date = (snapshot['date'] as firestore.Timestamp).toDate();
         challenge.puzzle = word;
-        _size = difficultyToSize(settingsController.difficulty);
+        _size = settingsController.difficulty.toGridSize();
         challenge.puzzleSize = _size;
 
         final DateTime nextFurdleTime =
@@ -225,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage>
       } else {
         final furdleIndex = Random().nextInt(maxWords);
         word = furdleList[furdleIndex];
-        showMessage(context, 'You are playing in offline mode',
+        Utility.showMessage(context, 'You are playing in offline mode',
             duration: const Duration(milliseconds: 2000));
       }
       fState.furdlePuzzle = challenge.puzzle;
@@ -292,10 +245,12 @@ class _MyHomePageState extends State<MyHomePage>
         isGameOver = false;
         switch (wordState) {
           case Word.incomplete:
-            showMessage(context, 'Word is incomplete!');
+            shakeFurdle();
+            Utility.showMessage(context, 'Word is incomplete!');
             break;
           case Word.invalid:
-            showMessage(context, 'Word not in list!');
+            shakeFurdle();
+            Utility.showMessage(context, 'Word not in list!');
             break;
           case Word.valid:
 
@@ -317,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage>
       }
     } else if (character == 'delete' || character == 'backspace') {
       fState.removeCell();
-    } else if (isLetter(x.toUpperCase())) {
+    } else if (x.toUpperCase().isLetter()) {
       if (fState.column >= _size.width) {
         return;
       }
@@ -328,19 +283,21 @@ class _MyHomePageState extends State<MyHomePage>
     furdleNotifier.notify();
   }
 
+  void shakeFurdle() {
+    _shakeController.reset();
+    _shakeController.forward();
+  }
+
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
-  /// grid size
   Size _size = defaultSize;
   ConfettiController confettiController = ConfettiController();
   bool isGameOver = false;
   late Puzzle challenge;
-  late Size screenSize;
   @override
   Widget build(BuildContext context) {
-    screenSize = MediaQuery.of(context).size;
+    Utility.screenSize = MediaQuery.of(context).size;
     // settingsController.clear();
     return AnimatedBuilder(
         animation: settingsController,
@@ -350,7 +307,7 @@ class _MyHomePageState extends State<MyHomePage>
             fit: StackFit.expand,
             children: [
               Positioned(
-                  top: screenSize.width > 600 ? 0 : kToolbarHeight / 2,
+                  top: Utility.screenSize.width > 600 ? 0 : kToolbarHeight / 2,
                   // alignment: Alignment.topCenter,
                   child: FurdleBar(
                     title: 'Furdle',
@@ -375,11 +332,13 @@ class _MyHomePageState extends State<MyHomePage>
                               } else {
                                 await Clipboard.setData(ClipboardData(
                                     text: furdleScoreShareMessage));
-                                showMessage(context, copiedToClipBoard,
-                                    isError: false);
+                                Utility.showMessage(
+                                  context,
+                                  copiedToClipBoard,
+                                );
                               }
                             } else {
-                              showMessage(context, shareIncomplete);
+                              Utility.showMessage(context, shareIncomplete);
                             }
                           },
                           icon: const Icon(Icons.share)),
@@ -392,7 +351,7 @@ class _MyHomePageState extends State<MyHomePage>
                   )),
               Positioned(
                 top: -100,
-                left: screenSize.width / 2,
+                left: Utility.screenSize.width / 2,
                 child: ConfettiWidget(
                   confettiController: confettiController,
                   blastDirection: 0,
@@ -413,9 +372,9 @@ class _MyHomePageState extends State<MyHomePage>
                     const SizedBox(
                       height: 50,
                     ),
-                    ValueListenableBuilder<FState>(
+                    ValueListenableBuilder<GameState>(
                         valueListenable: furdleNotifier,
-                        builder: (x, FState state, z) {
+                        builder: (x, GameState state, z) {
                           if (furdleNotifier.isLoading) {
                             return Container(
                               height: 200,
@@ -432,8 +391,8 @@ class _MyHomePageState extends State<MyHomePage>
                                         left: _shakeAnimation.value + 24.0,
                                         right: 24.0 - _shakeAnimation.value),
                                     child: Furdle(
-                                      fState: fState,
-                                      size: _size,
+                                      gameState: fState,
+                                      onGameOver: (Puzzle puzzle) {},
                                     ));
                               });
                         }),
@@ -508,52 +467,6 @@ class _FurdleBarState extends State<FurdleBar> {
           Row(children: widget.actions!)
         ],
       ),
-    );
-  }
-}
-
-extension FurdleTitle on String {
-  Widget toTitle({double boxSize = 25}) {
-    return Material(
-      color: Colors.transparent,
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        for (int i = 0; i < length; i++)
-          Container(
-              height: boxSize,
-              width: boxSize,
-              alignment: Alignment.center,
-              margin: const EdgeInsets.symmetric(
-                    horizontal: 2,
-                  ) +
-                  EdgeInsets.only(bottom: i.isOdd ? 8 : 0),
-              child: Text(
-                this[i].toUpperCase(),
-                style: const TextStyle(
-                    height: 1.1,
-                    letterSpacing: 2,
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              decoration: BoxDecoration(
-                  boxShadow: const [
-                    BoxShadow(
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        color: black,
-                        offset: Offset(0, 1)),
-                    BoxShadow(
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        color: black,
-                        offset: Offset(2, -1)),
-                  ],
-                  color: i <= 1
-                      ? green
-                      : i < 4
-                          ? yellow
-                          : primaryBlue))
-      ]),
     );
   }
 }
