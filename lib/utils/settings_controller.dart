@@ -2,14 +2,14 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/models/models.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'settings_service.dart';
+import '../service/settings_service.dart';
 
 /// A class that many Widgets can interact with to read user settings, update
 /// user settings, or listen to user settings changes.
 ///
 /// Controllers glue Data Services to Flutter Widgets. The SettingsController
 /// uses the SettingsService to store and retrieve user settings.
-class SettingsController with ChangeNotifier {
+class SettingsController extends ChangeNotifier {
   SettingsController() {
     _settingsService ??= SettingsService();
     loadSettings();
