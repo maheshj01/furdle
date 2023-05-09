@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
 import 'package:furdle/main.dart';
-import 'package:furdle/models/furdle.dart';
+import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
 
 enum KeyState {
@@ -54,7 +54,7 @@ class _FurdleState extends State<Furdle> {
       widget.gameState.cells = lastFurdle.cells;
       widget.gameState.puzzle = lastFurdle;
     } else {
-      final _gridSize = widget.gameState.puzzle.puzzleSize;
+      final _gridSize = widget.gameState.puzzle.size;
       for (int i = 0; i < _gridSize.height; i++) {
         List<FCellState> row = [];
         for (int j = 0; j < _gridSize.width; j++) {
@@ -83,7 +83,7 @@ class FurdleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    gridSize = state.puzzle.puzzleSize;
+    gridSize = state.puzzle.size;
     bool isPlayed = state.puzzle.moves > 0;
     bool isGameOver = state.puzzle.result != PuzzleResult.inprogress;
     cellSize = _size.width < 600 ? 65 : 80;

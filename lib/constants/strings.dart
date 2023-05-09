@@ -9,6 +9,7 @@ const String kThemeKey = 'theme';
 const String kFurdleKey = 'furdle';
 const String isAlreadyPlayeKey = 'isAlreadyPlayed';
 const String kMatchHistoryKey = 'kMatchHistoryKey';
+const String kStatsKey = 'kStatsKey';
 const String kDifficultyKey = 'kDifficultyKey';
 const String kPuzzleState = 'kPuzzleState';
 
@@ -25,3 +26,6 @@ String playStoreUrl =
     'https://play.google.com/store/apps/details?id=com.wml.furdle';
 String sourceUrl = 'https://github.com/maheshmnj/furdle';
 String emailSource = 'mailto:maheshmn121@gmail.com';
+String gameUrl = 'https://furdle.web.app';
+
+String kEnterKey = 'enter';

@@ -1,0 +1,5 @@
+- [] SettingsService and GameService should be separate
+- [] GameService should only talk to the server or local storage
+- [] SettingsService should only talk to local storage and game settings
+- [] SettingsController should only talk to SettingsService
+- [] Game should load from local Storage 

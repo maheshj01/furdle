@@ -1,9 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/colors.dart';
 
+import 'models/models.dart';
+
 extension FurdleTitle on String {
   bool isLetter() {
     return length == 1 && codeUnitAt(0) >= 65 && codeUnitAt(0) <= 90;
+  }
+
+  Difficulty toDifficulty() {
+    switch (this) {
+      case 'easy':
+        return Difficulty.easy;
+      case 'medium':
+        return Difficulty.medium;
+      case 'hard':
+        return Difficulty.hard;
+      default:
+        return Difficulty.medium;
+    }
+  }
+
+  ThemeMode toTheme() {
+    switch (this) {
+      case 'system':
+        return ThemeMode.system;
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  PuzzleResult toPuzzleResult() {
+    switch (this) {
+      case 'win':
+        return PuzzleResult.win;
+      case 'lose':
+        return PuzzleResult.lose;
+      case 'inprogress':
+        return PuzzleResult.inprogress;
+      default:
+        return PuzzleResult.none;
+    }
   }
 
   Widget toTitle({double boxSize = 25}) {

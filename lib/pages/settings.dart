@@ -4,16 +4,16 @@ import 'package:furdle/models/models.dart';
 
 import '../constants/strings.dart';
 
-class Settings extends StatefulWidget {
+class SettingsPage extends StatefulWidget {
   final String title = settingsTitle;
 
-  const Settings({Key? key}) : super(key: key);
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  State<Settings> createState() => _SettingsState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsState extends State<Settings> {
+class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();

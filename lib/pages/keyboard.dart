@@ -1,11 +1,13 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
-import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/game_view.dart';
 
 class KeyBoardView extends StatefulWidget {
+  /// defines whether the keyboard to be shown is for furdle mode
   final bool isFurdleMode;
   final Function(String, bool) onKeyEvent;
   final FocusNode? keyboardFocus;
@@ -70,7 +72,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       FocusScope.of(context).requestFocus(keyboardFocus);
     });
     return LayoutBuilder(
@@ -298,7 +300,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
         isDark ? Theme.of(context).splashColor : Colors.grey.withOpacity(0.5);
     double scaleFactor = _keySize / 60;
     bool isSpecialKey = widget.keyLabel.length > 1;
-    GameState state = GameState();
+    GameState state = GameState(puzzle: Puzzle.initialize());
     final keyState =
         state.kState.keyboardState[widget.keyLabel.toLowerCase()] ??
             KeyState.isDefault;

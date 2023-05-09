@@ -13,8 +13,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// you'd like to store settings on a web server, use the http package.
 class SettingsService {
   /// Loads the User's preferred ThemeMode from local or remote storage.
-  ThemeMode _themeMode = ThemeMode.system;
-
+  late SharedPreferences _sharedPreferences;
+  final String _kDefaultDifficulty = 'medium';
+  final String _kDefaultTheme = 'system';
   bool _isFurdleMode = false;
 
   bool get isFurdleMode => _isFurdleMode;
@@ -24,132 +25,57 @@ class SettingsService {
     _isFurdleMode = value;
   }
 
-  late SharedPreferences _sharedPreferences;
-
-  late Stats _stats;
-
-  late bool _isAlreadyPlayed = false;
-
-  Difficulty _difficulty = Difficulty.medium;
-
-  Difficulty get difficulty => _difficulty;
-
-  set difficulty(Difficulty value) {
-    _difficulty = value;
-    _sharedPreferences.setString(kDifficultyKey, value.name);
-  }
-
-  Stats get stats => _stats;
-
-  bool get isAlreadyPlayed => _isAlreadyPlayed;
-
-  set isAlreadyPlayed(bool value) {
-    _isAlreadyPlayed = value;
-  }
-
-  set stats(Stats value) {
-    _stats = value;
-  }
-
-  Future<ThemeMode> themeMode() async {
-    return _themeMode;
+  Future<void> init() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
   }
 
   /// Persists the user's preferred ThemeMode to local or remote storage.
-  Future<void> updateThemeMode(ThemeMode theme) async {
+  Future<void> setTheme(ThemeMode theme) async {
     // Use the shared_preferences package to persist settings locally or the
     // http package to persist settings over the network.
-    _sharedPreferences.setBool(kThemeKey, theme == ThemeMode.dark);
+    _sharedPreferences.setString(kThemeKey, theme.name);
   }
 
-  Future<void> init() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    _sharedPreferences = await SharedPreferences.getInstance();
+  Future<ThemeMode> getTheme() async {
+    final _theme = _sharedPreferences.getString(kThemeKey) ?? _kDefaultTheme;
+    return _theme.toTheme();
   }
 
-  Future<void> loadFurdle() async {
-    _isFurdleMode = _sharedPreferences.getBool(kFurdleKey) ?? false;
-    _stats = Stats.initialStats();
-    _stats = await getStats();
-    _difficulty = await getDifficulty();
-    _isAlreadyPlayed = isSameDate();
-  }
-
-  bool isSameDate() {
-    final now = DateTime.now();
-    if (_stats.total > 0) {
-      bool isSame = _stats.puzzles.last.date.isSameDate(now);
-      return isSame;
-    }
-    return false;
-  }
-
-  Future<void> saveCurrentFurdle(Puzzle puzzle) async {
-    final map = json.encode(puzzle.toJson());
-    _sharedPreferences.setString(kPuzzleState, map);
-  }
-
-  Future<Puzzle> getSavedPuzzle() async {
-    final String savedPuzzle = _sharedPreferences.getString(kPuzzleState) ?? '';
-    if (savedPuzzle.isEmpty) {
-      return Puzzle.initialize();
-    }
-    final decodedMap = jsonDecode(savedPuzzle) as Map<String, dynamic>;
-    final puzzle = Puzzle.fromJson(decodedMap);
-    return puzzle;
-  }
-
-  // we shouldn't clear Last played Puzzle anytime
-  Future<void> clearSavedPuzzle() async {
-    _sharedPreferences.remove(kPuzzleState);
+  Future<void> setDifficulty(Difficulty difficulty) async {
+    _sharedPreferences.setString(kDifficultyKey, difficulty.toString());
   }
 
   Future<Difficulty> getDifficulty() async {
-    String difficulty =
-        _sharedPreferences.getString(kDifficultyKey) ?? 'medium';
-    return _difficulty = difficulty.toLowerCase() == 'easy'
-        ? Difficulty.easy
-        : difficulty.toLowerCase() == 'medium'
-            ? Difficulty.medium
-            : Difficulty.hard;
+    final _difficulty =
+        _sharedPreferences.getString(kDifficultyKey) ?? _kDefaultDifficulty;
+    return _difficulty.toDifficulty();
   }
 
-  Future<Stats> getStats() async {
-    final savedPuzzle = await getSavedPuzzle();
+  Future<List<Puzzle>> getPuzzles() async {
     try {
       final list = _sharedPreferences.getStringList(kMatchHistoryKey) ?? [];
-      _stats.puzzles = list.map((e) {
+      final pastPuzzles = list.map((e) {
         final puzzle = Puzzle.fromJson(jsonDecode(e) as Map<String, dynamic>);
         return puzzle;
       }).toList();
-      if (savedPuzzle.cells.isNotEmpty && savedPuzzle.moves > 0) {
-        _stats.puzzle = savedPuzzle;
-      }
-      return _stats;
+      return pastPuzzles;
     } catch (_) {
-      return Stats.initialStats();
+      return [];
     }
   }
 
-  Future<void> configTheme() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    _sharedPreferences = await SharedPreferences.getInstance();
-    final isDark = _sharedPreferences.getBool(kThemeKey);
-    _themeMode = isDark == null
-        ? ThemeMode.system
-        : isDark
-            ? ThemeMode.dark
-            : ThemeMode.light;
+  Future<Stats> getStats() async {
+    Stats _stats = Stats.initialStats();
+    final data = _sharedPreferences.getString(kStatsKey);
+    if (data != null) {
+      final stats = jsonDecode(data) as Map<String, dynamic>;
+      _stats = Stats.fromJson(stats);
+    }
+    return _stats;
   }
 
-  /// Update stats on Game over
-  Future<void> updatePuzzleStats(Puzzle puzzle) async {
-    _stats.puzzles.add(puzzle);
-    final puzzleMapList =
-        _stats.puzzles.map((e) => json.encode(e.toJson())).toList();
-    _sharedPreferences.setStringList(kMatchHistoryKey, puzzleMapList);
-    _stats = await getStats();
-    saveCurrentFurdle(puzzle);
+  Future<void> updateStats(Stats stats) async {
+    _sharedPreferences.setString(kStatsKey, jsonEncode(stats.toJson()));
   }
 
   Future<void> clear() async {

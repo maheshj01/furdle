@@ -2,15 +2,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:furdle/controller/game_controller.dart';
+import 'package:furdle/controller/settings_controller.dart';
 import 'package:furdle/firebase_options.dart';
 import 'package:furdle/pages/home.dart';
-import 'package:furdle/utils/settings_controller.dart';
 import 'package:go_router/go_router.dart';
+
 import 'constants/constants.dart';
 
 /// Settings are exposed globally to access from anywhere
 
 late SettingsController settingsController;
+late GameController gameController;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -20,6 +23,7 @@ Future<void> main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
   settingsController = SettingsController();
+  gameController = GameController();
   runApp(MyApp());
 }
 

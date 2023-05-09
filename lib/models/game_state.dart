@@ -2,7 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/puzzle.dart';
-import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/utils/word.dart';
 
 import '../constants/strings.dart';
@@ -60,31 +60,32 @@ enum Word {
   /// word not in list
   invalid,
 
-  /// word matches the puzzle
+  /// word matches the target word
   match
 }
 
 class GameState extends ChangeNotifier {
-  int _row = 0;
-  int _column = 0;
-  bool _isPuzzleSolved = false;
-  Puzzle _puzzle = Puzzle.initialize();
+  int row;
+  int column;
 
-  /// current row
-  int get row => _row;
+  /// whether user has cracked the puzzle
+  bool isPuzzleCracked;
+  bool isGameOver;
+  Puzzle puzzle;
 
-  /// current column
-  int get column => _column;
+  GameState(
+      {this.row = 0,
+      this.column = 0,
+      this.isGameOver = false,
+      this.isPuzzleCracked = false,
+      required this.puzzle});
 
-  bool get isPuzzleSolved => _isPuzzleSolved;
+  late bool _isAlreadyPlayed = false;
 
-  /// current Puzzle details
-  Puzzle get puzzle => _puzzle;
+  bool get isAlreadyPlayed => _isAlreadyPlayed;
 
-  /// current Puzzle
-  /// to save and retrieve incomplete puzzle
-  set puzzle(Puzzle value) {
-    _puzzle = value;
+  set isAlreadyPlayed(bool value) {
+    _isAlreadyPlayed = value;
     notifyListeners();
   }
 
@@ -94,12 +95,13 @@ class GameState extends ChangeNotifier {
   /// word in a current row
   String get currentWord => _currentWord;
 
-  /// add a letter to current word
-  void addToWord(String letter) {
+  /// build current word for each letter entered
+  void buildWord(String letter) {
     _currentWord += letter;
   }
 
-  /// removes last letter from current word
+  /// update current word when a letter is removed
+  /// by pressing backspace or delete
   void removeFromWord() {
     if (_currentWord.isNotEmpty) {
       _currentWord = _currentWord.substring(0, _currentWord.length - 1);
@@ -119,38 +121,11 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  set furdlePuzzle(String value) {
-    puzzle.puzzle = value;
-    notifyListeners();
-  }
-
-  set isPuzzleSolved(bool value) {
-    _isPuzzleSolved = value;
-    notifyListeners();
-  }
-
-  /// if the current row is complete
-  /// and can be submitted
+  /// if the  word in current row equal to the width of the puzzle
+  /// then the word is complete and can be validated
   bool isWordComplete() {
-    /// last letter of current row is Non empty
-    return _cells[row][_puzzle.puzzleSize.width.toInt() - 1]
-        .character
-        .isNotEmpty;
-  }
-
-  set gridSize(Size value) {
-    _puzzle.puzzleSize = value;
-    notifyListeners();
-  }
-
-  set row(int value) {
-    _row = value;
-    notifyListeners();
-  }
-
-  set column(int value) {
-    _column = value;
-    notifyListeners();
+    final word = cells[row].map((e) => e.character).join('');
+    return word.length == puzzle.size.width;
   }
 
   final List<List<FCellState>> _cells = [];
@@ -193,17 +168,19 @@ class GameState extends ChangeNotifier {
     final occurence = puzzle.puzzle.split(character).toList().length - 1;
     FCellState cell = FCellState(
         character: character, state: characterToState(character, occurence));
-    if (_column < _puzzle.puzzleSize.width) {
-      _cells[row][column] = cell;
-      _column++;
-      addToWord(character);
+    if (column < puzzle.size.width) {
+      cells[row][column] = cell;
+      column++;
+      buildWord(character);
     }
     notifyListeners();
   }
 
   void removeCell() {
-    if (_column > 0) {
-      _column -= 1;
+    if (column > 0) {
+      column -= 1;
+
+      /// set the cell to default state
       _cells[row][column] = FCellState.defaultState();
       removeFromWord();
     }
@@ -222,27 +199,28 @@ class GameState extends ChangeNotifier {
       }
       updateKeyBoardState();
       _currentWord = '';
-      _column = 0;
-      _row++;
-      isPuzzleSolved = word == puzzle.puzzle;
+      column = 0;
+      row++;
+      isPuzzleCracked = word == puzzle.puzzle;
 
       /// saves rows-1 times
       /// last row is saved on game over
-      if (row < _puzzle.puzzleSize.height) {
+      if (row < puzzle.size.height) {
+        isGameOver = false;
         saveFurdleState();
         FirebaseAnalytics analytics = FirebaseAnalytics.instance;
         analytics.logEvent(
             name: 'word guessed', parameters: {'word': word, 'moves': row - 1});
       }
       notifyListeners();
-      return isPuzzleSolved ? Word.match : Word.valid;
+      return isPuzzleCracked ? Word.match : Word.valid;
     }
   }
 
   void saveFurdleState() {
     puzzle.cells = _cells;
     puzzle.moves = row;
-    settingsController.saveFurdleState(puzzle);
+    gameController.saveGameState(this);
   }
 
   String stateToGrid(KeyState state) {
@@ -259,31 +237,31 @@ class GameState extends ChangeNotifier {
   }
 
   void generateFurdleGrid() {
-    int attempts = _isPuzzleSolved ? row : 0;
+    int attempts = isPuzzleCracked ? row : 0;
     String generatedFurdle =
-        '#${settingsController.stats.number} $attempts/${_puzzle.puzzleSize.height.toInt()}\n\n';
-    for (int i = 0; i < _puzzle.puzzleSize.height; i++) {
+        '#${settingsController.stats.number} $attempts/${puzzle.size.height.toInt()}\n\n';
+    for (int i = 0; i < puzzle.size.height; i++) {
       String currentRow = '';
-      for (int j = 0; j < _puzzle.puzzleSize.width; j++) {
+      for (int j = 0; j < puzzle.size.width; j++) {
         currentRow += stateToGrid(_cells[i][j].state);
       }
       currentRow += '\n';
       generatedFurdle += currentRow;
     }
-    generatedFurdle += '\nhttps://furdle.web.app';
+    generatedFurdle += '\n$gameUrl';
     _shareFurdle = generatedFurdle;
     notifyListeners();
   }
 
   /// unsubmitted word in thr current row
   void updateKeyBoardState({bool isUpdate = false}) {
-    if (row >= _puzzle.puzzleSize.height) {
-      row = _puzzle.puzzleSize.height.toInt() - 1;
+    if (row >= puzzle.size.height) {
+      row = puzzle.size.height.toInt() - 1;
     }
     String word = '';
     if (isUpdate) {
-      for (int j = 0; j < _puzzle.puzzleSize.height; j++) {
-        for (int i = 0; i < _puzzle.puzzleSize.width; i++) {
+      for (int j = 0; j < puzzle.size.height; j++) {
+        for (int i = 0; i < puzzle.size.width; i++) {
           final letter = cells[j][i].character;
           word += letter;
           final furdleState = cells[j][i].state;
@@ -298,7 +276,7 @@ class GameState extends ChangeNotifier {
         }
       }
     } else {
-      for (int i = 0; i < _puzzle.puzzleSize.width; i++) {
+      for (int i = 0; i < puzzle.size.width; i++) {
         final letter = cells[row][i].character;
         word += letter;
         final furdleState = cells[row][i].state;

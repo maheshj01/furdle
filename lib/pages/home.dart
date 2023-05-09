@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:confetti/confetti.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -7,17 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/constants/constants.dart';
+import 'package:furdle/controller/game_controller.dart';
 import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
-import 'package:furdle/models/furdle.dart';
+import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
-import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/utility.dart';
-import 'package:furdle/utils/word.dart';
 import 'package:furdle/widgets/dialog.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -40,13 +38,16 @@ class _PlayGroundState extends State<PlayGround>
     setState(() {});
   }
 
-  GameState fState = GameState();
+  GameState gState = GameState(
+    puzzle: Puzzle.initialize(),
+  );
   late FurdleNotifier furdleNotifier;
   @override
   void dispose() {
     keyboardFocusNode.dispose();
     textController.dispose();
     _shakeController.dispose();
+    furdleNotifier.dispose();
     super.dispose();
   }
 
@@ -74,7 +75,7 @@ class _PlayGroundState extends State<PlayGround>
       bool showTimer = true}) {
     title ??= isSuccess
         ? 'Congratulations! 🎉'
-        : '${fState.puzzle.puzzle.toUpperCase()} 😞';
+        : '${gState.puzzle.puzzle.toUpperCase()} 😞';
     message ??= isSuccess ? furdleCracked : failedToCrackFurdle;
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
@@ -87,9 +88,9 @@ class _PlayGroundState extends State<PlayGround>
                 message: message!,
                 showTimer: showTimer,
                 onTimerComplete: () async {
-                  isGameOver = false;
-                  settingsController.isAlreadyPlayed = false;
-                  await getWord();
+                  gState.isGameOver = false;
+                  gameController.isAlreadyPlayed = false;
+                  await loadGame();
                   popView(context);
                 },
               ));
@@ -106,94 +107,59 @@ class _PlayGroundState extends State<PlayGround>
   @override
   void initState() {
     super.initState();
-    challenge = Puzzle.initialize(puzzle: '');
-    fState.gridSize = defaultSize;
-    fState.furdlePuzzle = challenge.puzzle;
-    challenge.puzzleSize = defaultSize;
-    furdleNotifier = FurdleNotifier(fState);
+    challenge = Puzzle.initialize();
+    gState.puzzle.size = defaultSize;
+    gState.puzzle.puzzle = challenge.puzzle;
+    challenge.size = defaultSize;
+    furdleNotifier = FurdleNotifier(gState);
     _initAnimation();
-    getWord();
+    loadGame();
     analytics.setCurrentScreen(screenName: 'Furdle');
   }
 
-  Future<void> getWord() async {
-    furdleNotifier.isLoading = true;
-    firestore.DocumentReference<Map<String, dynamic>> _docRef =
-        firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
-    _docRef.get().then((firestore.DocumentSnapshot snapshot) {
-      String word = '';
-      if (snapshot.exists) {
-        word = snapshot['word'];
-        challenge.number = snapshot['number'];
-        challenge.date = (snapshot['date'] as firestore.Timestamp).toDate();
-        challenge.puzzle = word;
-        _size = settingsController.difficulty.toGridSize();
-        challenge.puzzleSize = _size;
-
-        final DateTime nextFurdleTime =
-            challenge.date.add(const Duration(hours: hoursUntilNextFurdle));
-        final now = DateTime.now();
-        final durationLeft = nextFurdleTime.difference(now);
-        Puzzle _lastPlayedPuzzle = lastPuzzle();
-
-        if (now.isAfter(nextFurdleTime) ||
-            _lastPlayedPuzzle.number < challenge.number) {
-          settingsController.timeLeft = Duration.zero;
-        } else {
-          settingsController.timeLeft = durationLeft;
-        }
-        settingsController.stats.number = challenge.number;
-
-        bool isGameInProgress =
-            _lastPlayedPuzzle.result == PuzzleResult.inprogress &&
-                _lastPlayedPuzzle.moves > 0;
-        if (isGameInProgress) {
-          fState.row = _lastPlayedPuzzle.moves;
-          fState.column = 0;
-          fState.puzzle = _lastPlayedPuzzle;
-          isGameOver = false;
-        } else {
-          bool isPuzzleAlreadyPlayed =
-              _lastPlayedPuzzle.number == challenge.number &&
-                  _lastPlayedPuzzle.puzzle == challenge.puzzle;
-          if (isPuzzleAlreadyPlayed) {
-            fState.row = _lastPlayedPuzzle.moves;
-            fState.column = 0;
-            fState.puzzle = _lastPlayedPuzzle;
-            furdleNotifier.isLoading = false;
-            showFurdleDialog(
-              title: gameAlreadyPlayed,
-              message: 'Next puzzle in',
-            );
-            settingsController.isAlreadyPlayed = true;
-            isGameOver = true;
-            return;
-          } else {
-            fState.puzzle = challenge;
-            isGameOver = false;
-            settingsController.isAlreadyPlayed = false;
-            settingsController.stats.puzzle = Puzzle.initialize();
-          }
-        }
-      } else {
-        final furdleIndex = Random().nextInt(maxWords);
-        word = furdleList[furdleIndex];
-        Utility.showMessage(context, 'You are playing in offline mode',
-            duration: const Duration(milliseconds: 2000));
-      }
-      fState.furdlePuzzle = challenge.puzzle;
-      furdleNotifier.isLoading = false;
-    });
+  Future<Puzzle> getPuzzle() async {
+    challenge = await gameController.getPuzzle();
+    if (challenge.isOffline) {
+      Utility.showMessage(context, 'You are playing in offline mode',
+          duration: const Duration(milliseconds: 2000));
+    }
+    gState.puzzle = challenge;
+    return challenge;
   }
 
-  /// Get the last played puzzle
-  /// returns the inprogress game if it was left inComplete
-  Puzzle lastPuzzle() {
-    final lastPlayedPuzzle = settingsController.stats.puzzle;
-    // if (lastPlayedPuzzle.moves > 0 &&
-    //     lastPlayedPuzzle.result == PuzzleResult.inprogress) {
-    // }
-    return lastPlayedPuzzle;
+  Future<void> loadGame() async {
+    await gameController.initialize();
+    furdleNotifier.isLoading = true;
+    challenge = await getPuzzle();
+    final now = DateTime.now();
+    final DateTime nextPuzzleTime =
+        challenge.date!.add(const Duration(hours: hoursUntilNextFurdle));
+    if (challenge.result == PuzzleResult.none) {
+      challenge.result = PuzzleResult.inprogress;
+    } else {
+      /// Game is Inprogress
+      final durationLeft = nextPuzzleTime.difference(now);
+      if (challenge.result == PuzzleResult.inprogress) {
+        gState.row = challenge.moves;
+        gState.column = 0;
+        gState.puzzle = challenge;
+        gState.isPuzzleCracked = false;
+      } else {
+        /// Game is either won or lost
+        gState.isPuzzleCracked = challenge.result == PuzzleResult.win;
+        gState.row = challenge.moves;
+        gState.column = 0;
+        gState.puzzle = challenge;
+        furdleNotifier.isLoading = false;
+        showFurdleDialog(
+            title: gameAlreadyPlayed,
+            message: 'Next puzzle in',
+            isSuccess: challenge.result == PuzzleResult.win);
+        return;
+      }
+    }
+    settingsController.stats.number = challenge.number;
+    furdleNotifier.isLoading = false;
   }
 
   void updateTimer() {
@@ -206,7 +172,7 @@ class _PlayGroundState extends State<PlayGround>
         String word = '';
         challenge.puzzle = word;
         final DateTime nextFurdleTime =
-            challenge.date.add(const Duration(hours: hoursUntilNextFurdle));
+            challenge.date!.add(const Duration(hours: hoursUntilNextFurdle));
         final now = DateTime.now();
         final durationLeft = nextFurdleTime.difference(now);
         if (now.isAfter(nextFurdleTime)) {
@@ -218,31 +184,35 @@ class _PlayGroundState extends State<PlayGround>
     });
   }
 
+  /// User pressed the keys on virtual or physical keyboard
   Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
     analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
-    if (isGameOver || settingsController.isAlreadyPlayed) {
+    if (gState.isGameOver || gameController.isAlreadyPlayed) {
+      /// User presses keys from physical Keyboard on game over
       if (isPhysicalKeyEvent) return;
       showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
       return;
     }
     final character = x.toLowerCase();
-    if (character == 'enter') {
+    if (character == kEnterKey) {
       /// check if word is complete
-      final wordState = fState.validate();
-      challenge.cells = fState.cells;
+      final wordState = gState.validate();
+      challenge.cells = gState.cells;
       if (wordState == Word.match) {
-        isGameOver = true;
+        gState.isGameOver = true;
+        gState.isPuzzleCracked = true;
         updateTimer();
         confettiController.play();
-        isGameOver = true;
-        challenge.moves = fState.row;
+        gState.isGameOver = true;
+        challenge.moves = gState.row;
         challenge.result = PuzzleResult.win;
-        settingsController.gameOver(challenge);
+        gameController.onGameOver(challenge);
         Future.delayed(const Duration(milliseconds: 500), (() {
           showFurdleDialog(isSuccess: true);
         }));
       } else {
-        isGameOver = false;
+        gState.isGameOver = false;
+        gState.isPuzzleCracked = false;
         switch (wordState) {
           case Word.incomplete:
             shakeFurdle();
@@ -255,13 +225,13 @@ class _PlayGroundState extends State<PlayGround>
           case Word.valid:
 
             /// User failed to crack the furdle
-            if (fState.row == _size.height) {
+            if (gState.row == gState.puzzle.size.height) {
               updateTimer();
               showFurdleDialog(isSuccess: false);
-              isGameOver = true;
-              challenge.moves = fState.row;
+              gState.isGameOver = true;
+              challenge.moves = gState.row;
               challenge.result = PuzzleResult.lose;
-              settingsController.gameOver(challenge);
+              gameController.onGameOver(challenge);
             } else {
               challenge.result = PuzzleResult.inprogress;
               // analytics.logEvent(name: 'word guessed', parameters: {'word': fState.row});
@@ -271,12 +241,12 @@ class _PlayGroundState extends State<PlayGround>
         }
       }
     } else if (character == 'delete' || character == 'backspace') {
-      fState.removeCell();
+      gState.removeCell();
     } else if (x.toUpperCase().isLetter()) {
-      if (fState.column >= _size.width) {
+      if (gState.column >= gState.puzzle.size.width) {
         return;
       }
-      fState.addCell(character);
+      gState.addCell(character);
     } else {
       print('invalid Key event $character');
     }
@@ -291,9 +261,11 @@ class _PlayGroundState extends State<PlayGround>
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-  Size _size = defaultSize;
   ConfettiController confettiController = ConfettiController();
-  bool isGameOver = false;
+  GameController gameController = GameController();
+
+  /// This is a puzzle which is fetched from the server
+  /// and it will always be stored locally at every key press
   late Puzzle challenge;
   @override
   Widget build(BuildContext context) {
@@ -323,10 +295,10 @@ class _PlayGroundState extends State<PlayGround>
                     actions: [
                       IconButton(
                           onPressed: () async {
-                            if (isGameOver) {
-                              fState.generateFurdleGrid();
+                            if (gState.isGameOver) {
+                              gState.generateFurdleGrid();
                               final furdleScoreShareMessage =
-                                  '#FURDLE ${fState.shareFurdle}';
+                                  '#FURDLE ${gState.shareFurdle}';
                               if (!kIsWeb) {
                                 await Share.share(furdleScoreShareMessage);
                               } else {
@@ -344,7 +316,7 @@ class _PlayGroundState extends State<PlayGround>
                           icon: const Icon(Icons.share)),
                       IconButton(
                           onPressed: () {
-                            navigate(context, const Settings());
+                            navigate(context, const SettingsPage());
                           },
                           icon: const Icon(Icons.settings)),
                     ],
@@ -391,7 +363,7 @@ class _PlayGroundState extends State<PlayGround>
                                         left: _shakeAnimation.value + 24.0,
                                         right: 24.0 - _shakeAnimation.value),
                                     child: Furdle(
-                                      gameState: fState,
+                                      gameState: gState,
                                       onGameOver: (Puzzle puzzle) {},
                                     ));
                               });
