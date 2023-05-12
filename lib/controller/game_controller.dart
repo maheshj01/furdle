@@ -4,10 +4,8 @@ import 'package:furdle/service/game_service.dart';
 
 class GameController {
   GameService? _gameService;
-  late bool isAlreadyPlayed;
 
   Future<void> initialize() async {
-    isAlreadyPlayed = false;
     _gameService = GameService();
     await _gameService!.initialize();
   }

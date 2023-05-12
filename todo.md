@@ -3,3 +3,9 @@
 - [] SettingsService should only talk to local storage and game settings
 - [] SettingsController should only talk to SettingsService
 - [] Game should load from local Storage 
+
+
+
+/// Design game state class 
+
+_cells

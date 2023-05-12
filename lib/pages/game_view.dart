@@ -36,8 +36,8 @@ class Furdle extends StatefulWidget {
 class _FurdleState extends State<Furdle> {
   @override
   void initState() {
-    super.initState();
     _initGrid();
+    super.initState();
   }
 
   @override
@@ -47,8 +47,8 @@ class _FurdleState extends State<Furdle> {
     }
   }
 
-  void _initGrid() {
-    Puzzle lastFurdle = settingsController.stats.puzzle;
+  Future<void> _initGrid() async {
+    Puzzle lastFurdle = await gameController.getLastPlayedPuzzle();
     if (lastFurdle.moves > 0) {
       widget.gameState.cells.clear();
       widget.gameState.cells = lastFurdle.cells;
@@ -100,6 +100,7 @@ class FurdleGrid extends StatelessWidget {
                       i: i,
                       j: j,
                       cellSize: cellSize,
+                      //TODO: gState.Cells = 0 for some time hence the range erorr
                       cellState: state.cells[i][j],
                       isSubmitted: isGameOver ? i <= state.row : i < state.row,
                       isAlreadyPlayed: isPlayed,

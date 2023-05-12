@@ -89,7 +89,6 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// word in a current row
   String _currentWord = '';
 
   /// word in a current row
@@ -110,6 +109,7 @@ class GameState extends ChangeNotifier {
 
   String _shareFurdle = '';
 
+  /// furdle grid to be shared
   String get shareFurdle => _shareFurdle;
 
   static final _KState _kState = _KState.initialize();
@@ -124,7 +124,7 @@ class GameState extends ChangeNotifier {
   /// if the  word in current row equal to the width of the puzzle
   /// then the word is complete and can be validated
   bool isWordComplete() {
-    final word = cells[row].map((e) => e.character).join('');
+    final word = _cells[row].map((e) => e.character).join('');
     return word.length == puzzle.size.width;
   }
 
@@ -132,9 +132,9 @@ class GameState extends ChangeNotifier {
 
   List<List<FCellState>> get cells => _cells;
 
-  set cells(List<List<FCellState>> cells) {
+  set cells(List<List<FCellState>> kCells) {
     _cells.clear();
-    _cells.addAll(cells);
+    _cells.addAll(kCells);
     updateKeyBoardState(isUpdate: true);
     notifyListeners();
   }
@@ -169,7 +169,7 @@ class GameState extends ChangeNotifier {
     FCellState cell = FCellState(
         character: character, state: characterToState(character, occurence));
     if (column < puzzle.size.width) {
-      cells[row][column] = cell;
+      _cells[row][column] = cell;
       column++;
       buildWord(character);
     }
@@ -262,9 +262,9 @@ class GameState extends ChangeNotifier {
     if (isUpdate) {
       for (int j = 0; j < puzzle.size.height; j++) {
         for (int i = 0; i < puzzle.size.width; i++) {
-          final letter = cells[j][i].character;
+          final letter = _cells[j][i].character;
           word += letter;
-          final furdleState = cells[j][i].state;
+          final furdleState = _cells[j][i].state;
           final keyState = kState.keyboardState[letter];
 
           /// if Key is misplaced or is not enetered
@@ -277,9 +277,9 @@ class GameState extends ChangeNotifier {
       }
     } else {
       for (int i = 0; i < puzzle.size.width; i++) {
-        final letter = cells[row][i].character;
+        final letter = _cells[row][i].character;
         word += letter;
-        final furdleState = cells[row][i].state;
+        final furdleState = _cells[row][i].state;
         final keyState = kState.keyboardState[letter];
 
         /// if Key is misplaced or is not enetered
@@ -328,8 +328,7 @@ class _KState {
 }
 
 class FurdleNotifier extends ValueNotifier<GameState> {
-  FurdleNotifier(GameState state) : super(state);
-
+  FurdleNotifier(GameState value) : super(value);
   bool _isLoading = true;
 
   bool get isLoading => _isLoading;

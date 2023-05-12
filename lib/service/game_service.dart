@@ -46,7 +46,7 @@ class GameService extends IGameService {
   /// if the puzzle is not saved, gets a new puzzle from the server
   @override
   Future<Puzzle> loadGame() async {
-    bool _isFurdleMode = _sharedPreferences.getBool(kFurdleKey) ?? false;
+    // bool _isFurdleMode = _sharedPreferences.getBool(kFurdleKey) ?? false;
 
     Puzzle _puzzle = await getSavedPuzzle();
 
@@ -67,19 +67,19 @@ class GameService extends IGameService {
     Puzzle puzzle = Puzzle.initialize();
     DocumentReference<Map<String, dynamic>> _docRef =
         _firestore.collection(collectionProd).doc(statsProd);
-    _docRef.get().then((DocumentSnapshot snapshot) {
-      String word = '';
-      if (snapshot.exists) {
-        puzzle = puzzle.fromSnapshot(snapshot);
-        puzzle.difficulty = settingsController.difficulty;
-        puzzle.size = puzzle.difficulty.toGridSize();
-      } else {
-        puzzle.isOffline = true;
-        final furdleIndex = Random().nextInt(maxWords);
-        word = furdleList[furdleIndex];
-      }
-      _gameState.puzzle = puzzle;
-    });
+    final snapshot = await _docRef.get();
+    String word = '';
+    if (snapshot.exists) {
+      puzzle = puzzle.fromSnapshot(snapshot);
+      puzzle.difficulty = settingsController.difficulty;
+      puzzle.size = puzzle.difficulty.toGridSize();
+      puzzle.cells = puzzle.difficulty.toDefaultcells();
+    } else {
+      puzzle.isOffline = true;
+      final furdleIndex = Random().nextInt(maxWords);
+      word = furdleList[furdleIndex];
+    }
+    _gameState.puzzle = puzzle;
     return puzzle;
   }
 
@@ -91,7 +91,8 @@ class GameService extends IGameService {
   Future<Puzzle> getSavedPuzzle() async {
     final String savedPuzzle = _sharedPreferences.getString(kPuzzleState) ?? '';
     if (savedPuzzle.isEmpty) {
-      return Puzzle.initialize();
+      final newPuzzle = Puzzle.initialize();
+      return newPuzzle;
     }
     final decodedMap = jsonDecode(savedPuzzle) as Map<String, dynamic>;
     _gameState.puzzle = Puzzle.fromJson(decodedMap);

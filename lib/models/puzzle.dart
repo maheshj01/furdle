@@ -29,14 +29,31 @@ enum Difficulty {
 
   Difficulty fromLevel() {
     switch (difficulty) {
-      case 4:
+      case 7:
         return Difficulty.easy;
-      case 5:
-        return Difficulty.medium;
       case 6:
+        return Difficulty.medium;
+      case 5:
         return Difficulty.hard;
       default:
         return Difficulty.medium;
+    }
+  }
+
+  List<List<FCellState>> toDefaultcells() {
+    switch (this) {
+      case Difficulty.easy:
+        return List.generate(
+            7, (i) => List.generate(5, (j) => FCellState.defaultState()));
+      case Difficulty.medium:
+        return List.generate(
+            6, (i) => List.generate(5, (j) => FCellState.defaultState()));
+      case Difficulty.hard:
+        return List.generate(
+            5, (i) => List.generate(5, (j) => FCellState.defaultState()));
+      default:
+        return List.generate(
+            6, (i) => List.generate(5, (j) => FCellState.defaultState()));
     }
   }
 
@@ -96,7 +113,7 @@ class Puzzle {
       {this.number = 0,
       this.puzzle = '',
       this.date,
-      this.result = PuzzleResult.inprogress,
+      this.result = PuzzleResult.none,
       this.moves = 0,
       this.size = const Size(5.0, 6.0),
       this.difficulty = Difficulty.medium,
@@ -111,19 +128,20 @@ class Puzzle {
         moves: 0,
         size: const Size(5.0, 6.0),
         difficulty: Difficulty.medium,
-        cells: const [],
+        cells: Difficulty.medium.toDefaultcells(),
         date: DateTime.now(),
         isOffline: false);
   }
 
   Puzzle fromSnapshot(DocumentSnapshot snapshot) {
     return Puzzle(
-      puzzle: snapshot['word'],
-      number: snapshot['number'],
-      date: (snapshot['date'] as Timestamp).toDate(),
+      puzzle: snapshot.get('word'),
+      number: snapshot.get('number'),
+      date: (snapshot.get('date') as Timestamp).toDate(),
       isOffline: false,
       result: PuzzleResult.inprogress,
       moves: 0,
+      cells: Difficulty.medium.toDefaultcells(),
     );
   }
 

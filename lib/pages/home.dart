@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/constants/constants.dart';
-import 'package:furdle/controller/game_controller.dart';
 import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
@@ -89,7 +88,7 @@ class _PlayGroundState extends State<PlayGround>
                 showTimer: showTimer,
                 onTimerComplete: () async {
                   gState.isGameOver = false;
-                  gameController.isAlreadyPlayed = false;
+                  gState.isAlreadyPlayed = false;
                   await loadGame();
                   popView(context);
                 },
@@ -107,46 +106,34 @@ class _PlayGroundState extends State<PlayGround>
   @override
   void initState() {
     super.initState();
-    challenge = Puzzle.initialize();
-    gState.puzzle.size = defaultSize;
-    gState.puzzle.puzzle = challenge.puzzle;
-    challenge.size = defaultSize;
     furdleNotifier = FurdleNotifier(gState);
     _initAnimation();
     loadGame();
     analytics.setCurrentScreen(screenName: 'Furdle');
   }
 
-  Future<Puzzle> getPuzzle() async {
-    challenge = await gameController.getPuzzle();
-    if (challenge.isOffline) {
-      Utility.showMessage(context, 'You are playing in offline mode',
-          duration: const Duration(milliseconds: 2000));
-    }
-    gState.puzzle = challenge;
-    return challenge;
-  }
-
   Future<void> loadGame() async {
     await gameController.initialize();
     furdleNotifier.isLoading = true;
     challenge = await getPuzzle();
-    final now = DateTime.now();
     final DateTime nextPuzzleTime =
         challenge.date!.add(const Duration(hours: hoursUntilNextFurdle));
     if (challenge.result == PuzzleResult.none) {
       challenge.result = PuzzleResult.inprogress;
     } else {
       /// Game is Inprogress
+      final now = DateTime.now();
       final durationLeft = nextPuzzleTime.difference(now);
       if (challenge.result == PuzzleResult.inprogress) {
         gState.row = challenge.moves;
+        gState.cells = challenge.cells;
         gState.column = 0;
         gState.puzzle = challenge;
         gState.isPuzzleCracked = false;
       } else {
         /// Game is either won or lost
         gState.isPuzzleCracked = challenge.result == PuzzleResult.win;
+        gState.cells = challenge.cells;
         gState.row = challenge.moves;
         gState.column = 0;
         gState.puzzle = challenge;
@@ -160,6 +147,17 @@ class _PlayGroundState extends State<PlayGround>
     }
     settingsController.stats.number = challenge.number;
     furdleNotifier.isLoading = false;
+  }
+
+  Future<Puzzle> getPuzzle() async {
+    challenge = await gameController.getPuzzle();
+    if (challenge.isOffline) {
+      Utility.showMessage(context, 'You are playing in offline mode',
+          duration: const Duration(milliseconds: 2000));
+    }
+    gState.puzzle = challenge;
+    gState.cells = challenge.cells;
+    return challenge;
   }
 
   void updateTimer() {
@@ -187,7 +185,7 @@ class _PlayGroundState extends State<PlayGround>
   /// User pressed the keys on virtual or physical keyboard
   Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
     analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
-    if (gState.isGameOver || gameController.isAlreadyPlayed) {
+    if (gState.isGameOver || gState.isAlreadyPlayed) {
       /// User presses keys from physical Keyboard on game over
       if (isPhysicalKeyEvent) return;
       showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
@@ -262,7 +260,6 @@ class _PlayGroundState extends State<PlayGround>
   late final Animation<double> _shakeAnimation;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   ConfettiController confettiController = ConfettiController();
-  GameController gameController = GameController();
 
   /// This is a puzzle which is fetched from the server
   /// and it will always be stored locally at every key press
