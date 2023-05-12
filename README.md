@@ -1,7 +1,7 @@
 # Furdle (Flutter + Wordle)
 
 
-An open sourced wordle built with flutter. A new puzzle is available every 6 hours.
+An open sourced wordle built with flutter. A new puzzle is available every day midnight UTC.
 
 - Supports physical keyboard input
 - Saves Game stats
@@ -12,8 +12,9 @@ An open sourced wordle built with flutter. A new puzzle is available every 6 hou
 - Different Difficulty mode (easy, medium ,hard)
 
 ### Can you crack the todays furdle?
+Try it out https://furdle.web.app/
 
-FURDLE #28 6/6
+FURDLE #125 6/6
 
 🟨⬛️⬛️⬛️⬛️<br>
 ⬛️🟩⬛️⬛️🟩<br>
@@ -22,7 +23,7 @@ FURDLE #28 6/6
 ⬛️🟩🟩⬛️🟩<br>
 🟩🟩🟩🟩🟩<br>
 
-### Try it on the web https://furdle.web.app/
+
 <img width="1176" alt="image" src="https://user-images.githubusercontent.com/31410839/152667914-8d4c1458-d1ad-4783-8440-47a74eadc385.png">
 
 ### Android v0.3.0
