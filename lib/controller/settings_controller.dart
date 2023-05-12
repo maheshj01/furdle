@@ -19,7 +19,6 @@ class SettingsController extends ChangeNotifier {
   SettingsService? _settingsService;
   late Settings _settings;
 
-  Duration _timeLeft = Duration.zero;
 
   String _version = '';
 
@@ -27,13 +26,6 @@ class SettingsController extends ChangeNotifier {
 
   set version(String value) {
     _version = value;
-    notifyListeners();
-  }
-
-  Duration get timeLeft => _timeLeft;
-
-  set timeLeft(Duration duration) {
-    _timeLeft = duration;
     notifyListeners();
   }
 

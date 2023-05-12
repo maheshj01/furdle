@@ -69,9 +69,9 @@ class _FurdleDialogState extends State<FurdleDialog> {
                   ),
                   _isAlreadyPlayed && widget.showTimer
                       ? TweenAnimationBuilder<Duration>(
-                          duration: settingsController.timeLeft,
+                          duration: gameController.timeLeft,
                           tween: Tween(
-                              begin: settingsController.timeLeft,
+                              begin: gameController.timeLeft,
                               end: Duration.zero),
                           onEnd: () {
                             _isAlreadyPlayed = false;

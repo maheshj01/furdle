@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:confetti/confetti.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
@@ -86,9 +85,11 @@ class _PlayGroundState extends State<PlayGround>
                 title: title!,
                 message: message!,
                 showTimer: showTimer,
+                isAlreadyPlayed: gState.isAlreadyPlayed,
                 onTimerComplete: () async {
                   gState.isGameOver = false;
                   gState.isAlreadyPlayed = false;
+                  gState.isPuzzleCracked = false;
                   await loadGame();
                   popView(context);
                 },
@@ -136,11 +137,13 @@ class _PlayGroundState extends State<PlayGround>
         gState.cells = challenge.cells;
         gState.row = challenge.moves;
         gState.column = 0;
+        gState.isGameOver = true;
+        gState.isAlreadyPlayed = true;
         gState.puzzle = challenge;
         furdleNotifier.isLoading = false;
         showFurdleDialog(
             title: gameAlreadyPlayed,
-            message: 'Next puzzle in',
+            message: 'Next puzzle in \n$durationLeft',
             isSuccess: challenge.result == PuzzleResult.win);
         return;
       }
@@ -160,35 +163,41 @@ class _PlayGroundState extends State<PlayGround>
     return challenge;
   }
 
-  void updateTimer() {
-    firestore.DocumentReference<Map<String, dynamic>> _docRef =
-        firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
-    _docRef.get().then((firestore.DocumentSnapshot snapshot) {
-      if (snapshot.exists) {
-        challenge.number = snapshot['number'];
-        challenge.date = (snapshot['date'] as firestore.Timestamp).toDate();
-        String word = '';
-        challenge.puzzle = word;
-        final DateTime nextFurdleTime =
-            challenge.date!.add(const Duration(hours: hoursUntilNextFurdle));
-        final now = DateTime.now();
-        final durationLeft = nextFurdleTime.difference(now);
-        if (now.isAfter(nextFurdleTime)) {
-          settingsController.timeLeft = Duration.zero;
-        } else {
-          settingsController.timeLeft = durationLeft;
-        }
-      }
-    });
+  void updateTimer() async {
+    // firestore.DocumentReference<Map<String, dynamic>> _docRef = firestore
+    //     .FirebaseFirestore.instance
+    //     .collection(collectionProd)
+    //     .doc(statsProd);
+    // final docSnapshot = await _docRef.get();
+    // if (docSnapshot.exists) {
+    //   challenge.number = docSnapshot.get('number')
+    //   challenge.date = (docSnapshot.get('date') as firestore.Timestamp).toDate();
+    //   String word = '';
+    //   challenge.puzzle = word;
+    final DateTime nextFurdleTime =
+        challenge.date!.add(const Duration(hours: hoursUntilNextFurdle));
+    final now = DateTime.now();
+    final durationLeft = nextFurdleTime.difference(now);
+    if (now.isAfter(nextFurdleTime)) {
+      gameController.timeLeft = Duration.zero;
+    } else {
+      gameController.timeLeft = durationLeft;
+    }
+    // }
   }
 
   /// User pressed the keys on virtual or physical keyboard
   Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
     analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
-    if (gState.isGameOver || gState.isAlreadyPlayed) {
+    if (gState.isGameOver || gState.isAlreadyPlayed || gState.isPuzzleCracked) {
       /// User presses keys from physical Keyboard on game over
       if (isPhysicalKeyEvent) return;
-      showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
+      final DateTime nextPuzzleTime =
+          challenge.date!.add(const Duration(hours: hoursUntilNextFurdle));
+      print(
+          "now = ${DateTime.now().toLocal()} last time= ${challenge.date!.toLocal()} next puzzle time= ${nextPuzzleTime.toLocal()}");
+      showFurdleDialog(
+          title: gameAlreadyPlayed, message: 'Next puzzle in $nextPuzzleTime');
       return;
     }
     final character = x.toLowerCase();

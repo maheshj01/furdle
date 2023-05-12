@@ -8,7 +8,7 @@ int maxWords = 2334;
 
 Size defaultSize = Difficulty.easy.toGridSize();
 
-const int hoursUntilNextFurdle = 6;
+const int hoursUntilNextFurdle = 24;
 
 const String collectionProd = 'furdle';
 const String statsProd = 'stats';

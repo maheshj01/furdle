@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/constants/colors.dart';
+import 'package:furdle/constants/constants.dart';
 
 import 'models/models.dart';
 
@@ -95,6 +95,16 @@ extension FurdleTitle on String {
 extension DateOnlyCompare on DateTime {
   bool isSameDate(DateTime other) {
     return year == other.year && month == other.month && day == other.day;
+  }
+
+  /// whether the current time has Surpassed `hoursUntilNextFurdle` hours
+  /// since the specified time
+  bool hasSurpassedHoursUntilNextFurdle() {
+    final now = DateTime.now().toLocal();
+    final DateTime nextPuzzleTime =
+        toLocal().add(const Duration(hours: hoursUntilNextFurdle));
+    bool result = now.isAfter(nextPuzzleTime);
+    return result;
   }
 }
 

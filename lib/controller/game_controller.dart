@@ -10,6 +10,14 @@ class GameController {
     await _gameService!.initialize();
   }
 
+  Duration _timeLeft = Duration.zero;
+
+  Duration get timeLeft => _timeLeft;
+
+  set timeLeft(Duration duration) {
+    _timeLeft = duration;
+  }
+
   /// returns either a new puzzle or the last played puzzle,
   /// if the puzzle is not saved, gets a new puzzle from the server
   Future<Puzzle> getPuzzle() async {

@@ -116,6 +116,24 @@ class GameState extends ChangeNotifier {
 
   _KState get kState => _kState;
 
+  GameState setUpNewPuzzle(Puzzle pz) {
+    puzzle = pz;
+    _isAlreadyPlayed = false;
+    isGameOver = false;
+    isPuzzleCracked = false;
+    _cells.clear();
+    _KState.initialize();
+    for (int i = 0; i < puzzle.size.height; i++) {
+      List<FCellState> row = [];
+      for (int j = 0; j < puzzle.size.width; j++) {
+        row.add(FCellState.defaultState());
+      }
+      _cells.add(row);
+    }
+    notifyListeners();
+    return this;
+  }
+
   void updateKeyState(FCellState cellState) {
     _kState.updateKey(cellState);
     notifyListeners();
@@ -316,6 +334,7 @@ class _KState {
   Map<String, KeyState> get keyboardState => _keyboardState;
 
   _KState.initialize() {
+    _keyboardState.clear();
     alphabets.split('').toList().forEach((element) {
       final state = FCellState(character: element, state: KeyState.isDefault);
       updateKey(state);

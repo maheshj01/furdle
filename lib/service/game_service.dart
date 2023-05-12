@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/constants/strings.dart';
+import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
@@ -54,16 +55,30 @@ class GameService extends IGameService {
     if (_puzzle.result == PuzzleResult.none &&
         _puzzle.moves == 0 &&
         _puzzle.puzzle.isEmpty) {
-      _puzzle = await getPuzzle();
+      _puzzle = await getNewPuzzle();
+      _gameState = _gameState.setUpNewPuzzle(_puzzle);
+    } else {
+      // Puzzle is saved (Win/lose/inprogress)
+      // if puzzle is Inprogress then return saved Puzzle
+      // if puzzle has ended then check if new puzzle is available
+      // otherwise return saved puzzle
+      if (_puzzle.result == PuzzleResult.inprogress) {
+        _gameState.puzzle = _puzzle;
+      } else {
+        if (_gameState.puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
+          _puzzle = await getNewPuzzle();
+        }
+        _gameState = _gameState.setUpNewPuzzle(_puzzle);
+      }
+      _gameState = _gameState.setUpNewPuzzle(_puzzle);
     }
-    _gameState.puzzle = _puzzle;
     return _gameState.puzzle;
   }
 
   /// get the puzzle from server
   /// if not available, get a random puzzle from the list
   /// The random puzzle will not count towards the stats
-  Future<Puzzle> getPuzzle() async {
+  Future<Puzzle> getNewPuzzle() async {
     Puzzle puzzle = Puzzle.initialize();
     DocumentReference<Map<String, dynamic>> _docRef =
         _firestore.collection(collectionProd).doc(statsProd);
