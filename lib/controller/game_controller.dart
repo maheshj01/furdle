@@ -32,11 +32,6 @@ class GameController {
     return await _gameService!.loadGame();
   }
 
-  /// returns the last played puzzle otherwise a new puzzle
-  Future<GameState> getSavedGame() async {
-    return await _gameService!.getSavedGame();
-  }
-
   Future<void> onGameOver(GameState state) async {
     await _gameService!.onGameOver(state);
     _onGameStateChange(gameState);

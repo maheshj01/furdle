@@ -132,6 +132,7 @@ class _PlayGroundState extends State<PlayGround>
       _state.isGameOver = false;
       return;
     }
+    gameController.gameState = _state;
     settingsController.stats.number = currentPuzzle.number;
     furdleNotifier.isLoading = false;
   }
@@ -142,7 +143,6 @@ class _PlayGroundState extends State<PlayGround>
       Utility.showMessage(context, 'You are playing in offline mode',
           duration: const Duration(milliseconds: 2000));
     }
-    gameController.gameState = _localGame;
     // gameController.gameState.cells = challenge.cells;
     return _localGame;
   }

@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/puzzle.dart';

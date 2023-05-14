@@ -43,7 +43,7 @@ class GameService extends IGameService {
   @override
   Future<void> initialize() async {
     _sharedPreferences = await SharedPreferences.getInstance();
-    gameState = GameState.instance();
+    _gameState = GameState.instance();
   }
 
   /// returns either a new puzzle or the last played puzzle
@@ -61,9 +61,6 @@ class GameService extends IGameService {
       _gameState = await getNewGameState();
       return _gameState;
     } else {
-      /// The game is inprogress
-      _gameState = _localState;
-
       /// If the game is inprogress and the puzzle is not saved by any chance
       /// get a new puzzle
       if (_puzzle.moves == 0 || _puzzle.puzzle.isEmpty) {
@@ -97,7 +94,8 @@ class GameService extends IGameService {
   }
 
   Future<void> _saveCurrentState(GameState state) async {
-    final map = json.encode(state.toJson());
+    var st =  state.toJson();
+    final map = json.encode(st);
     _sharedPreferences.setString(kGameState, map);
   }
 
