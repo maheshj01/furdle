@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:furdle/controller/game_controller.dart';
 import 'package:furdle/controller/settings_controller.dart';
 import 'package:furdle/firebase_options.dart';
-import 'package:furdle/pages/home.dart';
+import 'package:furdle/pages/playground.dart';
 import 'package:go_router/go_router.dart';
 
 import 'constants/constants.dart';
@@ -23,6 +23,7 @@ Future<void> main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   GoRouter.setUrlPathStrategy(UrlPathStrategy.path);
   settingsController = SettingsController();
+  await settingsController.loadSettings();
   gameController = GameController();
   runApp(MyApp());
 }

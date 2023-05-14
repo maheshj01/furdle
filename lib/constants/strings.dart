@@ -11,7 +11,7 @@ const String isAlreadyPlayeKey = 'isAlreadyPlayed';
 const String kMatchHistoryKey = 'kMatchHistoryKey';
 const String kStatsKey = 'kStatsKey';
 const String kDifficultyKey = 'kDifficultyKey';
-const String kPuzzleState = 'kPuzzleState';
+const String kGameState = 'kGameState';
 
 const String shareIncomplete =
     'You can\'t share a furdle that hasn\'t been solved yet!';

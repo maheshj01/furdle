@@ -68,17 +68,77 @@ class GameState extends ChangeNotifier {
   int row;
   int column;
 
-  /// whether user has cracked the puzzle
-  bool isPuzzleCracked;
   bool isGameOver;
+  Difficulty difficulty;
+
+  /// the puzzle to be solved
   Puzzle puzzle;
+
+  /// Defines the state of furdle grid
+  /// This is also used to define the color of the keys
+  /// in the keyboard
+  List<List<FCellState>> cells;
+
+  static _KState _kState = _KState.initialize();
+
+  _KState get kState => _kState;
+
+  bool get isPuzzleCracked => (puzzle.result == PuzzleResult.win && isGameOver);
 
   GameState(
       {this.row = 0,
       this.column = 0,
       this.isGameOver = false,
-      this.isPuzzleCracked = false,
+      this.cells = const [],
+      this.difficulty = Difficulty.medium,
       required this.puzzle});
+
+  Map<String, Object> toJson() {
+    return {
+      'row': row,
+      'column': column,
+      'isGameOver': isGameOver,
+      'puzzle': puzzle.toJson(),
+      'difficulty': difficulty.toLevel(),
+      'cells': cellsToMap(),
+    };
+  }
+
+  factory GameState.instance() {
+    final _difficulty = settingsController.difficulty;
+    final _cells = _difficulty.toDefaultcells();
+    return GameState(
+        row: 0,
+        column: 0,
+        isGameOver: false,
+        cells: _cells,
+        difficulty: _difficulty,
+        puzzle: Puzzle.initialize());
+  }
+
+  factory GameState.fromJson(Map<String, dynamic> json) {
+    final _difficulty = Difficulty.fromLevel(json['difficulty']);
+    final puzzleSize = _difficulty.toGridSize();
+
+    final map = (json['cells'] as Map<String, dynamic>);
+    List<List<FCellState>> cellList = [];
+    for (int i = 0; i < puzzleSize.height; i++) {
+      List<FCellState> list = [];
+      for (int j = 0; j < puzzleSize.width; j++) {
+        FCellState cell = FCellState.fromJson((map['$i']! as List<dynamic>)[j]);
+        list.add(cell);
+      }
+      cellList.add(list);
+    }
+
+    return GameState(
+        row: json['row'],
+        cells: cellList,
+        column: json['column'],
+        difficulty: _difficulty,
+        isGameOver: json['isGameOver'],
+        puzzle: Puzzle.fromJson(json['puzzle']));
+  }
 
   late bool _isAlreadyPlayed = false;
 
@@ -112,26 +172,26 @@ class GameState extends ChangeNotifier {
   /// furdle grid to be shared
   String get shareFurdle => _shareFurdle;
 
-  static final _KState _kState = _KState.initialize();
-
-  _KState get kState => _kState;
-
-  GameState setUpNewPuzzle(Puzzle pz) {
+  GameState initNewState(Puzzle pz) {
     puzzle = pz;
     _isAlreadyPlayed = false;
     isGameOver = false;
-    isPuzzleCracked = false;
-    _cells.clear();
-    _KState.initialize();
-    for (int i = 0; i < puzzle.size.height; i++) {
-      List<FCellState> row = [];
-      for (int j = 0; j < puzzle.size.width; j++) {
-        row.add(FCellState.defaultState());
-      }
-      _cells.add(row);
-    }
+    _kState = _KState.initialize();
+    _initCells();
     notifyListeners();
     return this;
+  }
+
+  void _initCells() {
+    cells = [];
+    final gridSize = puzzle.difficulty.toGridSize();
+    for (int i = 0; i < gridSize.height; i++) {
+      List<FCellState> row = [];
+      for (int j = 0; j < gridSize.width; j++) {
+        row.add(FCellState.defaultState());
+      }
+      cells.add(row);
+    }
   }
 
   void updateKeyState(FCellState cellState) {
@@ -142,19 +202,28 @@ class GameState extends ChangeNotifier {
   /// if the  word in current row equal to the width of the puzzle
   /// then the word is complete and can be validated
   bool isWordComplete() {
-    final word = _cells[row].map((e) => e.character).join('');
+    final word = cells[row].map((e) => e.character).join('');
     return word.length == puzzle.size.width;
   }
 
-  final List<List<FCellState>> _cells = [];
-
-  List<List<FCellState>> get cells => _cells;
-
-  set cells(List<List<FCellState>> kCells) {
-    _cells.clear();
-    _cells.addAll(kCells);
+  void setCells(List<List<FCellState>> kCells) {
+    cells.clear();
+    cells.addAll(kCells);
     updateKeyBoardState(isUpdate: true);
     notifyListeners();
+  }
+
+  Map<String, List<Map<String, String>>> cellsToMap() {
+    final Map<String, List<Map<String, String>>> result = {};
+    for (int i = 0; i < puzzle.size.height; i++) {
+      List<Map<String, String>> list = [];
+      for (int j = 0; j < puzzle.size.width; j++) {
+        final json = cells[i][j].toJson();
+        list.add(json);
+      }
+      result['$i'] = list;
+    }
+    return result;
   }
 
   KeyState characterToState(String letter, int count) {
@@ -187,7 +256,7 @@ class GameState extends ChangeNotifier {
     FCellState cell = FCellState(
         character: character, state: characterToState(character, occurence));
     if (column < puzzle.size.width) {
-      _cells[row][column] = cell;
+      cells[row][column] = cell;
       column++;
       buildWord(character);
     }
@@ -199,7 +268,7 @@ class GameState extends ChangeNotifier {
       column -= 1;
 
       /// set the cell to default state
-      _cells[row][column] = FCellState.defaultState();
+      cells[row][column] = FCellState.defaultState();
       removeFromWord();
     }
     notifyListeners();
@@ -219,26 +288,13 @@ class GameState extends ChangeNotifier {
       _currentWord = '';
       column = 0;
       row++;
-      isPuzzleCracked = word == puzzle.puzzle;
-
-      /// saves rows-1 times
-      /// last row is saved on game over
-      if (row < puzzle.size.height) {
-        isGameOver = false;
-        saveFurdleState();
-        FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-        analytics.logEvent(
-            name: 'word guessed', parameters: {'word': word, 'moves': row - 1});
+      if (word == puzzle.puzzle) {
+        puzzle.result = PuzzleResult.win;
+        isGameOver = true;
       }
       notifyListeners();
       return isPuzzleCracked ? Word.match : Word.valid;
     }
-  }
-
-  void saveFurdleState() {
-    puzzle.cells = _cells;
-    puzzle.moves = row;
-    gameController.saveGameState(this);
   }
 
   String stateToGrid(KeyState state) {
@@ -261,7 +317,7 @@ class GameState extends ChangeNotifier {
     for (int i = 0; i < puzzle.size.height; i++) {
       String currentRow = '';
       for (int j = 0; j < puzzle.size.width; j++) {
-        currentRow += stateToGrid(_cells[i][j].state);
+        currentRow += stateToGrid(cells[i][j].state);
       }
       currentRow += '\n';
       generatedFurdle += currentRow;
@@ -271,7 +327,6 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// unsubmitted word in thr current row
   void updateKeyBoardState({bool isUpdate = false}) {
     if (row >= puzzle.size.height) {
       row = puzzle.size.height.toInt() - 1;
@@ -280,9 +335,9 @@ class GameState extends ChangeNotifier {
     if (isUpdate) {
       for (int j = 0; j < puzzle.size.height; j++) {
         for (int i = 0; i < puzzle.size.width; i++) {
-          final letter = _cells[j][i].character;
+          final letter = cells[j][i].character;
           word += letter;
-          final furdleState = _cells[j][i].state;
+          final furdleState = cells[j][i].state;
           final keyState = kState.keyboardState[letter];
 
           /// if Key is misplaced or is not enetered
@@ -295,9 +350,9 @@ class GameState extends ChangeNotifier {
       }
     } else {
       for (int i = 0; i < puzzle.size.width; i++) {
-        final letter = _cells[row][i].character;
+        final letter = cells[row][i].character;
         word += letter;
-        final furdleState = _cells[row][i].state;
+        final furdleState = cells[row][i].state;
         final keyState = kState.keyboardState[letter];
 
         /// if Key is misplaced or is not enetered
@@ -323,7 +378,7 @@ class GameState extends ChangeNotifier {
   }
 
   void clear() {
-    _cells.clear();
+    cells.clear();
     notifyListeners();
   }
 }
@@ -346,9 +401,10 @@ class _KState {
   }
 }
 
-class FurdleNotifier extends ValueNotifier<GameState> {
-  FurdleNotifier(GameState value) : super(value);
+class LoadingNotifier extends ValueNotifier<bool> {
   bool _isLoading = true;
+
+  LoadingNotifier(super.value);
 
   bool get isLoading => _isLoading;
 

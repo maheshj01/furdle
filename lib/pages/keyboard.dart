@@ -300,7 +300,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
         isDark ? Theme.of(context).splashColor : Colors.grey.withOpacity(0.5);
     double scaleFactor = _keySize / 60;
     bool isSpecialKey = widget.keyLabel.length > 1;
-    GameState state = GameState(puzzle: Puzzle.initialize());
+    GameState state = gameController.gameState;
     final keyState =
         state.kState.keyboardState[widget.keyLabel.toLowerCase()] ??
             KeyState.isDefault;

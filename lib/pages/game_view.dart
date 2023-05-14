@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
-import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
-import 'package:furdle/models/puzzle.dart';
 
 enum KeyState {
   /// letter is present in the right spot
@@ -18,61 +16,6 @@ enum KeyState {
   isDefault
 }
 
-class Furdle extends StatefulWidget {
-  Furdle({Key? key, required this.gameState, this.onGameOver})
-      : super(key: key);
-
-  /// state of the game
-  GameState gameState;
-
-  /// callback when the game is over with the puzzle
-  /// details as the parameter
-  final Function(Puzzle)? onGameOver;
-
-  @override
-  State<Furdle> createState() => _FurdleState();
-}
-
-class _FurdleState extends State<Furdle> {
-  @override
-  void initState() {
-    _initGrid();
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant Furdle oldWidget) {
-    if (oldWidget.gameState != widget.gameState) {
-      super.didUpdateWidget(oldWidget);
-    }
-  }
-
-  Future<void> _initGrid() async {
-    Puzzle lastFurdle = await gameController.getLastPlayedPuzzle();
-    if (lastFurdle.moves > 0) {
-      widget.gameState.cells.clear();
-      widget.gameState.cells = lastFurdle.cells;
-      widget.gameState.puzzle = lastFurdle;
-    } else {
-      final _gridSize = widget.gameState.puzzle.size;
-      for (int i = 0; i < _gridSize.height; i++) {
-        List<FCellState> row = [];
-        for (int j = 0; j < _gridSize.width; j++) {
-          row.add(FCellState.defaultState());
-        }
-        widget.gameState.cells.add(row);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FurdleGrid(
-      state: widget.gameState,
-    );
-  }
-}
-
 class FurdleGrid extends StatelessWidget {
   FurdleGrid({Key? key, required this.state}) : super(key: key);
 
@@ -85,7 +28,7 @@ class FurdleGrid extends StatelessWidget {
     final _size = MediaQuery.of(context).size;
     gridSize = state.puzzle.size;
     bool isPlayed = state.puzzle.moves > 0;
-    bool isGameOver = state.puzzle.result != PuzzleResult.inprogress;
+    bool isGameOver = state.isGameOver;
     cellSize = _size.width < 600 ? 65 : 80;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

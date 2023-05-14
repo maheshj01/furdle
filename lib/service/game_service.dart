@@ -2,7 +2,6 @@
 // like stats, modes, difficulty, etc.
 
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -13,7 +12,6 @@ import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/service/iservice.dart';
-import 'package:furdle/utils/word.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameService extends IGameService {
@@ -24,6 +22,13 @@ class GameService extends IGameService {
   // Make SettingsService a private variable so it is not used directly.
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  GameState get gameState => _gameState;
+
+  set gameState(GameState state) {
+    _gameState = state;
+    onGameStateChange(state);
+  }
 
   /// Get the last played puzzle
   /// returns the inprogress game if it was left inComplete
@@ -37,94 +42,92 @@ class GameService extends IGameService {
 
   @override
   Future<void> initialize() async {
-    _gameState = GameState(
-      puzzle: Puzzle.initialize(),
-    );
     _sharedPreferences = await SharedPreferences.getInstance();
+    gameState = GameState.instance();
   }
 
   /// returns either a new puzzle or the last played puzzle
-  /// if the puzzle is not saved, gets a new puzzle from the server
+  /// if the puzzle is not saved, gets a new puzzle from the server if available
   @override
-  Future<Puzzle> loadGame() async {
-    // bool _isFurdleMode = _sharedPreferences.getBool(kFurdleKey) ?? false;
-
-    Puzzle _puzzle = await getSavedPuzzle();
-
-    /// if the puzzle is not saved/, get a new puzzle
-    if (_puzzle.result == PuzzleResult.none &&
-        _puzzle.moves == 0 &&
-        _puzzle.puzzle.isEmpty) {
-      _puzzle = await getNewPuzzle();
-      _gameState = _gameState.setUpNewPuzzle(_puzzle);
-    } else {
-      // Puzzle is saved (Win/lose/inprogress)
-      // if puzzle is Inprogress then return saved Puzzle
-      // if puzzle has ended then check if new puzzle is available
-      // otherwise return saved puzzle
-      if (_puzzle.result == PuzzleResult.inprogress) {
-        _gameState.puzzle = _puzzle;
-      } else {
-        if (_gameState.puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
-          _puzzle = await getNewPuzzle();
-        }
-        _gameState = _gameState.setUpNewPuzzle(_puzzle);
+  Future<GameState> loadGame() async {
+    GameState _localState = await getSavedGame();
+    Puzzle _puzzle = _localState.puzzle;
+    final _gameResult = _localState.puzzle.result;
+    if (_gameResult == PuzzleResult.win || _gameResult == PuzzleResult.lose) {
+      if (_puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
+        _gameState = await getNewGameState();
       }
-      _gameState = _gameState.setUpNewPuzzle(_puzzle);
+    } else if (_gameResult == PuzzleResult.none) {
+      _gameState = await getNewGameState();
+      return _gameState;
+    } else {
+      /// The game is inprogress
+      _gameState = _localState;
+
+      /// If the game is inprogress and the puzzle is not saved by any chance
+      /// get a new puzzle
+      if (_puzzle.moves == 0 || _puzzle.puzzle.isEmpty) {
+        _gameState = await getNewGameState();
+      }
     }
-    return _gameState.puzzle;
+    return _gameState;
   }
 
   /// get the puzzle from server
   /// if not available, get a random puzzle from the list
   /// The random puzzle will not count towards the stats
-  Future<Puzzle> getNewPuzzle() async {
-    Puzzle puzzle = Puzzle.initialize();
-    DocumentReference<Map<String, dynamic>> _docRef =
-        _firestore.collection(collectionProd).doc(statsProd);
-    final snapshot = await _docRef.get();
-    String word = '';
-    if (snapshot.exists) {
-      puzzle = puzzle.fromSnapshot(snapshot);
-      puzzle.difficulty = settingsController.difficulty;
-      puzzle.size = puzzle.difficulty.toGridSize();
-      puzzle.cells = puzzle.difficulty.toDefaultcells();
+  Future<GameState> getNewGameState({Puzzle? challenge}) async {
+    await clearLocalState();
+    late Puzzle puzzle;
+    if (challenge == null) {
+      puzzle = Puzzle.initialize();
+      DocumentReference<Map<String, dynamic>> _docRef =
+          _firestore.collection(collectionProd).doc(statsProd);
+      final snapshot = await _docRef.get();
+      if (snapshot.exists) {
+        puzzle = puzzle.fromSnapshot(snapshot);
+      } else {
+        puzzle = puzzle.getRandomPuzzle();
+      }
     } else {
-      puzzle.isOffline = true;
-      final furdleIndex = Random().nextInt(maxWords);
-      word = furdleList[furdleIndex];
+      puzzle = Puzzle.forFriends(challenge);
     }
-    _gameState.puzzle = puzzle;
-    return puzzle;
+    _gameState = _gameState.initNewState(puzzle);
+    return _gameState;
   }
 
-  Future<void> saveCurrentFurdle(Puzzle puzzle) async {
-    final map = json.encode(puzzle.toJson());
-    _sharedPreferences.setString(kPuzzleState, map);
+  Future<void> _saveCurrentState(GameState state) async {
+    final map = json.encode(state.toJson());
+    _sharedPreferences.setString(kGameState, map);
   }
 
-  Future<Puzzle> getSavedPuzzle() async {
-    final String savedPuzzle = _sharedPreferences.getString(kPuzzleState) ?? '';
+  /// returns the last played puzzle
+  Future<GameState> getSavedGame() async {
+    final String savedPuzzle = _sharedPreferences.getString(kGameState) ?? '';
     if (savedPuzzle.isEmpty) {
-      final newPuzzle = Puzzle.initialize();
-      return newPuzzle;
+      final newState = GameState(puzzle: Puzzle.initialize());
+      return newState;
     }
     final decodedMap = jsonDecode(savedPuzzle) as Map<String, dynamic>;
-    _gameState.puzzle = Puzzle.fromJson(decodedMap);
-    return _gameState.puzzle;
+    _gameState = GameState.fromJson(decodedMap);
+    return _gameState;
   }
 
-  // we shouldn't clear Last played Puzzle anytime
-  Future<void> clearSavedPuzzle() async {
-    _sharedPreferences.remove(kPuzzleState);
+  // clear this state when a new Puzzle is being loaded
+  Future<void> clearLocalState() async {
+    _sharedPreferences.remove(kGameState);
   }
 
   @override
-  Future<void> onGameOver(Puzzle puzzle) async {
+  Future<void> onGameOver(GameState state) async {
     await _analytics.logEvent(name: 'GameOver', parameters: {
       'result': _gameState.puzzle.result.name,
       'moves': _gameState.puzzle.moves
     });
-    saveCurrentFurdle(puzzle);
+  }
+
+  @override
+  Future<void> onGameStateChange(GameState state) async {
+    await _saveCurrentState(state);
   }
 }

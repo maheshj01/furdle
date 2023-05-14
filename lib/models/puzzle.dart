@@ -1,7 +1,13 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/extensions.dart';
+import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
+
+import '../constants/constants.dart';
+import '../utils/word.dart';
 
 enum PuzzleResult {
   /// User has won the game
@@ -10,7 +16,8 @@ enum PuzzleResult {
   /// User has lost the game
   lose,
 
-  /// The game is in progress
+  /// The game is in progress when the user makes a first move
+  /// i.e move > 0
   inprogress,
 
   /// The game has not been played
@@ -25,10 +32,10 @@ enum Difficulty {
   final int difficulty;
   const Difficulty(this.difficulty);
 
-  int toDifficulty() => difficulty;
+  int toLevel() => difficulty;
 
-  Difficulty fromLevel() {
-    switch (difficulty) {
+  factory Difficulty.fromLevel(int level) {
+    switch (level) {
       case 7:
         return Difficulty.easy;
       case 6:
@@ -107,7 +114,6 @@ class Puzzle {
   bool isOffline;
   DateTime? date;
   Difficulty difficulty;
-  List<List<FCellState>> cells;
 
   Puzzle(
       {this.number = 0,
@@ -117,7 +123,6 @@ class Puzzle {
       this.moves = 0,
       this.size = const Size(5.0, 6.0),
       this.difficulty = Difficulty.medium,
-      this.cells = const [],
       this.isOffline = false});
 
   factory Puzzle.initialize() {
@@ -128,9 +133,21 @@ class Puzzle {
         moves: 0,
         size: const Size(5.0, 6.0),
         difficulty: Difficulty.medium,
-        cells: Difficulty.medium.toDefaultcells(),
         date: DateTime.now(),
         isOffline: false);
+  }
+
+  /// Create a new puzzle from the current puzzle
+  factory Puzzle.forFriends(Puzzle puzzle) {
+    return Puzzle(
+        number: puzzle.number,
+        puzzle: puzzle.puzzle,
+        result: PuzzleResult.none,
+        moves: 0,
+        size: puzzle.size,
+        difficulty: puzzle.difficulty,
+        date: puzzle.date,
+        isOffline: puzzle.isOffline);
   }
 
   Puzzle fromSnapshot(DocumentSnapshot snapshot) {
@@ -139,9 +156,10 @@ class Puzzle {
       number: snapshot.get('number'),
       date: (snapshot.get('date') as Timestamp).toDate(),
       isOffline: false,
-      result: PuzzleResult.inprogress,
+      result: PuzzleResult.none,
+      size: settingsController.difficulty.toGridSize(),
+      difficulty: Difficulty.medium,
       moves: 0,
-      cells: Difficulty.medium.toDefaultcells(),
     );
   }
 
@@ -154,7 +172,6 @@ class Puzzle {
       Size? size,
       DateTime? date,
       Difficulty? difficulty,
-      List<List<FCellState>>? cells,
       bool? isOffline}) {
     return Puzzle(
         number: number ?? this.number,
@@ -164,7 +181,6 @@ class Puzzle {
         size: size ?? this.size,
         date: date ?? this.date,
         difficulty: difficulty ?? this.difficulty,
-        cells: cells ?? this.cells,
         isOffline: isOffline ?? this.isOffline);
   }
 
@@ -198,23 +214,8 @@ class Puzzle {
     difficulty = puzzle.difficulty;
   }
 
-  Map<String, List<Map<String, String>>> cellsToMap(
-      List<List<FCellState>> cellList) {
-    final Map<String, List<Map<String, String>>> result = {};
-    for (int i = 0; i < size.height; i++) {
-      List<Map<String, String>> list = [];
-      for (int j = 0; j < size.width; j++) {
-        final json = cellList[i][j].toJson();
-        list.add(json);
-      }
-      result['$i'] = list;
-    }
-    return result;
-  }
-
   Map<String, Object> toJson() {
     return {
-      'cells': cellsToMap(cells),
       'number': number,
       'puzzle': puzzle,
       'result': result.name,
@@ -226,29 +227,31 @@ class Puzzle {
   }
 
   factory Puzzle.fromJson(Map<String, dynamic> json) {
-    final listSize = json['size'].toString().split('x').toList();
-    final furdleSize =
-        Size(double.parse(listSize[0]), double.parse(listSize[1]));
-    final map = (json['cells'] as Map<String, dynamic>);
-
-    List<List<FCellState>> cellList = [];
-    for (int i = 0; i < furdleSize.height; i++) {
-      List<FCellState> list = [];
-      for (int j = 0; j < furdleSize.width; j++) {
-        FCellState cell = FCellState.fromJson((map['$i']! as List<dynamic>)[j]);
-        list.add(cell);
-      }
-      cellList.add(list);
-    }
-
+    final difficulty = json['difficulty'].toString().toDifficulty();
     return Puzzle(
-        cells: cellList,
         number: json['number'] as int,
         puzzle: json['puzzle'] as String,
         result: json['result'].toString().toPuzzleResult(),
         moves: json['moves'] as int,
-        size: furdleSize,
+        size: difficulty.toGridSize(),
         date: DateTime.parse(json['date'] as String),
-        difficulty: json['difficulty'].toString().toDifficulty());
+        difficulty: difficulty);
+  }
+
+  Puzzle getRandomPuzzle() {
+    Puzzle _newPuzzle = Puzzle.initialize();
+    final randomNumber = Random().nextInt(maxWords);
+    final word = furdleList[randomNumber];
+    final _difficulty = settingsController.difficulty;
+    _newPuzzle = _newPuzzle.copyWith(
+        puzzle: word,
+        difficulty: _difficulty,
+        result: PuzzleResult.none,
+        isOffline: true,
+        number: randomNumber,
+        moves: 0,
+        size: _newPuzzle.difficulty.toGridSize(),
+        date: DateTime.now());
+    return _newPuzzle;
   }
 }
