@@ -68,7 +68,6 @@ class GameState extends ChangeNotifier {
   int column;
 
   bool isGameOver;
-  Difficulty difficulty;
 
   /// the puzzle to be solved
   Puzzle puzzle;
@@ -89,7 +88,6 @@ class GameState extends ChangeNotifier {
       this.column = 0,
       this.isGameOver = false,
       this.cells = const [],
-      this.difficulty = Difficulty.medium,
       required this.puzzle});
 
   Map<String, Object> toJson() {
@@ -98,7 +96,6 @@ class GameState extends ChangeNotifier {
       'column': column,
       'isGameOver': isGameOver,
       'puzzle': puzzle.toJson(),
-      'difficulty': difficulty.toLevel(),
       'cells': cellsToMap(),
     };
   }
@@ -111,7 +108,6 @@ class GameState extends ChangeNotifier {
         column: 0,
         isGameOver: false,
         cells: _cells,
-        difficulty: _difficulty,
         puzzle: Puzzle.initialize());
   }
 
@@ -134,7 +130,6 @@ class GameState extends ChangeNotifier {
         row: json['row'],
         cells: cellList,
         column: json['column'],
-        difficulty: _difficulty,
         isGameOver: json['isGameOver'],
         puzzle: Puzzle.fromJson(json['puzzle']));
   }
@@ -181,6 +176,12 @@ class GameState extends ChangeNotifier {
     return this;
   }
 
+  void updateDifficulty(Difficulty difficulty) {
+    puzzle.difficulty = difficulty;
+    _initCells();
+    notifyListeners();
+  }
+
   void _initCells() {
     cells = [];
     final gridSize = puzzle.difficulty.toGridSize();
@@ -214,9 +215,9 @@ class GameState extends ChangeNotifier {
 
   Map<String, List<Map<String, String>>> cellsToMap() {
     final Map<String, List<Map<String, String>>> result = {};
-    for (int i = 0; i < puzzle.size.height; i++) {
+    for (int i = 0; i < cells.length; i++) {
       List<Map<String, String>> list = [];
-      for (int j = 0; j < puzzle.size.width; j++) {
+      for (int j = 0; j < cells[0].length; j++) {
         final json = cells[i][j].toJson();
         list.add(json);
       }

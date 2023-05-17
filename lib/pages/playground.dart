@@ -106,10 +106,11 @@ class _PlayGroundState extends State<PlayGround>
   }
 
   Future<void> loadGame() async {
+    furdleNotifier.isLoading = true;
     _state = GameState.instance();
     await gameController.initialize();
+    print(settingsController.difficulty);
     _state = gameController.gameState;
-    furdleNotifier.isLoading = true;
     _state = await getGame();
     final currentPuzzle = _state.puzzle;
     final DateTime nextPuzzleTime =
@@ -248,6 +249,8 @@ class _PlayGroundState extends State<PlayGround>
       print('invalid Key event $character');
     }
     gameController.gameState = _state;
+
+    /// Update the UI with new state
     furdleNotifier.notify();
   }
 

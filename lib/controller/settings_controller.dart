@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/extensions.dart';
+import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -14,7 +15,6 @@ class SettingsController extends ChangeNotifier {
   // Make SettingsService a private variable so it is not used directly.
   SettingsService? _settingsService;
   late Settings _settings;
-
 
   String _version = '';
 
@@ -44,6 +44,7 @@ class SettingsController extends ChangeNotifier {
 
   set difficulty(Difficulty value) {
     _settings.difficulty = value;
+    _settingsService!.setDifficulty(value);
     notifyListeners();
   }
 

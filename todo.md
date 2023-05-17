@@ -17,3 +17,5 @@
 - [ ] Puzzle and GameState class should be separate and do only one thing
 - [ ] GameState stores teh current state of the game including the current puzzle and the keyboard state
 - [ ] Every move should be saved to the GameState
+- [ ] Puzzle.cells and Puzzle.difficulty are not consistent
+- [ ] Update Difficulty is broken since we are directly updating the state of the puzzle if its a new Game. We should reinitialize the puzzle when we update the difficulty for a new game.

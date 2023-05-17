@@ -9,7 +9,7 @@ class GameController {
 
   set gameState(GameState state) {
     _gameState = state;
-    _onGameStateChange(state);
+    onGameStateChange(state);
   }
 
   Future<void> initialize() async {
@@ -34,10 +34,10 @@ class GameController {
 
   Future<void> onGameOver(GameState state) async {
     await _gameService!.onGameOver(state);
-    _onGameStateChange(gameState);
+    onGameStateChange(gameState);
   }
 
-  Future<void> _onGameStateChange(GameState state) async {
+  Future<void> onGameStateChange(GameState state) async {
     await _gameService!.onGameStateChange(state);
   }
 }

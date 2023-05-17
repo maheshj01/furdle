@@ -15,7 +15,6 @@ import 'package:furdle/service/iservice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameService extends IGameService {
-  static const _furdleStateKey = 'furdleState';
   late GameState _gameState;
   late SharedPreferences _sharedPreferences;
 
@@ -63,10 +62,11 @@ class GameService extends IGameService {
     } else {
       /// If the game is inprogress and the puzzle is not saved by any chance
       /// get a new puzzle
-      if (_puzzle.moves == 0 || _puzzle.puzzle.isEmpty) {
+      if (_puzzle.moves == 0 && _puzzle.puzzle.isEmpty) {
         _gameState = await getNewGameState();
       }
     }
+    gameState = _localState;
     return _gameState;
   }
 
@@ -94,7 +94,7 @@ class GameService extends IGameService {
   }
 
   Future<void> _saveCurrentState(GameState state) async {
-    var st =  state.toJson();
+    var st = state.toJson();
     final map = json.encode(st);
     _sharedPreferences.setString(kGameState, map);
   }

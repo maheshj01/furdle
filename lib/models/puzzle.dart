@@ -46,6 +46,18 @@ enum Difficulty {
         return Difficulty.medium;
     }
   }
+  factory Difficulty.fromToggleIndex(int index) {
+    switch (index) {
+      case 0:
+        return Difficulty.easy;
+      case 1:
+        return Difficulty.medium;
+      case 2:
+        return Difficulty.hard;
+      default:
+        return Difficulty.medium;
+    }
+  }
 
   List<List<FCellState>> toDefaultcells() {
     switch (this) {
