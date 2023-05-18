@@ -112,7 +112,7 @@ class GameState extends ChangeNotifier {
   }
 
   factory GameState.fromJson(Map<String, dynamic> json) {
-    final _difficulty = Difficulty.fromLevel(json['difficulty']);
+    final _difficulty = Difficulty.fromString(json['puzzle']['difficulty']);
     final puzzleSize = _difficulty.toGridSize();
 
     final map = (json['cells'] as Map<String, dynamic>);
@@ -178,12 +178,11 @@ class GameState extends ChangeNotifier {
 
   void updateDifficulty(Difficulty difficulty) {
     puzzle.difficulty = difficulty;
-    _initCells();
     notifyListeners();
   }
 
   void _initCells() {
-    cells = [];
+    cells = <List<FCellState>>[];
     final gridSize = puzzle.difficulty.toGridSize();
     for (int i = 0; i < gridSize.height; i++) {
       List<FCellState> row = [];
@@ -283,6 +282,11 @@ class GameState extends ChangeNotifier {
       final word = currentWord;
       if (!furdleList.contains(word)) {
         return Word.invalid;
+      }
+
+      /// when the first word is submitted mark game as inprogress
+      if (row == 0) {
+        puzzle.result = PuzzleResult.inprogress;
       }
       updateKeyBoardState();
       _currentWord = '';

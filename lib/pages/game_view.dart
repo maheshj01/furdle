@@ -17,19 +17,16 @@ enum KeyState {
 }
 
 class FurdleGrid extends StatelessWidget {
-  FurdleGrid({Key? key, required this.state}) : super(key: key);
-
+  const FurdleGrid({Key? key, required this.state}) : super(key: key);
   final GameState state;
-  double cellSize = 80;
 
-  Size? gridSize;
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    gridSize = state.puzzle.size;
+    Size? gridSize = state.puzzle.size;
     bool isPlayed = state.puzzle.moves > 0;
     bool isGameOver = state.isGameOver;
-    cellSize = _size.width < 600 ? 65 : 80;
+    double cellSize = _size.width < 600 ? 65 : 80;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

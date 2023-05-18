@@ -116,7 +116,6 @@ class _PlayGroundState extends State<PlayGround>
     final DateTime nextPuzzleTime =
         currentPuzzle.date!.add(const Duration(hours: hoursUntilNextFurdle));
     if (currentPuzzle.result == PuzzleResult.none) {
-      currentPuzzle.result = PuzzleResult.inprogress;
       _state.isGameOver = false;
       _state.isAlreadyPlayed = false;
     } else if (currentPuzzle.result == PuzzleResult.win) {

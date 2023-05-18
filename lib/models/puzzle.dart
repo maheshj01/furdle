@@ -34,6 +34,19 @@ enum Difficulty {
 
   int toLevel() => difficulty;
 
+  factory Difficulty.fromString(String df) {
+    switch (df) {
+      case 'easy':
+        return Difficulty.easy;
+      case 'medium':
+        return Difficulty.medium;
+      case 'hard':
+        return Difficulty.hard;
+      default:
+        return Difficulty.medium;
+    }
+  }
+
   factory Difficulty.fromLevel(int level) {
     switch (level) {
       case 7:

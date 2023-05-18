@@ -56,7 +56,9 @@ class GameService extends IGameService {
       if (_puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
         _gameState = await getNewGameState();
       }
-    } else if (_gameResult == PuzzleResult.none) {
+    } else if (_gameResult == PuzzleResult.none &&
+        _localState.column == 0 &&
+        _localState.row == 0) {
       _gameState = await getNewGameState();
       return _gameState;
     } else {
@@ -65,6 +67,9 @@ class GameService extends IGameService {
       if (_puzzle.moves == 0 && _puzzle.puzzle.isEmpty) {
         _gameState = await getNewGameState();
       }
+      return _gameState;
+
+      /// if the game is in Progress return
     }
     gameState = _localState;
     return _gameState;
