@@ -89,7 +89,7 @@ class FurdleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    double divideFactor = _size.width < 400 ? difficultyToDivideFactor() : 2.0;
+    double divideFactor = _size.width < 400 ? difficultyToDivideFactor() : 2.2;
     final kSize = _size.height / (gridSize!.height * divideFactor);
     bool isPlayed = state.puzzle.moves > 0;
     bool isGameOver = state.puzzle.result != PuzzleResult.inprogress;
