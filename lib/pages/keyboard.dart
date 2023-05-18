@@ -25,7 +25,6 @@ class KeyBoardView extends StatefulWidget {
 
 class _KeyBoardViewState extends State<KeyBoardView> {
   late FocusNode keyboardFocus;
-  late KeyBindrr bindrr;
 
   @override
   void dispose() {
@@ -36,7 +35,6 @@ class _KeyBoardViewState extends State<KeyBoardView> {
   @override
   void initState() {
     super.initState();
-    bindrr = KeyBindrr(character: '', isPressed: false);
     keyboardFocus = widget.keyboardFocus ?? FocusNode();
     controller = widget.controller ?? TextEditingController();
   }
@@ -70,6 +68,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
     widget.onKeyEvent(bindrr.character, false);
   }
 
+  KeyBindrr bindrr = KeyBindrr(character: '', isPressed: false);
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

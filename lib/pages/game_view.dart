@@ -32,10 +32,10 @@ class FurdleGrid extends StatelessWidget {
       children: [
         Column(
           children: [
-            for (int i = 0; i < gridSize!.height; i++)
+            for (int i = 0; i < gridSize.height; i++)
               Row(
                 children: [
-                  for (int j = 0; j < gridSize!.width; j++)
+                  for (int j = 0; j < gridSize.width; j++)
                     FurdleCell(
                       i: i,
                       j: j,

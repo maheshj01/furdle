@@ -109,7 +109,6 @@ class _PlayGroundState extends State<PlayGround>
     furdleNotifier.isLoading = true;
     _state = GameState.instance();
     await gameController.initialize();
-    print(settingsController.difficulty);
     _state = gameController.gameState;
     _state = await getGame();
     final currentPuzzle = _state.puzzle;
@@ -124,15 +123,21 @@ class _PlayGroundState extends State<PlayGround>
       showFurdleDialog(
           title: gameAlreadyPlayed,
           message: 'Next puzzle in \n$nextPuzzleTime',
-          isSuccess: currentPuzzle.result == PuzzleResult.win);
-      return;
+          isSuccess: true);
+    } else if (currentPuzzle.result == PuzzleResult.lose) {
+      _state.isGameOver = true;
+      _state.isAlreadyPlayed = true;
+      showFurdleDialog(
+          title: gameAlreadyPlayed,
+          message: 'Next puzzle in \n$nextPuzzleTime',
+          isSuccess: false);
     } else {
       /// Game is in progress
       _state.isAlreadyPlayed = false;
       _state.isGameOver = false;
-      return;
     }
     gameController.gameState = _state;
+    gameController.gameState.updateKeyboard();
     settingsController.stats.number = currentPuzzle.number;
     furdleNotifier.isLoading = false;
   }
@@ -250,7 +255,7 @@ class _PlayGroundState extends State<PlayGround>
     gameController.gameState = _state;
 
     /// Update the UI with new state
-    furdleNotifier.notify();
+    furdleNotifier.isLoading = false;
   }
 
   void shakeFurdle() {

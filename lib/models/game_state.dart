@@ -205,10 +205,14 @@ class GameState extends ChangeNotifier {
     return word.length == puzzle.size.width;
   }
 
+  void updateKeyboard() {
+    _updateKeyBoardState(isUpdate: true);
+  }
+
   void setCells(List<List<FCellState>> kCells) {
     cells.clear();
     cells.addAll(kCells);
-    updateKeyBoardState(isUpdate: true);
+    _updateKeyBoardState(isUpdate: true);
     notifyListeners();
   }
 
@@ -288,7 +292,7 @@ class GameState extends ChangeNotifier {
       if (row == 0) {
         puzzle.result = PuzzleResult.inprogress;
       }
-      updateKeyBoardState();
+      _updateKeyBoardState();
       _currentWord = '';
       column = 0;
       row++;
@@ -331,7 +335,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateKeyBoardState({bool isUpdate = false}) {
+  void _updateKeyBoardState({bool isUpdate = false}) {
     if (row >= puzzle.size.height) {
       row = puzzle.size.height.toInt() - 1;
     }
@@ -353,6 +357,7 @@ class GameState extends ChangeNotifier {
         }
       }
     } else {
+      /// update submitted row
       for (int i = 0; i < puzzle.size.width; i++) {
         final letter = cells[row][i].character;
         word += letter;
@@ -414,10 +419,10 @@ class LoadingNotifier extends ValueNotifier<bool> {
 
   set isLoading(bool value) {
     _isLoading = value;
-    notify();
+    _notify();
   }
 
-  void notify() {
+  void _notify() {
     notifyListeners();
   }
 }
