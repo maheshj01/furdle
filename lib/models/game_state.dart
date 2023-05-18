@@ -335,6 +335,9 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// updates keyboard state for submitted row and all rows
+  /// if isUpdate is true
+  /// else updates keyboard state for submitted row only
   void _updateKeyBoardState({bool isUpdate = false}) {
     if (row >= puzzle.size.height) {
       row = puzzle.size.height.toInt() - 1;
