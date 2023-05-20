@@ -24,9 +24,13 @@ exports.scheduledFunction = functions.pubsub
     .timeZone("UTC")
     .onRun(async () => {
       const docRef = await admin.firestore().collection("furdle").doc("stats");
+      const now = admin.firestore.Timestamp.now();
+      // next run is 24 hours from now
+      const nextRun = now.toMillis() + 24 * 60 * 60 * 1000;
       return await docRef.update({
         date: admin.firestore.Timestamp.now(),
         number: admin.firestore.FieldValue.increment(1),
+        nextRun: admin.firestore.Timestamp.fromMillis(nextRun),
         word: randomWord(wordList),
       });
     });
