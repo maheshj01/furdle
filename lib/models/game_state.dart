@@ -148,11 +148,6 @@ class GameState extends ChangeNotifier {
   /// word in a current row
   String get currentWord => _currentWord;
 
-  /// build current word for each letter entered
-  void buildWord(String letter) {
-    _currentWord += letter;
-  }
-
   /// update current word when a letter is removed
   /// by pressing backspace or delete
   void removeFromWord() {
@@ -255,27 +250,25 @@ class GameState extends ChangeNotifier {
   }
 
   void addCell(String character) {
+    if (column == puzzle.size.width) return;
+
     FCellState cell =
         FCellState(character: character, state: KeyState.isDefault);
     if (column < puzzle.size.width) {
       cells[row][column] = cell;
+      _currentWord += character;
       column += 1;
-      if (column == puzzle.size.width) {
-        column = puzzle.size.width.toInt() - 1;
-      }
-      buildWord(character);
     }
     notifyListeners();
   }
 
   void removeCell() {
-    if (column > -1) {
+    if (column != 0) {
       /// set the cell to default state
-      cells[row][column] = FCellState.defaultState();
       column -= 1;
+      cells[row][column] = FCellState.defaultState();
       removeFromWord();
-    }
-    if (column < 0) {
+    } else {
       column = 0;
       _currentWord = '';
     }
@@ -292,7 +285,6 @@ class GameState extends ChangeNotifier {
       if (!furdleList.contains(word)) {
         return Word.invalid;
       }
-      // TODO: Update state of cells only on submitting the word
       for (int i = 0; i < word.length; i++) {
         final occurence = puzzle.puzzle.split(word[i]).toList().length - 1;
         final char = word[i];
