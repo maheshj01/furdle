@@ -82,8 +82,8 @@ class _PlayGroundState extends State<PlayGround>
                 onTimerComplete: () async {
                   _state.isGameOver = false;
                   _state.isAlreadyPlayed = false;
-                  await loadGame();
                   popView(context);
+                  await loadGame();
                 },
               ));
         },
@@ -179,26 +179,23 @@ class _PlayGroundState extends State<PlayGround>
   /// User pressed the keys on virtual or physical keyboard
   Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
     Puzzle _currentPuzzle = _state.puzzle;
-    analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
     if (_state.isGameOver ||
         _state.isAlreadyPlayed ||
         _currentPuzzle.result == PuzzleResult.win ||
         _currentPuzzle.result == PuzzleResult.lose) {
       /// User presses keys from physical Keyboard on game over
       if (isPhysicalKeyEvent) return;
-      final currentPuzzle = _currentPuzzle;
-      final DateTime nextPuzzleTime =
-          currentPuzzle.date!.add(const Duration(hours: hoursUntilNextFurdle));
-      print(
-          "now = ${DateTime.now().toLocal()} last time= ${currentPuzzle.date!.toLocal()} next puzzle time= ${nextPuzzleTime.toLocal()}");
-      showFurdleDialog(
-          title: gameAlreadyPlayed, message: 'Next puzzle in $nextPuzzleTime');
+      analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
+      final DateTime nextPuzzleTime = _state.puzzle.nextRun!;
+      final durationLeft = nextPuzzleTime.difference(DateTime.now());
+      gameController.timeLeft = durationLeft;
+      showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
       return;
     }
     final character = x.toLowerCase();
     if (character == kEnterKey) {
       /// check if word is complete
-      final wordState = _state.validate();
+      final wordState = _state.submitWord();
       if (wordState == Word.match) {
         _state.isGameOver = true;
         _currentPuzzle.result = PuzzleResult.win;

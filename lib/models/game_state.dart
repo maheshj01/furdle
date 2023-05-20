@@ -279,7 +279,7 @@ class GameState extends ChangeNotifier {
   }
 
   /// check if word is valid and present in list of words
-  Word validate() {
+  Word submitWord() {
     final isComplete = isWordComplete();
     if (!isComplete) {
       return Word.incomplete;

@@ -138,12 +138,14 @@ class Puzzle {
   Size size;
   bool isOffline;
   DateTime? date;
+  DateTime? nextRun;
   Difficulty difficulty;
 
   Puzzle(
       {this.number = 0,
       this.puzzle = '',
       this.date,
+      this.nextRun,
       this.result = PuzzleResult.none,
       this.moves = 0,
       this.size = const Size(5.0, 6.0),
@@ -159,6 +161,7 @@ class Puzzle {
         size: const Size(5.0, 6.0),
         difficulty: Difficulty.medium,
         date: DateTime.now(),
+        nextRun: DateTime.now().add(const Duration(days: 1)),
         isOffline: false);
   }
 
@@ -172,6 +175,7 @@ class Puzzle {
         size: puzzle.size,
         difficulty: puzzle.difficulty,
         date: puzzle.date,
+        nextRun: puzzle.date,
         isOffline: puzzle.isOffline);
   }
 
@@ -179,7 +183,8 @@ class Puzzle {
     return Puzzle(
       puzzle: snapshot.get('word'),
       number: snapshot.get('number'),
-      date: (snapshot.get('date') as Timestamp).toDate(),
+      date: (snapshot.get('date') as Timestamp).toDate().toLocal(),
+      nextRun: (snapshot.get('nextRun') as Timestamp).toDate().toLocal(),
       isOffline: false,
       result: PuzzleResult.none,
       size: settingsController.difficulty.toGridSize(),
@@ -196,6 +201,7 @@ class Puzzle {
       int? moves,
       Size? size,
       DateTime? date,
+      DateTime? nextRun,
       Difficulty? difficulty,
       bool? isOffline}) {
     return Puzzle(
@@ -205,6 +211,7 @@ class Puzzle {
         moves: moves ?? this.moves,
         size: size ?? this.size,
         date: date ?? this.date,
+        nextRun: nextRun ?? this.nextRun,
         difficulty: difficulty ?? this.difficulty,
         isOffline: isOffline ?? this.isOffline);
   }
@@ -236,6 +243,7 @@ class Puzzle {
     moves = puzzle.moves;
     size = puzzle.size;
     date = DateTime.now();
+    nextRun = DateTime.now().add(const Duration(days: 1));
     difficulty = puzzle.difficulty;
   }
 
@@ -247,6 +255,7 @@ class Puzzle {
       'moves': moves,
       'size': '${size.width}x${size.height}',
       'date': date.toString(),
+      'nextRun': nextRun.toString(),
       'difficulty': difficulty.name
     };
   }
@@ -260,6 +269,7 @@ class Puzzle {
         moves: json['moves'] as int,
         size: difficulty.toGridSize(),
         date: DateTime.parse(json['date'] as String),
+        nextRun: DateTime.parse(json['nextRun'] as String),
         difficulty: difficulty);
   }
 
@@ -276,7 +286,9 @@ class Puzzle {
         number: randomNumber,
         moves: 0,
         size: _newPuzzle.difficulty.toGridSize(),
-        date: DateTime.now());
+        date: DateTime.now(),
+        nextRun: DateTime.now().add(const Duration(days: 1)));
+
     return _newPuzzle;
   }
 }
