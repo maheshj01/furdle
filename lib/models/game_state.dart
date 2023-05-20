@@ -255,24 +255,29 @@ class GameState extends ChangeNotifier {
   }
 
   void addCell(String character) {
-    final occurence = puzzle.puzzle.split(character).toList().length - 1;
-    FCellState cell = FCellState(
-        character: character, state: characterToState(character, occurence));
+    FCellState cell =
+        FCellState(character: character, state: KeyState.isDefault);
     if (column < puzzle.size.width) {
       cells[row][column] = cell;
-      column++;
+      column += 1;
+      if (column == puzzle.size.width) {
+        column = puzzle.size.width.toInt() - 1;
+      }
       buildWord(character);
     }
     notifyListeners();
   }
 
   void removeCell() {
-    if (column > 0) {
-      column -= 1;
-
+    if (column > -1) {
       /// set the cell to default state
       cells[row][column] = FCellState.defaultState();
+      column -= 1;
       removeFromWord();
+    }
+    if (column < 0) {
+      column = 0;
+      _currentWord = '';
     }
     notifyListeners();
   }
@@ -286,6 +291,14 @@ class GameState extends ChangeNotifier {
       final word = currentWord;
       if (!furdleList.contains(word)) {
         return Word.invalid;
+      }
+      // TODO: Update state of cells only on submitting the word
+      for (int i = 0; i < word.length; i++) {
+        final occurence = puzzle.puzzle.split(word[i]).toList().length - 1;
+        final char = word[i];
+        final state = characterToState(word[i], occurence);
+        FCellState _cell = FCellState(character: char, state: state);
+        cells[row][i] = _cell;
       }
 
       /// when the first word is submitted mark game as inprogress
@@ -336,26 +349,33 @@ class GameState extends ChangeNotifier {
   }
 
   /// updates keyboard state for submitted row and all rows
-  /// if isUpdate is true
+  /// if isUpdate is true updates keyboard state for all rows
   /// else updates keyboard state for submitted row only
   void _updateKeyBoardState({bool isUpdate = false}) {
     if (row >= puzzle.size.height) {
       row = puzzle.size.height.toInt() - 1;
     }
-    String word = '';
     if (isUpdate) {
       for (int j = 0; j < puzzle.size.height; j++) {
         for (int i = 0; i < puzzle.size.width; i++) {
           final letter = cells[j][i].character;
-          word += letter;
-          final furdleState = cells[j][i].state;
+          final cellState = cells[j][i].state;
           final keyState = kState.keyboardState[letter];
 
-          /// if Key is misplaced or is not enetered
-          if (keyState == KeyState.misplaced ||
-              keyState == KeyState.isDefault) {
-            //   final state = characterToKeyboardState(letter, currentState);
-            kState.keyboardState[letter] = furdleState;
+          /// keyboard state should be updated based on priority of states in cells
+          /// if Key is present in the right spot
+          /// if Key is misplaced
+          /// if Key is not present in the puzzle
+          /// if Key is not entered
+          if (cellState.toPriority() > 2 && keyState!.toPriority() < 3) {
+            kState.keyboardState[letter] = cellState;
+          } else if (cellState.toPriority() > 1 && keyState!.toPriority() < 2) {
+            kState.keyboardState[letter] = cellState;
+          } else if (cellState.toPriority() > 0 && keyState!.toPriority() < 1) {
+            kState.keyboardState[letter] = cellState;
+          } else if (cellState.toPriority() > 0 &&
+              keyState!.toPriority() == 0) {
+            kState.keyboardState[letter] = cellState;
           }
         }
       }
@@ -363,7 +383,6 @@ class GameState extends ChangeNotifier {
       /// update submitted row
       for (int i = 0; i < puzzle.size.width; i++) {
         final letter = cells[row][i].character;
-        word += letter;
         final furdleState = cells[row][i].state;
         final keyState = kState.keyboardState[letter];
 

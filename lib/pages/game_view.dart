@@ -4,16 +4,25 @@ import 'package:furdle/models/game_state.dart';
 
 enum KeyState {
   /// letter is present in the right spot
-  exists,
-
-  /// letter is not present in any spot
-  notExists,
+  /// green color
+  exists(3),
 
   /// letter is present in the wrong spot
-  misplaced,
+  /// orange color
+  misplaced(2),
+
+  /// letter is not present in any spot
+  /// black color
+  notExists(1),
 
   /// letter is empty
-  isDefault
+  /// grey color
+  isDefault(0);
+
+  final int priority;
+  const KeyState(this.priority);
+
+  int toPriority() => priority;
 }
 
 class FurdleGrid extends StatelessWidget {
@@ -26,7 +35,7 @@ class FurdleGrid extends StatelessWidget {
     Size? gridSize = state.puzzle.size;
     bool isPlayed = state.puzzle.moves > 0;
     bool isGameOver = state.isGameOver;
-    double cellSize = _size.width < 600 ? 65 : 80;
+    double cellSize = _size.width < 600 ? 65 : 70;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -40,7 +49,6 @@ class FurdleGrid extends StatelessWidget {
                       i: i,
                       j: j,
                       cellSize: cellSize,
-                      //TODO: gState.Cells = 0 for some time hence the range erorr
                       cellState: state.cells[i][j],
                       isSubmitted: isGameOver ? i <= state.row : i < state.row,
                       isAlreadyPlayed: isPlayed,
@@ -62,7 +70,7 @@ class FurdleCell extends StatefulWidget {
 
   /// whether or not a word is submitted
   /// if true it will show the colors
-  /// of the submitted word
+  /// of the submitted word in the grid
   bool isSubmitted = false;
   bool isAlreadyPlayed = false;
 
