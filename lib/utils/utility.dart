@@ -17,19 +17,6 @@ class Utility {
     _screenSize = screenSize;
   }
 
-  Color keyStateToColor(KeyState state, {bool isFurdle = false}) {
-    switch (state) {
-      case KeyState.exists:
-        return Colors.green;
-      case KeyState.notExists:
-        return Colors.black;
-      case KeyState.misplaced:
-        return Colors.yellow;
-      default:
-        return isFurdle ? Colors.grey : Colors.white;
-    }
-  }
-
   static Future<void> launch(String url, {bool isNewTab = true}) async {
     await launchUrl(
       Uri.parse(url),

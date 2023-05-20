@@ -280,7 +280,7 @@ class KeyBuilder extends StatefulWidget {
 class _KeyBuilderState extends State<KeyBuilder> {
   Color stateToColor(KeyState state) {
     switch (state) {
-      case KeyState.exists:
+      case KeyState.match:
         return Colors.green;
       case KeyState.notExists:
         return Colors.black87;

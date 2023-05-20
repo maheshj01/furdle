@@ -29,8 +29,8 @@ class FCellState {
       case 'isDefault':
         state = KeyState.isDefault;
         break;
-      case 'exists':
-        state = KeyState.exists;
+      case 'match':
+        state = KeyState.match;
         break;
       case 'misplaced':
         state = KeyState.misplaced;
@@ -201,13 +201,13 @@ class GameState extends ChangeNotifier {
   }
 
   void updateKeyboard() {
-    _updateKeyBoardState(isUpdate: true);
+    _updateKeyBoardState(updateRow: true);
   }
 
   void setCells(List<List<FCellState>> kCells) {
     cells.clear();
     cells.addAll(kCells);
-    _updateKeyBoardState(isUpdate: true);
+    _updateKeyBoardState(updateRow: true);
     notifyListeners();
   }
 
@@ -224,27 +224,30 @@ class GameState extends ChangeNotifier {
     return result;
   }
 
-  KeyState characterToState(String letter, int count) {
+  KeyState characterToState(String letter, int count, int i) {
     int index = indexOf(letter);
     final bool hasNoDuplicateLetters =
         count == 1 && currentWord.contains(letter);
     if (index < 0) {
       return KeyState.notExists;
-    } else if (letterExists(index, letter)) {
-      return KeyState.exists;
+    } else if (isRightPosition(i, letter)) {
+      return KeyState.match;
     } else {
       if (hasNoDuplicateLetters) {
-        return KeyState.notExists;
-      } else {
         return KeyState.misplaced;
+      } else {
+        return KeyState.notExists;
       }
     }
   }
 
-  bool letterExists(int index, String letter) {
-    return puzzle.puzzle[column] == letter;
+  /// whether the puzzle contains the letter at the given index
+  bool isRightPosition(int index, String letter) {
+    return puzzle.puzzle[index] == letter;
   }
 
+  /// Returns the position of the first match of [pattern] in this string,
+  /// starting at [start], inclusive:
   int indexOf(letter) {
     return puzzle.puzzle.toLowerCase().indexOf(letter);
   }
@@ -286,9 +289,9 @@ class GameState extends ChangeNotifier {
         return Word.invalid;
       }
       for (int i = 0; i < word.length; i++) {
-        final occurence = puzzle.puzzle.split(word[i]).toList().length - 1;
         final char = word[i];
-        final state = characterToState(word[i], occurence);
+        final occurence = puzzle.puzzle.split(char).toList().length - 1;
+        final state = characterToState(char, occurence, i);
         FCellState _cell = FCellState(character: char, state: state);
         cells[row][i] = _cell;
       }
@@ -297,7 +300,7 @@ class GameState extends ChangeNotifier {
       if (row == 0) {
         puzzle.result = PuzzleResult.inprogress;
       }
-      _updateKeyBoardState();
+      _updateKeyBoardState(updateRow: true);
       _currentWord = '';
       column = 0;
       row++;
@@ -316,13 +319,14 @@ class GameState extends ChangeNotifier {
         return '⬜️';
       case KeyState.misplaced:
         return '🟨';
-      case KeyState.exists:
+      case KeyState.match:
         return '🟩';
       case KeyState.notExists:
         return '⬛️';
     }
   }
 
+  /// Share furdle grid
   void generateFurdleGrid() {
     int attempts = isPuzzleCracked ? row : 0;
     String generatedFurdle =
@@ -343,48 +347,53 @@ class GameState extends ChangeNotifier {
   /// updates keyboard state for submitted row and all rows
   /// if isUpdate is true updates keyboard state for all rows
   /// else updates keyboard state for submitted row only
-  void _updateKeyBoardState({bool isUpdate = false}) {
+  void _updateKeyBoardState({bool updateRow = false}) {
     if (row >= puzzle.size.height) {
       row = puzzle.size.height.toInt() - 1;
     }
-    if (isUpdate) {
-      for (int j = 0; j < puzzle.size.height; j++) {
-        for (int i = 0; i < puzzle.size.width; i++) {
-          final letter = cells[j][i].character;
-          final cellState = cells[j][i].state;
-          final keyState = kState.keyboardState[letter];
-
-          /// keyboard state should be updated based on priority of states in cells
-          /// if Key is present in the right spot
-          /// if Key is misplaced
-          /// if Key is not present in the puzzle
-          /// if Key is not entered
-          if (cellState.toPriority() > 2 && keyState!.toPriority() < 3) {
-            kState.keyboardState[letter] = cellState;
-          } else if (cellState.toPriority() > 1 && keyState!.toPriority() < 2) {
-            kState.keyboardState[letter] = cellState;
-          } else if (cellState.toPriority() > 0 && keyState!.toPriority() < 1) {
-            kState.keyboardState[letter] = cellState;
-          } else if (cellState.toPriority() > 0 &&
-              keyState!.toPriority() == 0) {
-            kState.keyboardState[letter] = cellState;
-          }
-        }
-      }
-    } else {
-      /// update submitted row
+    for (int j = 0; j < puzzle.size.height; j++) {
       for (int i = 0; i < puzzle.size.width; i++) {
-        final letter = cells[row][i].character;
-        final furdleState = cells[row][i].state;
+        final letter = cells[j][i].character;
+        final cellState = cells[j][i].state;
         final keyState = kState.keyboardState[letter];
 
-        /// if Key is misplaced or is not enetered
-        if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
-          //   final state = characterToKeyboardState(letter, currentState);
-          kState.keyboardState[letter] = furdleState;
+        /// get unsubmitted word
+        if (j == row) {
+          if (cellState == KeyState.isDefault) {
+            _currentWord += letter;
+          }
+        }
+
+        /// keyboard state should be updated based on priority of states in cells
+        /// if Key is present in the right spot
+        /// if Key is misplaced
+        /// if Key is not present in the puzzle
+        /// if Key is not entered
+        if (cellState.toPriority() > 2 && keyState!.toPriority() < 3) {
+          kState.keyboardState[letter] = cellState;
+        } else if (cellState.toPriority() > 1 && keyState!.toPriority() < 2) {
+          kState.keyboardState[letter] = cellState;
+        } else if (cellState.toPriority() > 0 && keyState!.toPriority() < 1) {
+          kState.keyboardState[letter] = cellState;
+        } else if (cellState.toPriority() > 0 && keyState!.toPriority() == 0) {
+          kState.keyboardState[letter] = cellState;
         }
       }
     }
+    // } else {
+    //   /// update submitted row in furdle grid
+    //   for (int i = 0; i < puzzle.size.width; i++) {
+    //     final letter = cells[row][i].character;
+    //     final furdleState = cells[row][i].state;
+    //     final keyState = kState.keyboardState[letter];
+
+    //     /// if Key is misplaced or is not enetered
+    //     if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
+    //       //   final state = characterToKeyboardState(letter, currentState);
+    //       kState.keyboardState[letter] = furdleState;
+    //     }
+    //   }
+    // }
     notifyListeners();
     // print('update keyboard state\n ${kState.keyboardState}');
   }
@@ -393,8 +402,8 @@ class GameState extends ChangeNotifier {
     int index = indexOf(letter);
     if (index < 0) {
       return KeyState.notExists;
-    } else if (letterExists(index, letter)) {
-      return KeyState.exists;
+    } else if (isRightPosition(index, letter)) {
+      return KeyState.match;
     } else {
       return KeyState.misplaced;
     }

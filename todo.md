@@ -28,6 +28,7 @@
 - [ ] Stats should be updated and saved to local storage when the game is finished
 - [ ] The game should be able to load the stats from local storage
 - [ ] Provide an option to reset the stats with a confirmation dialog
+- [ ]
 
 
 ### Transferring user stats to a new Device (No sign in)

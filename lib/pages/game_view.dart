@@ -5,7 +5,7 @@ import 'package:furdle/models/game_state.dart';
 enum KeyState {
   /// letter is present in the right spot
   /// green color
-  exists(3),
+  match(3),
 
   /// letter is present in the wrong spot
   /// orange color
@@ -95,7 +95,7 @@ class _FurdleCellState extends State<FurdleCell>
       return Colors.grey;
     }
     switch (state) {
-      case KeyState.exists:
+      case KeyState.match:
         return green;
       case KeyState.notExists:
         return black;

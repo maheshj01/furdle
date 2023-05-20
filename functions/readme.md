@@ -17,8 +17,13 @@
     npm start
     ```
 
+4. Auto fix linting errors
 
-4. Deploy to firebase
+    ```sh
+    npx eslint --fix .
+    ```
+
+5. Deploy to firebase
 
 ```
 npm run deploy
