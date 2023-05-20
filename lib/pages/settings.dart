@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
+import 'package:furdle/utils/utility.dart';
 
 import '../constants/strings.dart';
 
-class Settings extends StatefulWidget {
+class SettingsPage extends StatefulWidget {
   final String title = settingsTitle;
 
-  const Settings({Key? key}) : super(key: key);
+  const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  State<Settings> createState() => _SettingsState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsState extends State<Settings> {
+class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
@@ -103,11 +104,21 @@ class _SettingsState extends State<Settings> {
                       Text('Hard'),
                     ],
                     onPressed: (int index) {
-                      settingsController.difficulty = index == 0
-                          ? Difficulty.easy
-                          : index == 1
-                              ? Difficulty.medium
-                              : Difficulty.hard;
+                      final _selectedDifficulty =
+                          Difficulty.fromToggleIndex(index);
+                      final _puzzle = gameController.gameState.puzzle;
+                      if (_selectedDifficulty !=
+                          settingsController.difficulty) {
+                        /// If game has not started change the settings
+                        if (_puzzle.result == PuzzleResult.none) {
+                          settingsController.difficulty = _selectedDifficulty;
+                          gameController.gameState.puzzle =
+                              _puzzle.copyWith(difficulty: _selectedDifficulty);
+                        } else {
+                          Utility.showMessage(context,
+                              "The settings will be applied to the next puzzle");
+                        }
+                      }
                       setState(() {});
                     },
                     isSelected: [

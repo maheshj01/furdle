@@ -1,49 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/game_view.dart';
+import 'package:furdle/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// State Color for either furdle or Keyboard
-Color keyStateToColor(KeyState state, {bool isFurdle = false}) {
-  switch (state) {
-    case KeyState.exists:
-      return Colors.green;
-    case KeyState.notExists:
-      return Colors.black;
-    case KeyState.misplaced:
-      return Colors.yellow;
-    default:
-      return isFurdle ? Colors.grey : Colors.white;
-  }
-}
+class Utility {
+  static Size _screenSize = const Size(0, 0);
 
-extension DateOnlyCompare on DateTime {
-  bool isSameDate(DateTime other) {
-    return year == other.year && month == other.month && day == other.day;
-  }
-}
+  static Size get screenSize => _screenSize;
 
-extension TimeLeft on Duration {
-  String timeLeftAsString() {
-    int hours = inHours;
-    int minutes = inMinutes;
-    if (minutes < 0 || hours < 0) {
-      return "0 hrs 0 mins";
+  static set screenSize(Size size) {
+    _screenSize = size;
+  }
+
+  Utility({required Size screenSize}) {
+    _screenSize = screenSize;
+  }
+
+  Color keyStateToColor(KeyState state, {bool isFurdle = false}) {
+    switch (state) {
+      case KeyState.exists:
+        return Colors.green;
+      case KeyState.notExists:
+        return Colors.black;
+      case KeyState.misplaced:
+        return Colors.yellow;
+      default:
+        return isFurdle ? Colors.grey : Colors.white;
     }
-    if (minutes > 60) {
-      hours = minutes ~/ 60;
-      minutes = (minutes - hours * 60) % 60;
-    }
-    return '$hours hrs $minutes mins';
   }
-}
 
-/// TODO: Add canLaunch condition back when this issue is fixed https://github.com/flutter/flutter/issues/74557
-Future<void> launchUrl(String url, {bool isNewTab = true}) async {
-  // await canLaunch(url)
-  // ?
-  await launch(
-    url,
-    webOnlyWindowName: isNewTab ? '_blank' : '_self',
-  );
-  // : throw 'Could not launch $url';
+  static Future<void> launch(String url, {bool isNewTab = true}) async {
+    await launchUrl(
+      Uri.parse(url),
+      webOnlyWindowName: isNewTab ? '_blank' : '_self',
+    );
+  }
+
+  static void showMessage(context, message,
+      {Duration? duration = const Duration(milliseconds: 1500)}) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar(
+        screenSize: _screenSize, message: '$message', duration: duration!));
+  }
 }

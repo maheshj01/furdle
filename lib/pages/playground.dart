@@ -1,34 +1,32 @@
-import 'dart:math';
-
-import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:confetti/confetti.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:furdle/constants/constants.dart';
+import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
-import 'package:furdle/models/furdle.dart';
+import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
-import 'package:furdle/pages/furdle.dart';
+import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
-import 'package:furdle/utils/word.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:furdle/widgets/dialog.dart';
 import 'package:share_plus/share_plus.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class PlayGround extends StatefulWidget {
+  const PlayGround({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _PlayGroundState createState() => _PlayGroundState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class _PlayGroundState extends State<PlayGround>
     with SingleTickerProviderStateMixin {
   final keyboardFocusNode = FocusNode();
   final textController = TextEditingController();
@@ -38,13 +36,13 @@ class _MyHomePageState extends State<MyHomePage>
     setState(() {});
   }
 
-  FState fState = FState();
-  late FurdleNotifier furdleNotifier;
+  late LoadingNotifier furdleNotifier;
   @override
   void dispose() {
     keyboardFocusNode.dispose();
     textController.dispose();
     _shakeController.dispose();
+    furdleNotifier.dispose();
     super.dispose();
   }
 
@@ -61,21 +59,6 @@ class _MyHomePageState extends State<MyHomePage>
       });
   }
 
-  int difficultyToGridSize(Difficulty difficulty) {
-    switch (difficulty) {
-      case Difficulty.easy:
-        return 4;
-      case Difficulty.medium:
-        return 5;
-      case Difficulty.hard:
-        return 6;
-    }
-  }
-
-  bool isLetter(String x) {
-    return x.length == 1 && x.codeUnitAt(0) >= 65 && x.codeUnitAt(0) <= 90;
-  }
-
   void showFurdleDialog(
       {String? title,
       String? message,
@@ -83,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage>
       bool showTimer = true}) {
     title ??= isSuccess
         ? 'Congratulations! 🎉'
-        : '${fState.furdlePuzzle.toUpperCase()} 😞';
+        : '${_state.puzzle.puzzle.toUpperCase()} 😞';
     message ??= isSuccess ? furdleCracked : failedToCrackFurdle;
     showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
@@ -95,10 +78,11 @@ class _MyHomePageState extends State<MyHomePage>
                 title: title!,
                 message: message!,
                 showTimer: showTimer,
+                isAlreadyPlayed: _state.isAlreadyPlayed,
                 onTimerComplete: () async {
-                  isGameOver = false;
-                  settingsController.isAlreadyPlayed = false;
-                  await getWord();
+                  _state.isGameOver = false;
+                  _state.isAlreadyPlayed = false;
+                  await loadGame();
                   popView(context);
                 },
               ));
@@ -112,203 +96,146 @@ class _MyHomePageState extends State<MyHomePage>
         });
   }
 
-  SnackBar _snackBar({required String message, required Duration duration}) {
-    final double margin = screenSize.width / 3;
-    return SnackBar(
-      content: Text(
-        message,
-        textAlign: TextAlign.center,
-      ),
-      behavior: SnackBarBehavior.floating,
-      duration: duration,
-      margin: EdgeInsets.only(
-          bottom: screenSize.height * 0.9 - kToolbarHeight,
-          right: screenSize.width < 500 ? 20 : margin,
-          left: screenSize.width < 500 ? 20 : margin),
-    );
-  }
-
-  void showMessage(context, message,
-      {bool isError = true,
-      Duration? duration = const Duration(milliseconds: 1500)}) {
-    if (isError) {
-      _shakeController.reset();
-      _shakeController.forward();
-    }
-    ScaffoldMessenger.of(context)
-        .showSnackBar(_snackBar(message: '$message', duration: duration!));
-  }
-
   @override
   void initState() {
     super.initState();
-    challenge = Puzzle.initialize(puzzle: '');
-    fState.furdleSize = _size;
-    fState.furdlePuzzle = challenge.puzzle;
-    challenge.puzzleSize = _size;
-    furdleNotifier = FurdleNotifier(fState);
+    furdleNotifier = LoadingNotifier(false);
     _initAnimation();
-    getWord();
+    loadGame();
     analytics.setCurrentScreen(screenName: 'Furdle');
   }
 
-  Size difficultyToSize(Difficulty difficulty) {
-    switch (difficulty) {
-      case Difficulty.easy:
-        return const Size(5.0, 7.0);
-      case Difficulty.medium:
-        return const Size(5.0, 6.0);
-      case Difficulty.hard:
-        return const Size(5.0, 5.0);
-    }
-  }
-
-  Future<void> getWord() async {
+  Future<void> loadGame() async {
     furdleNotifier.isLoading = true;
-    firestore.DocumentReference<Map<String, dynamic>> _docRef =
-        firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
-    _docRef.get().then((firestore.DocumentSnapshot snapshot) {
-      String word = '';
-      if (snapshot.exists) {
-        word = snapshot['word'];
-        challenge.number = snapshot['number'];
-        challenge.date = (snapshot['date'] as firestore.Timestamp).toDate();
-        challenge.puzzle = word;
-        _size = difficultyToSize(settingsController.difficulty);
-        challenge.puzzleSize = _size;
-
-        final DateTime nextFurdleTime =
-            challenge.date.add(const Duration(hours: hoursUntilNextFurdle));
-        final now = DateTime.now();
-        final durationLeft = nextFurdleTime.difference(now);
-        Puzzle _lastPlayedPuzzle = lastPuzzle();
-
-        if (now.isAfter(nextFurdleTime) ||
-            _lastPlayedPuzzle.number < challenge.number) {
-          settingsController.timeLeft = Duration.zero;
-        } else {
-          settingsController.timeLeft = durationLeft;
-        }
-        settingsController.stats.number = challenge.number;
-
-        bool isGameInProgress =
-            _lastPlayedPuzzle.result == PuzzleResult.inprogress &&
-                _lastPlayedPuzzle.moves > 0;
-        if (isGameInProgress) {
-          fState.row = _lastPlayedPuzzle.moves;
-          fState.column = 0;
-          fState.puzzle = _lastPlayedPuzzle;
-          isGameOver = false;
-        } else {
-          bool isPuzzleAlreadyPlayed =
-              _lastPlayedPuzzle.number == challenge.number &&
-                  _lastPlayedPuzzle.puzzle == challenge.puzzle;
-          if (isPuzzleAlreadyPlayed) {
-            fState.row = _lastPlayedPuzzle.moves;
-            fState.column = 0;
-            fState.puzzle = _lastPlayedPuzzle;
-            furdleNotifier.isLoading = false;
-            showFurdleDialog(
-              title: gameAlreadyPlayed,
-              message: 'Next puzzle in',
-            );
-            settingsController.isAlreadyPlayed = true;
-            isGameOver = true;
-            return;
-          } else {
-            fState.puzzle = challenge;
-            isGameOver = false;
-            settingsController.isAlreadyPlayed = false;
-            settingsController.stats.puzzle = Puzzle.initialize();
-          }
-        }
-      } else {
-        final furdleIndex = Random().nextInt(maxWords);
-        word = furdleList[furdleIndex];
-        showMessage(context, 'You are playing in offline mode',
-            duration: const Duration(milliseconds: 2000));
-      }
-      fState.furdlePuzzle = challenge.puzzle;
-      furdleNotifier.isLoading = false;
-    });
+    _state = GameState.instance();
+    await gameController.initialize();
+    _state = gameController.gameState;
+    _state = await getGame();
+    final currentPuzzle = _state.puzzle;
+    final DateTime nextPuzzleTime =
+        currentPuzzle.date!.add(const Duration(hours: hoursUntilNextFurdle));
+    if (currentPuzzle.result == PuzzleResult.none) {
+      _state.isGameOver = false;
+      _state.isAlreadyPlayed = false;
+    } else if (currentPuzzle.result == PuzzleResult.win) {
+      _state.isGameOver = true;
+      _state.isAlreadyPlayed = true;
+      showFurdleDialog(
+          title: gameAlreadyPlayed,
+          message: 'Next puzzle in \n$nextPuzzleTime',
+          isSuccess: true);
+    } else if (currentPuzzle.result == PuzzleResult.lose) {
+      _state.isGameOver = true;
+      _state.isAlreadyPlayed = true;
+      showFurdleDialog(
+          title: gameAlreadyPlayed,
+          message: 'Next puzzle in \n$nextPuzzleTime',
+          isSuccess: false);
+    } else {
+      /// Game is in progress
+      _state.isAlreadyPlayed = false;
+      _state.isGameOver = false;
+    }
+    gameController.gameState = _state;
+    gameController.gameState.updateKeyboard();
+    settingsController.stats.number = currentPuzzle.number;
+    furdleNotifier.isLoading = false;
   }
 
-  /// Get the last played puzzle
-  /// returns the inprogress game if it was left inComplete
-  Puzzle lastPuzzle() {
-    final lastPlayedPuzzle = settingsController.stats.puzzle;
-    // if (lastPlayedPuzzle.moves > 0 &&
-    //     lastPlayedPuzzle.result == PuzzleResult.inprogress) {
+  Future<GameState> getGame() async {
+    final _localGame = await gameController.loadGame();
+    if (_localGame.puzzle.isOffline) {
+      Utility.showMessage(context, 'You are playing in offline mode',
+          duration: const Duration(milliseconds: 2000));
+    }
+    // gameController.gameState.cells = challenge.cells;
+    return _localGame;
+  }
+
+  void updateTimer() async {
+    // firestore.DocumentReference<Map<String, dynamic>> _docRef = firestore
+    //     .FirebaseFirestore.instance
+    //     .collection(collectionProd)
+    //     .doc(statsProd);
+    // final docSnapshot = await _docRef.get();
+    // if (docSnapshot.exists) {
+    //   challenge.number = docSnapshot.get('number')
+    //   challenge.date = (docSnapshot.get('date') as firestore.Timestamp).toDate();
+    //   String word = '';
+    //   challenge.puzzle = word;
+    final _currentPuzzle = _state.puzzle;
+    final DateTime nextFurdleTime =
+        _currentPuzzle.date!.add(const Duration(hours: hoursUntilNextFurdle));
+    final now = DateTime.now();
+    final durationLeft = nextFurdleTime.difference(now);
+    if (now.isAfter(nextFurdleTime)) {
+      gameController.timeLeft = Duration.zero;
+    } else {
+      gameController.timeLeft = durationLeft;
+    }
     // }
-    return lastPlayedPuzzle;
   }
 
-  void updateTimer() {
-    firestore.DocumentReference<Map<String, dynamic>> _docRef =
-        firestore.FirebaseFirestore.instance.collection('furdle').doc('stats');
-    _docRef.get().then((firestore.DocumentSnapshot snapshot) {
-      if (snapshot.exists) {
-        challenge.number = snapshot['number'];
-        challenge.date = (snapshot['date'] as firestore.Timestamp).toDate();
-        String word = '';
-        challenge.puzzle = word;
-        final DateTime nextFurdleTime =
-            challenge.date.add(const Duration(hours: hoursUntilNextFurdle));
-        final now = DateTime.now();
-        final durationLeft = nextFurdleTime.difference(now);
-        if (now.isAfter(nextFurdleTime)) {
-          settingsController.timeLeft = Duration.zero;
-        } else {
-          settingsController.timeLeft = durationLeft;
-        }
-      }
-    });
-  }
-
+  /// User pressed the keys on virtual or physical keyboard
   Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
+    Puzzle _currentPuzzle = _state.puzzle;
     analytics.logEvent(name: 'KeyPressed', parameters: {'key': x});
-    if (isGameOver || settingsController.isAlreadyPlayed) {
+    if (_state.isGameOver ||
+        _state.isAlreadyPlayed ||
+        _currentPuzzle.result == PuzzleResult.win ||
+        _currentPuzzle.result == PuzzleResult.lose) {
+      /// User presses keys from physical Keyboard on game over
       if (isPhysicalKeyEvent) return;
-      showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
+      final currentPuzzle = _currentPuzzle;
+      final DateTime nextPuzzleTime =
+          currentPuzzle.date!.add(const Duration(hours: hoursUntilNextFurdle));
+      print(
+          "now = ${DateTime.now().toLocal()} last time= ${currentPuzzle.date!.toLocal()} next puzzle time= ${nextPuzzleTime.toLocal()}");
+      showFurdleDialog(
+          title: gameAlreadyPlayed, message: 'Next puzzle in $nextPuzzleTime');
       return;
     }
     final character = x.toLowerCase();
-    if (character == 'enter') {
+    if (character == kEnterKey) {
       /// check if word is complete
-      final wordState = fState.validate();
-      challenge.cells = fState.cells;
+      final wordState = _state.validate();
       if (wordState == Word.match) {
-        isGameOver = true;
+        _state.isGameOver = true;
+        _currentPuzzle.result = PuzzleResult.win;
         updateTimer();
         confettiController.play();
-        isGameOver = true;
-        challenge.moves = fState.row;
-        challenge.result = PuzzleResult.win;
-        settingsController.gameOver(challenge);
+        _state.isGameOver = true;
+        _currentPuzzle.moves = _state.row;
+        _currentPuzzle.result = PuzzleResult.win;
+        _state.puzzle = _currentPuzzle;
+        gameController.onGameOver(_state);
         Future.delayed(const Duration(milliseconds: 500), (() {
           showFurdleDialog(isSuccess: true);
         }));
       } else {
-        isGameOver = false;
+        _state.isGameOver = false;
         switch (wordState) {
           case Word.incomplete:
-            showMessage(context, 'Word is incomplete!');
+            shakeFurdle();
+            Utility.showMessage(context, 'Word is incomplete!');
             break;
           case Word.invalid:
-            showMessage(context, 'Word not in list!');
+            shakeFurdle();
+            Utility.showMessage(context, 'Word not in list!');
             break;
           case Word.valid:
 
             /// User failed to crack the furdle
-            if (fState.row == _size.height) {
+            if (_state.row == _state.puzzle.size.height) {
               updateTimer();
               showFurdleDialog(isSuccess: false);
-              isGameOver = true;
-              challenge.moves = fState.row;
-              challenge.result = PuzzleResult.lose;
-              settingsController.gameOver(challenge);
+              _state.isGameOver = true;
+              _currentPuzzle.moves = _state.row;
+              _currentPuzzle.result = PuzzleResult.lose;
+              _state.puzzle = _currentPuzzle;
+              gameController.onGameOver(_state);
             } else {
-              challenge.result = PuzzleResult.inprogress;
+              _currentPuzzle.result = PuzzleResult.inprogress;
               // analytics.logEvent(name: 'word guessed', parameters: {'word': fState.row});
             }
             break;
@@ -316,31 +243,35 @@ class _MyHomePageState extends State<MyHomePage>
         }
       }
     } else if (character == 'delete' || character == 'backspace') {
-      fState.removeCell();
-    } else if (isLetter(x.toUpperCase())) {
-      if (fState.column >= _size.width) {
+      _state.removeCell();
+    } else if (x.toUpperCase().isLetter()) {
+      if (_state.column >= _state.puzzle.size.width) {
         return;
       }
-      fState.addCell(character);
+      _state.addCell(character);
     } else {
       print('invalid Key event $character');
     }
-    furdleNotifier.notify();
+    gameController.gameState = _state;
+
+    /// Update the UI with new state
+    furdleNotifier.isLoading = false;
+  }
+
+  void shakeFurdle() {
+    _shakeController.reset();
+    _shakeController.forward();
   }
 
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-
-  /// grid size
-  Size _size = defaultSize;
   ConfettiController confettiController = ConfettiController();
-  bool isGameOver = false;
-  late Puzzle challenge;
-  late Size screenSize;
+  late GameState _state;
+
   @override
   Widget build(BuildContext context) {
-    screenSize = MediaQuery.of(context).size;
+    Utility.screenSize = MediaQuery.of(context).size;
     // settingsController.clear();
     return AnimatedBuilder(
         animation: settingsController,
@@ -350,7 +281,7 @@ class _MyHomePageState extends State<MyHomePage>
             fit: StackFit.expand,
             children: [
               Positioned(
-                  top: screenSize.width > 600 ? 0 : kToolbarHeight / 2,
+                  top: Utility.screenSize.width > 600 ? 0 : kToolbarHeight / 2,
                   // alignment: Alignment.topCenter,
                   child: FurdleBar(
                     title: 'Furdle',
@@ -366,33 +297,35 @@ class _MyHomePageState extends State<MyHomePage>
                     actions: [
                       IconButton(
                           onPressed: () async {
-                            if (isGameOver) {
-                              fState.generateFurdleGrid();
+                            if (_state.isGameOver) {
+                              _state.generateFurdleGrid();
                               final furdleScoreShareMessage =
-                                  '#FURDLE ${fState.shareFurdle}';
+                                  '#FURDLE ${_state.shareFurdle}';
                               if (!kIsWeb) {
                                 await Share.share(furdleScoreShareMessage);
                               } else {
                                 await Clipboard.setData(ClipboardData(
                                     text: furdleScoreShareMessage));
-                                showMessage(context, copiedToClipBoard,
-                                    isError: false);
+                                Utility.showMessage(
+                                  context,
+                                  copiedToClipBoard,
+                                );
                               }
                             } else {
-                              showMessage(context, shareIncomplete);
+                              Utility.showMessage(context, shareIncomplete);
                             }
                           },
                           icon: const Icon(Icons.share)),
                       IconButton(
                           onPressed: () {
-                            navigate(context, const Settings());
+                            navigate(context, const SettingsPage());
                           },
                           icon: const Icon(Icons.settings)),
                     ],
                   )),
               Positioned(
                 top: -100,
-                left: screenSize.width / 2,
+                left: Utility.screenSize.width / 2,
                 child: ConfettiWidget(
                   confettiController: confettiController,
                   blastDirection: 0,
@@ -413,10 +346,10 @@ class _MyHomePageState extends State<MyHomePage>
                     const SizedBox(
                       height: 50,
                     ),
-                    ValueListenableBuilder<FState>(
+                    ValueListenableBuilder<bool>(
                         valueListenable: furdleNotifier,
-                        builder: (x, FState state, z) {
-                          if (furdleNotifier.isLoading) {
+                        builder: (x, bool isLoading, z) {
+                          if (isLoading) {
                             return Container(
                               height: 200,
                               alignment: Alignment.center,
@@ -431,9 +364,9 @@ class _MyHomePageState extends State<MyHomePage>
                                     padding: EdgeInsets.only(
                                         left: _shakeAnimation.value + 24.0,
                                         right: 24.0 - _shakeAnimation.value),
-                                    child: Furdle(
-                                      fState: fState,
-                                      size: _size,
+                                    child: FurdleGrid(
+                                      state: _state,
+                                      // onGameOver: (Puzzle puzzle) {},
                                     ));
                               });
                         }),
@@ -508,52 +441,6 @@ class _FurdleBarState extends State<FurdleBar> {
           Row(children: widget.actions!)
         ],
       ),
-    );
-  }
-}
-
-extension FurdleTitle on String {
-  Widget toTitle({double boxSize = 25}) {
-    return Material(
-      color: Colors.transparent,
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        for (int i = 0; i < length; i++)
-          Container(
-              height: boxSize,
-              width: boxSize,
-              alignment: Alignment.center,
-              margin: const EdgeInsets.symmetric(
-                    horizontal: 2,
-                  ) +
-                  EdgeInsets.only(bottom: i.isOdd ? 8 : 0),
-              child: Text(
-                this[i].toUpperCase(),
-                style: const TextStyle(
-                    height: 1.1,
-                    letterSpacing: 2,
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              decoration: BoxDecoration(
-                  boxShadow: const [
-                    BoxShadow(
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        color: black,
-                        offset: Offset(0, 1)),
-                    BoxShadow(
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        color: black,
-                        offset: Offset(2, -1)),
-                  ],
-                  color: i <= 1
-                      ? green
-                      : i < 4
-                          ? yellow
-                          : primaryBlue))
-      ]),
     );
   }
 }

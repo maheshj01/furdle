@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
-import 'package:furdle/main.dart';
-import 'package:furdle/models/furdle.dart';
-import 'package:furdle/models/puzzle.dart';
+import 'package:furdle/models/game_state.dart';
 
 enum KeyState {
   /// letter is present in the right spot
@@ -18,95 +16,31 @@ enum KeyState {
   isDefault
 }
 
-class Furdle extends StatefulWidget {
-  Size? size;
-  Furdle({Key? key, required this.fState, this.size = defaultSize})
-      : super(key: key);
-  FState fState;
-
-  @override
-  State<Furdle> createState() => _FurdleState();
-}
-
-class _FurdleState extends State<Furdle> {
-  @override
-  void initState() {
-    super.initState();
-    _initGrid();
-  }
-
-  @override
-  void didUpdateWidget(covariant Furdle oldWidget) {
-    if (oldWidget.size != widget.size || oldWidget.fState != widget.fState) {
-      super.didUpdateWidget(oldWidget);
-    }
-  }
-
-  void _initGrid() {
-    Puzzle lastFurdle = settingsController.stats.puzzle;
-    if (lastFurdle.moves > 0) {
-      widget.fState.cells.clear();
-      widget.fState.cells = lastFurdle.cells;
-      widget.fState.puzzle = lastFurdle;
-    } else {
-      for (int i = 0; i < widget.size!.height; i++) {
-        List<FCellState> row = [];
-        for (int j = 0; j < widget.size!.width; j++) {
-          row.add(FCellState.defaultState());
-        }
-        widget.fState.cells.add(row);
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FurdleGrid(
-      state: widget.fState,
-      gridSize: widget.size,
-    );
-  }
-}
-
 class FurdleGrid extends StatelessWidget {
-  FurdleGrid({Key? key, this.gridSize, required this.state}) : super(key: key);
-
-  final FState state;
-  final Size? gridSize;
-  double cellSize = 80;
-
-  double difficultyToDivideFactor() {
-    switch (settingsController.difficulty) {
-      case Difficulty.easy:
-        return 2.4;
-      case Difficulty.medium:
-        return 2.4;
-      case Difficulty.hard:
-        return 2.5;
-    }
-  }
+  const FurdleGrid({Key? key, required this.state}) : super(key: key);
+  final GameState state;
 
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    double divideFactor = _size.width < 400 ? difficultyToDivideFactor() : 2.2;
-    final kSize = _size.height / (gridSize!.height * divideFactor);
+    Size? gridSize = state.puzzle.size;
     bool isPlayed = state.puzzle.moves > 0;
-    bool isGameOver = state.puzzle.result != PuzzleResult.inprogress;
-    cellSize = kSize;
+    bool isGameOver = state.isGameOver;
+    double cellSize = _size.width < 600 ? 65 : 80;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Column(
           children: [
-            for (int i = 0; i < gridSize!.height; i++)
+            for (int i = 0; i < gridSize.height; i++)
               Row(
                 children: [
-                  for (int j = 0; j < gridSize!.width; j++)
+                  for (int j = 0; j < gridSize.width; j++)
                     FurdleCell(
                       i: i,
                       j: j,
                       cellSize: cellSize,
+                      //TODO: gState.Cells = 0 for some time hence the range erorr
                       cellState: state.cells[i][j],
                       isSubmitted: isGameOver ? i <= state.row : i < state.row,
                       isAlreadyPlayed: isPlayed,
@@ -186,7 +120,6 @@ class _FurdleCellState extends State<FurdleCell>
 
   @override
   void didUpdateWidget(covariant FurdleCell oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     if (widget.cellState != oldWidget.cellState) {
       _controller.reset();
@@ -196,7 +129,6 @@ class _FurdleCellState extends State<FurdleCell>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _controller.dispose();
     super.dispose();
   }

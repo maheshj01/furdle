@@ -1,69 +1,68 @@
 import 'package:furdle/models/puzzle.dart';
 
 class Stats {
-  List<Puzzle> _puzzles;
-  Puzzle _puzzle;
-  int _number;
-  int _total;
-  int _won;
-  int _lost;
-  int _averageTime;
+  List<Puzzle> puzzles;
+  Puzzle puzzle;
+  int number;
+  int total;
+  int won;
+  int lost;
+  int averageTime;
+
+  Stats({
+    required this.puzzles,
+    required this.puzzle,
+    required this.number,
+    required this.total,
+    required this.won,
+    required this.lost,
+    required this.averageTime,
+  });
 
   Stats.initialStats()
-      : _won = 0,
-      _puzzle = Puzzle.initialize(),
-        _number = 0,
-        _puzzles = [],
-        _lost = 0,
-        _total = 0,
-        _averageTime = 0;
+      : won = 0,
+        puzzle = Puzzle.initialize(),
+        number = 0,
+        puzzles = [],
+        lost = 0,
+        total = 0,
+        averageTime = 0;
 
-  int get averageTime => _averageTime;
+  /// to json for saving to disk
 
-  /// furdle number global for everyone
-  /// this number increments every 6 hours
-  int get number => _number;
-
-  set number(int value) {
-    _number = value;
+  Map<String, dynamic> toJson() {
+    return {
+      'puzzles': puzzles.map((p) => p.toJson()).toList(),
+      'puzzle': puzzle.toJson(),
+      'number': number,
+      'total': total,
+      'won': won,
+      'lost': lost,
+      'averageTime': averageTime,
+    };
   }
 
-  set averageTime(int value) {
-    _averageTime = value;
+  /// from json for loading from disk
+
+  factory Stats.fromJson(Map<String, dynamic> json) {
+    return Stats(
+      puzzles: json['puzzles']
+          .map<Puzzle>((p) => Puzzle.fromJson(p as Map<String, dynamic>))
+          .toList(),
+      puzzle: Puzzle.fromJson(json['puzzle'] as Map<String, dynamic>),
+      number: json['number'] as int,
+      total: json['total'] as int,
+      won: json['won'] as int,
+      lost: json['lost'] as int,
+      averageTime: json['averageTime'] as int,
+    );
   }
 
-  /// total games played by user
-  int get total => _total;
-
-  set total(int value) {
-    _total = value;
-  }
-  
-  /// last played puzzle
-  Puzzle get puzzle => _puzzle;
-
-  set puzzle(Puzzle value) {
-    _puzzle = value;
-  }
-
-  int get lost => _lost;
-
-  set lost(int value) {
-    _lost = value;
-  }
-
-  int get won => _won;
-
-  set won(int value) {
-    _won = value;
-  }
-
-  List<Puzzle> get puzzles => _puzzles;
-
-  set puzzles(List<Puzzle> value) {
-    _puzzles = value;
-    total = _puzzles.length;
-    won = _puzzles.where((p) => p.result == PuzzleResult.win).length;
+  /// list of all puzzles played by user
+  void setPuzzles(List<Puzzle> value) {
+    puzzles = value;
+    total = puzzles.length;
+    won = puzzles.where((p) => p.result == PuzzleResult.win).length;
     lost = total - won;
   }
 }

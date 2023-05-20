@@ -88,7 +88,7 @@ class HelpPage extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(vertical: 20),
                     child: GestureDetector(
                       onTap: () {
-                        launchUrl(playStoreUrl);
+                        Utility.launch(playStoreUrl);
                       },
                       child: Image.asset('assets/googleplay.png'),
                     )),
@@ -98,13 +98,13 @@ class HelpPage extends StatelessWidget {
                   child: Column(
                     children: [
                       'Email'.toLink(onTap: () {
-                        launchUrl(emailSource);
+                        Utility.launch(emailSource);
                       }),
                       const SizedBox(
                         height: 10,
                       ),
                       'Github'.toLink(onTap: () {
-                        launchUrl(sourceUrl);
+                        Utility.launch(sourceUrl);
                       })
                     ],
                   )),
