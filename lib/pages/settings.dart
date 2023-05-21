@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/extensions.dart';
@@ -42,6 +43,12 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late Stats stats;
   @override
   Widget build(BuildContext context) {
@@ -71,122 +78,153 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 16,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _subtitle('Theme'),
-                ToggleButtons(
-                    children: const [
-                      Text('Light'),
-                      Text('Dark'),
-                      Text('System'),
-                    ],
-                    constraints:
-                        const BoxConstraints(minWidth: 80, minHeight: 40),
-                    onPressed: (int index) {
-                      settingsController.updateThemeMode(index == 0
-                          ? ThemeMode.light
-                          : index == 1
-                              ? ThemeMode.dark
-                              : ThemeMode.system);
-                      setState(() {});
-                    },
-                    isSelected: [
-                      settingsController.themeMode == ThemeMode.light,
-                      settingsController.themeMode == ThemeMode.dark,
-                      settingsController.themeMode == ThemeMode.system,
-                    ]),
-              ],
-            ),
-            const Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _subtitle('Difficulty'),
-                ToggleButtons(
-                    constraints:
-                        const BoxConstraints(minWidth: 80, minHeight: 40),
-                    children: const [
-                      Text('Easy'),
-                      Text('Medium'),
-                      Text('Hard'),
-                    ],
-                    onPressed: (int index) {
-                      final _selectedDifficulty =
-                          Difficulty.fromToggleIndex(index);
-                      final _puzzle = gameController.gameState.puzzle;
-                      if (_selectedDifficulty !=
-                          settingsController.difficulty) {
-                        /// If game has not started change the settings
-                        if (_puzzle.result == PuzzleResult.none) {
-                          settingsController.difficulty = _selectedDifficulty;
-                          gameController.gameState.puzzle =
-                              _puzzle.copyWith(difficulty: _selectedDifficulty);
-                        } else {
-                          Utility.showMessage(context,
-                              "The settings will be applied to the next puzzle");
-                        }
-                      }
-                      setState(() {});
-                    },
-                    isSelected: [
-                      settingsController.difficulty == Difficulty.easy,
-                      settingsController.difficulty == Difficulty.medium,
-                      settingsController.difficulty == Difficulty.hard,
-                    ]),
-              ],
-            ),
-            const Divider(),
-            _subtitle('Score'),
-            _stats('Played', '${stats.total}'),
-            _stats('Win', '${stats.won}'),
-            _stats('Lose', '${stats.lost}'),
-            const Divider(),
-            const Expanded(child: SizedBox()),
-            !kIsWeb
-                ? const SizedBox()
-                : Center(
-                    child: FutureBuilder(
-                      builder: (BuildContext context,
-                          AsyncSnapshot<DateTime> snapshot) {
-                        if (snapshot.hasData) {
-                          return Text(
-                            'Last Updated: ${snapshot.data?.toLocal().standardDate()}',
-                            // style: Theme.of(context).textTheme.titleSmall!,
-                          );
-                        }
-                        return const SizedBox();
-                      },
-                      future: getLastUpdateDateTime(),
-                    ),
+      body: StreamBuilder<DocumentSnapshot>(
+          stream: _firestore.collection('furdle').doc('features').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final remoteSettings =
+                snapshot.data!.data() as Map<String, dynamic>;
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 16,
                   ),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Copyright © 2022 Widget Media Labs ',
-                    style: Theme.of(context).textTheme.bodyMedium!),
-              ],
-            ),
-            SizedBox(
-              height: 50,
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Text('v${settingsController.version}')),
-            )
-          ],
-        ),
-      ),
+                  !remoteSettings['theme']
+                      ? const SizedBox()
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _subtitle('Theme'),
+                            ToggleButtons(
+                                children: const [
+                                  Text('Light'),
+                                  Text('Dark'),
+                                  Text('System'),
+                                ],
+                                constraints: const BoxConstraints(
+                                    minWidth: 80, minHeight: 40),
+                                onPressed: (int index) {
+                                  settingsController.updateThemeMode(index == 0
+                                      ? ThemeMode.light
+                                      : index == 1
+                                          ? ThemeMode.dark
+                                          : ThemeMode.system);
+                                  setState(() {});
+                                },
+                                isSelected: [
+                                  settingsController.themeMode ==
+                                      ThemeMode.light,
+                                  settingsController.themeMode ==
+                                      ThemeMode.dark,
+                                  settingsController.themeMode ==
+                                      ThemeMode.system,
+                                ]),
+                          ],
+                        ),
+                  !remoteSettings['theme'] ? const SizedBox() : const Divider(),
+                  !remoteSettings['difficulty']
+                      ? const SizedBox()
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _subtitle('Difficulty'),
+                            ToggleButtons(
+                                constraints: const BoxConstraints(
+                                    minWidth: 80, minHeight: 40),
+                                children: const [
+                                  Text('Easy'),
+                                  Text('Medium'),
+                                  Text('Hard'),
+                                ],
+                                onPressed: (int index) {
+                                  final _selectedDifficulty =
+                                      Difficulty.fromToggleIndex(index);
+                                  final _puzzle =
+                                      gameController.gameState.puzzle;
+                                  if (_selectedDifficulty !=
+                                      settingsController.difficulty) {
+                                    /// If game has not started change the settings
+                                    if (_puzzle.result == PuzzleResult.none) {
+                                      settingsController.difficulty =
+                                          _selectedDifficulty;
+                                      gameController.gameState.puzzle =
+                                          _puzzle.copyWith(
+                                              difficulty: _selectedDifficulty);
+                                    } else {
+                                      Utility.showMessage(context,
+                                          "The settings will be applied to the next puzzle");
+                                    }
+                                  }
+                                  setState(() {});
+                                },
+                                isSelected: [
+                                  settingsController.difficulty ==
+                                      Difficulty.easy,
+                                  settingsController.difficulty ==
+                                      Difficulty.medium,
+                                  settingsController.difficulty ==
+                                      Difficulty.hard,
+                                ]),
+                          ],
+                        ),
+                  !remoteSettings['difficulty']
+                      ? const SizedBox()
+                      : const Divider(),
+                  !remoteSettings['stats']
+                      ? const SizedBox()
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _subtitle('Score'),
+                            _stats('Played', '${stats.total}'),
+                            _stats('Win', '${stats.won}'),
+                            _stats('Lose', '${stats.lost}'),
+                            const Divider(),
+                          ],
+                        ),
+                  const Expanded(child: SizedBox()),
+                  !kIsWeb
+                      ? const SizedBox()
+                      : Center(
+                          child: FutureBuilder(
+                            builder: (BuildContext context,
+                                AsyncSnapshot<DateTime> snapshot) {
+                              if (snapshot.hasData) {
+                                return Text(
+                                  'Last Updated: ${snapshot.data?.toLocal().standardDate()}',
+                                  // style: Theme.of(context).textTheme.titleSmall!,
+                                );
+                              }
+                              return const SizedBox();
+                            },
+                            future: getLastUpdateDateTime(),
+                          ),
+                        ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Copyright © 2022 Widget Media Labs ',
+                          style: Theme.of(context).textTheme.bodyMedium!),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 50,
+                    child: Align(
+                        alignment: Alignment.center,
+                        child: Text('v${settingsController.version}')),
+                  )
+                ],
+              ),
+            );
+          }),
     );
   }
 }
