@@ -269,7 +269,7 @@ class Puzzle {
         moves: json['moves'] as int,
         size: difficulty.toGridSize(),
         date: DateTime.parse(json['date'] as String),
-        nextRun: DateTime.parse(json['nextRun'] as String),
+        nextRun: DateTime.parse(json['nextRun']),
         difficulty: difficulty);
   }
 

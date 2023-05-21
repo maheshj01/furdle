@@ -27,5 +27,6 @@ String playStoreUrl =
 String sourceUrl = 'https://github.com/maheshmnj/furdle';
 String emailSource = 'mailto:maheshmn121@gmail.com';
 String gameUrl = 'https://furdle.web.app';
-
+const String lastCommitApi =
+    'https://api.github.com/repos/maheshmnj/furdle/branches/master';
 String kEnterKey = 'enter';

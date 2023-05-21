@@ -1,7 +1,12 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
 import 'package:furdle/utils/utility.dart';
+import 'package:http/http.dart' as http;
 
 import '../constants/strings.dart';
 
@@ -24,6 +29,17 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> getStats() async {
     stats = settingsController.stats;
     setState(() {});
+  }
+
+  Future<DateTime> getLastUpdateDateTime() async {
+    try {
+      final response = await http.get(Uri.parse(lastCommitApi));
+      final json = jsonDecode(response.body);
+      final date = DateTime.parse(json['commit']['commit']['author']['date']);
+      return date;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   late Stats stats;
@@ -129,12 +145,39 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
             const Divider(),
-            _subtitle('Stats'),
+            _subtitle('Score'),
             _stats('Played', '${stats.total}'),
             _stats('Win', '${stats.won}'),
             _stats('Lose', '${stats.lost}'),
             const Divider(),
             const Expanded(child: SizedBox()),
+            !kIsWeb
+                ? const SizedBox()
+                : Center(
+                    child: FutureBuilder(
+                      builder: (BuildContext context,
+                          AsyncSnapshot<DateTime> snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            'Last Updated: ${snapshot.data?.toLocal().standardDate()}',
+                            // style: Theme.of(context).textTheme.titleSmall!,
+                          );
+                        }
+                        return const SizedBox();
+                      },
+                      future: getLastUpdateDateTime(),
+                    ),
+                  ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Copyright © 2022 Widget Media Labs ',
+                    style: Theme.of(context).textTheme.bodyMedium!),
+              ],
+            ),
             SizedBox(
               height: 50,
               child: Align(

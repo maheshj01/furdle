@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/constants.dart';
+import 'package:intl/intl.dart';
 
 import 'models/models.dart';
 
@@ -92,6 +93,9 @@ extension FurdleTitle on String {
   }
 }
 
+const String dateFormatter = 'MMMM dd, y';
+const String dateTimeFormatter = 'MMMM dd, y HH:mm';
+
 extension DateOnlyCompare on DateTime {
   bool isSameDate(DateTime other) {
     return year == other.year && month == other.month && day == other.day;
@@ -105,6 +109,35 @@ extension DateOnlyCompare on DateTime {
         toLocal().add(const Duration(hours: hoursUntilNextFurdle));
     bool result = now.isAfter(nextPuzzleTime);
     return result;
+  }
+
+  String formatDate() {
+    final now = DateTime.now();
+    final differenceInDays = getDifferenceInDaysWithNow();
+
+    if (isSameDate(now)) {
+      return 'Today';
+    } else if (differenceInDays == 1) {
+      return 'Yesterday';
+    } else {
+      return standardDate();
+    }
+  }
+
+  String standardDate() {
+    final formatter = DateFormat(dateFormatter);
+    return formatter.format(this);
+  }
+
+  //
+  String formatDateTime() {
+    final formatter = DateFormat(dateTimeFormatter);
+    return formatter.format(this);
+  }
+
+  int getDifferenceInDaysWithNow() {
+    final now = DateTime.now();
+    return now.difference(this).inDays;
   }
 }
 
