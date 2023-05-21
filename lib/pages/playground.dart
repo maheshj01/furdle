@@ -121,9 +121,7 @@ class _PlayGroundState extends State<PlayGround>
       _state.isGameOver = true;
       _state.isAlreadyPlayed = true;
       showFurdleDialog(
-          title: gameAlreadyPlayed,
-          message: 'Next puzzle in \n$nextPuzzleTime',
-          isSuccess: true);
+          title: gameAlreadyPlayed, message: 'Next puzzle in', isSuccess: true);
     } else if (currentPuzzle.result == PuzzleResult.lose) {
       _state.isGameOver = true;
       _state.isAlreadyPlayed = true;
@@ -189,7 +187,11 @@ class _PlayGroundState extends State<PlayGround>
       final DateTime nextPuzzleTime = _state.puzzle.nextRun!;
       final durationLeft = nextPuzzleTime.difference(DateTime.now());
       gameController.timeLeft = durationLeft;
-      showFurdleDialog(title: gameAlreadyPlayed, message: 'Next puzzle in');
+      _state.isAlreadyPlayed = true;
+      showFurdleDialog(
+        title: gameAlreadyPlayed,
+        message: 'Next puzzle in',
+      );
       return;
     }
     final character = x.toLowerCase();
