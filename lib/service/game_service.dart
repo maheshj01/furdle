@@ -56,6 +56,9 @@ class GameService extends IGameService {
       if (_puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
         _gameState = await getNewGameState();
       }
+      final durationLeft =
+          _localState.puzzle.nextRun!.difference(DateTime.now());
+      gameController.timeLeft = durationLeft;
     } else if (_gameResult == PuzzleResult.none &&
         _localState.column == 0 &&
         _localState.row == 0) {
@@ -72,6 +75,7 @@ class GameService extends IGameService {
       /// if the game is in Progress return
     }
     gameState = _localState;
+
     return _gameState;
   }
 
