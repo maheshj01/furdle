@@ -5,8 +5,8 @@ import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/utility.dart';
 
 class HelpPage extends StatelessWidget {
-  HelpPage({Key? key}) : super(key: key);
-  final String title = helpTitle;
+  const HelpPage({Key? key}) : super(key: key);
+  static String title = helpTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class HelpPage extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: () {
-                  popView(context);
+                  Navigate.popView(context);
                 },
                 icon: const Icon(Icons.close))
           ]),

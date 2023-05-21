@@ -82,7 +82,7 @@ class _PlayGroundState extends State<PlayGround>
                 onTimerComplete: () async {
                   _state.isGameOver = false;
                   _state.isAlreadyPlayed = false;
-                  popView(context);
+                  Navigate.popView(context);
                   await loadGame();
                 },
               ));
@@ -284,10 +284,10 @@ class _PlayGroundState extends State<PlayGround>
                     title: 'Furdle',
                     leading: IconButton(
                         onPressed: () {
-                          navigate(
+                          Navigate.push(
                             context,
-                            HelpPage(),
-                            type: SlideTransitionType.btt,
+                            const HelpPage(),
+                            transitionType: TransitionType.scale,
                           );
                         },
                         icon: const Icon(Icons.help)),
@@ -315,7 +315,7 @@ class _PlayGroundState extends State<PlayGround>
                           icon: const Icon(Icons.share)),
                       IconButton(
                           onPressed: () {
-                            navigate(context, const SettingsPage());
+                            Navigate.push(context, const SettingsPage());
                           },
                           icon: const Icon(Icons.settings)),
                     ],

@@ -1,88 +1,100 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 
-enum SlideTransitionType {
-  /// Navigation transition from left to right
-  ltr,
+enum TransitionType { ltr, rtl, ttb, btt, bl, br, tl, tr, scale }
 
-  /// Navigation transition from right to left
-  rtl,
+class Navigate<T> {
+  /// Replace the top widget with another widget
+  Future<T?> pushReplace(BuildContext context, Widget widget,
+      {bool isDialog = false,
+      bool isRootNavigator = true,
+      TransitionType slideTransitionType = TransitionType.scale}) async {
+    final T value = await Navigator.of(context, rootNavigator: isRootNavigator)
+        .pushReplacement(NavigateRoute(widget, type: slideTransitionType));
+    return value;
+  }
 
-  /// Navigation transition from top to bottom
-  ttb,
+  static Future<void> push(BuildContext context, Widget widget,
+      {bool isDialog = false,
+      bool isRootNavigator = true,
+      TransitionType transitionType = TransitionType.scale}) async {
+    await Navigator.of(context, rootNavigator: isRootNavigator)
+        .push(NavigateRoute(widget, type: transitionType));
+    // return value;
+  }
 
-  /// Navigation transition from bottom to top
-  btt,
+// pop all Routes except first
+  static void popToFirst(BuildContext context, {bool isRootNavigator = true}) =>
+      Navigator.of(context, rootNavigator: isRootNavigator)
+          .popUntil((route) => route.isFirst);
 
-  /// Navigation transition from bottom left
-  bl,
+  static Future<void> popView<T>(BuildContext context,
+          {T? value, bool isRootNavigator = true}) async =>
+      Navigator.of(context, rootNavigator: isRootNavigator).pop(value);
 
-  /// Navigation transition from bottom right
-  br,
-
-  /// Navigation transition from top left
-  tl,
-
-  /// Navigation transition from top right
-  tr
+  static Future<void> pushAndPopAll(BuildContext context, Widget widget,
+      {bool isRootNavigator = true,
+      TransitionType transitionType = TransitionType.scale}) async {
+    final value = await Navigator.of(context, rootNavigator: isRootNavigator)
+        .pushAndRemoveUntil(NavigateRoute(widget, type: transitionType),
+            (Route<dynamic> route) => false);
+    return value;
+  }
 }
 
-Future<void> navigateReplace(BuildContext context, Widget widget,
-        {bool isDialog = false,
-        bool isRootNavigator = true,
-        SlideTransitionType type = SlideTransitionType.rtl}) async =>
-    await Navigator.of(context, rootNavigator: isRootNavigator)
-        .pushReplacement(PageRoute(widget, type: type));
-
-/// navigator to push a new route in the Navigator Stack
-/// the default transition is right to left which can be changed transition animation
-Future<void> navigate(BuildContext context, Widget widget,
-        {bool isDialog = false,
-        bool isRootNavigator = true,
-        SlideTransitionType type = SlideTransitionType.rtl}) =>
-    Navigator.of(context, rootNavigator: isRootNavigator)
-        .push(PageRoute(widget, type: type));
-
-/// pop all Routes except first
-void popToFirst(BuildContext context, {bool isRootNavigator = true}) =>
-    Navigator.of(context, rootNavigator: isRootNavigator)
-        .popUntil((route) => route.isFirst);
-
-void popView(BuildContext context, {bool isRootNavigator = true}) async =>
-    Navigator.of(context, rootNavigator: isRootNavigator).pop();
-
-navigateAndPopAll(BuildContext context, Widget widget,
-        {bool isRootNavigator = true}) =>
-    Navigator.of(context, rootNavigator: isRootNavigator).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => widget),
-        (Route<dynamic> route) => false);
-
-Offset getTransitionOffset(SlideTransitionType type) {
+Offset getTransitionOffset(TransitionType type) {
   switch (type) {
-    case SlideTransitionType.ltr:
+    case TransitionType.ltr:
       return const Offset(-1.0, 0.0);
-    case SlideTransitionType.rtl:
+    case TransitionType.rtl:
       return const Offset(1.0, 0.0);
-    case SlideTransitionType.ttb:
+    case TransitionType.ttb:
       return const Offset(0.0, -1.0);
-    case SlideTransitionType.btt:
+    case TransitionType.btt:
       return const Offset(0.0, 1.0);
-    case SlideTransitionType.bl:
+    case TransitionType.bl:
       return const Offset(-1.0, 1.0);
-    case SlideTransitionType.br:
+    case TransitionType.br:
       return const Offset(1.0, 1.0);
-    case SlideTransitionType.tl:
+    case TransitionType.tl:
       return const Offset(-1.0, -1.0);
-    case SlideTransitionType.tr:
+    case TransitionType.tr:
       return const Offset(1.0, 1.0);
+    case TransitionType.scale:
+      return const Offset(0.6, 1.0);
     default:
       return const Offset(1.0, 0.0);
   }
 }
 
+class NavigateRoute extends PageRouteBuilder {
+  final Widget widget;
+  final bool? rootNavigator;
+  final TransitionType type;
+  NavigateRoute(this.widget, {this.rootNavigator, required this.type})
+      : super(
+          pageBuilder: (context, animation, secondaryAnimation) => widget,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            var begin = getTransitionOffset(type);
+            var end = Offset.zero;
+            var curve = Curves.ease;
+            var tween =
+                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+            if (type == TransitionType.scale) {
+              return child;
+            }
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+        );
+}
+
 class PageRoute extends PageRouteBuilder {
   final Widget widget;
   final bool? rootNavigator;
-  final SlideTransitionType type;
+  final TransitionType type;
   PageRoute(this.widget, {this.rootNavigator, required this.type})
       : super(
           pageBuilder: (context, animation, secondaryAnimation) => widget,
@@ -99,4 +111,49 @@ class PageRoute extends PageRouteBuilder {
             );
           },
         );
+}
+
+class PageRoutes {
+  static const double kDefaultDuration = 0.5;
+  static Route<T> fadeThrough<T>(Widget page,
+      [double duration = kDefaultDuration]) {
+    return PageRouteBuilder<T>(
+      transitionDuration: Duration(milliseconds: (duration * 1000).round()),
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeThroughTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            child: child);
+      },
+    );
+  }
+
+  static Route<T> fadeScale<T>(Widget page,
+      [double duration = kDefaultDuration]) {
+    return PageRouteBuilder<T>(
+      transitionDuration: Duration(milliseconds: (duration * 1000).round()),
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeScaleTransition(animation: animation, child: child);
+      },
+    );
+  }
+
+  static Route<T> sharedAxis<T>(Widget page,
+      [SharedAxisTransitionType type = SharedAxisTransitionType.scaled,
+      double duration = kDefaultDuration]) {
+    return PageRouteBuilder<T>(
+      transitionDuration: Duration(milliseconds: (duration * 1000).round()),
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return SharedAxisTransition(
+          child: child,
+          animation: animation,
+          secondaryAnimation: secondaryAnimation,
+          transitionType: type,
+        );
+      },
+    );
+  }
 }
