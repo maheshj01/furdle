@@ -80,10 +80,13 @@ class _PlayGroundState extends State<PlayGround>
                 showTimer: showTimer,
                 isAlreadyPlayed: _state.isAlreadyPlayed,
                 onTimerComplete: () async {
-                  _state.isGameOver = false;
-                  _state.isAlreadyPlayed = false;
+                  furdleNotifier.isLoading = true;
+                  _state = await gameController.getNewGame();
+                  gameController.gameState = _state;
+                  gameController.gameState.updateKeyboard();
+                  settingsController.stats.number = _state.puzzle.number;
+                  furdleNotifier.isLoading = false;
                   Navigate.popView(context);
-                  await loadGame();
                 },
               ));
         },

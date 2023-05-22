@@ -32,6 +32,10 @@ class GameController {
     return await _gameService!.loadGame();
   }
 
+  Future<GameState> getNewGame() async {
+    return await _gameService!.getNewGameState();
+  }
+
   Future<void> onGameOver(GameState state) async {
     await _gameService!.onGameOver(state);
     onGameStateChange(gameState);
