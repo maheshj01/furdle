@@ -17,9 +17,9 @@ class Navigate<T> {
   static Future<void> push(BuildContext context, Widget widget,
       {bool isDialog = false,
       bool isRootNavigator = true,
-      TransitionType transitionType = TransitionType.scale}) async {
-    await Navigator.of(context, rootNavigator: isRootNavigator)
-        .push(NavigateRoute(widget, type: transitionType));
+      TransitionType slideTransitionType = TransitionType.scale}) async {
+    final value = await Navigator.of(context, rootNavigator: isRootNavigator)
+        .push(NavigateRoute(widget, type: slideTransitionType));
     // return value;
   }
 
@@ -34,9 +34,9 @@ class Navigate<T> {
 
   static Future<void> pushAndPopAll(BuildContext context, Widget widget,
       {bool isRootNavigator = true,
-      TransitionType transitionType = TransitionType.scale}) async {
+      TransitionType slideTransitionType = TransitionType.scale}) async {
     final value = await Navigator.of(context, rootNavigator: isRootNavigator)
-        .pushAndRemoveUntil(NavigateRoute(widget, type: transitionType),
+        .pushAndRemoveUntil(NavigateRoute(widget, type: slideTransitionType),
             (Route<dynamic> route) => false);
     return value;
   }

@@ -292,7 +292,6 @@ class _PlayGroundState extends State<PlayGround>
                           Navigate.push(
                             context,
                             const HelpPage(),
-                            transitionType: TransitionType.scale,
                           );
                         },
                         icon: const Icon(Icons.help)),
