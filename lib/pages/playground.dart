@@ -179,7 +179,7 @@ class _PlayGroundState extends State<PlayGround>
 
   /// User pressed the keys on virtual or physical keyboard
   Future<void> onKeyEvent(String x, bool isPhysicalKeyEvent) async {
-    Puzzle _currentPuzzle = _state.puzzle;
+    final Puzzle _currentPuzzle = _state.puzzle;
     if (_state.isGameOver ||
         _state.isAlreadyPlayed ||
         _currentPuzzle.result == PuzzleResult.win ||
@@ -393,9 +393,7 @@ class _PlayGroundState extends State<PlayGround>
                                 keyboardFocus: keyboardFocusNode,
                                 controller: textController,
                                 isFurdleMode: true,
-                                onKeyEvent:
-                                    (String x, bool isPhysicalKeyEvent) =>
-                                        onKeyEvent(x, isPhysicalKeyEvent),
+                                onKeyEvent: onKeyEvent,
                               ),
                             ),
                           );

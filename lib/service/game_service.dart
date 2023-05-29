@@ -132,6 +132,7 @@ class GameService extends IGameService {
       'result': _gameState.puzzle.result.name,
       'moves': _gameState.puzzle.moves
     });
+    settingsController.addPuzzleToStats(_gameState.puzzle);
   }
 
   @override

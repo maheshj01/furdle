@@ -27,7 +27,7 @@ class SettingsController extends ChangeNotifier {
   bool isSameDate() {
     final now = DateTime.now();
     if (_settings.stats.total > 0) {
-      bool isSame = _settings.stats.puzzles.last.date!.isSameDate(now);
+      final bool isSame = _settings.stats.puzzles.last.date!.isSameDate(now);
       return isSame;
     }
     return false;
@@ -67,7 +67,8 @@ class SettingsController extends ChangeNotifier {
     _settings = Settings.initialize();
     _themeMode = await getTheme();
     _settings.difficulty = await getDifficulty();
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    _settings.stats = await _settingsService!.getStats();
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     version = packageInfo.version;
     // Important! Inform listeners a change has occurred.
     notifyListeners();
@@ -99,18 +100,18 @@ class SettingsController extends ChangeNotifier {
 
   /// Update stats on Game over
   Future<void> addPuzzleToStats(Puzzle puzzle) async {
-    _settings.stats.puzzles.add(puzzle);
-    updateStats();
+    stats.puzzles.add(puzzle);
+    stats.setPuzzles(stats.puzzles);
+    updateStats(stats);
   }
 
   Future<Stats> getStats() async {
-    Stats _stats = await _settingsService!.getStats();
-    _settings.stats = _stats;
-    return _stats;
+    _settings.stats = await _settingsService!.getStats();
+    return _settings.stats;
   }
 
-  Future<void> updateStats() async {
-    await _settingsService!.updateStats(stats);
+  Future<void> updateStats(Stats st) async {
+    await _settingsService!.updateStats(st);
   }
 
   Future<void> clear() async {
