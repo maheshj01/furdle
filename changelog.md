@@ -1,3 +1,6 @@
+### v0.3.5 [May 29, 2023]
+- Update Stats on GameOver
+
 ### v0.3.4 [May 20, 2023]
 - Refactor code complete
 - Add remote settings configuration
