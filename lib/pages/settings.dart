@@ -82,7 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
           stream: _firestore.collection('furdle').doc('features').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             }
             final remoteSettings =
                 snapshot.data!.data() as Map<String, dynamic>;
@@ -91,7 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     height: 16,
                   ),
                   !remoteSettings['theme']

@@ -49,8 +49,8 @@ class GameService extends IGameService {
   /// if the puzzle is not saved, gets a new puzzle from the server if available
   @override
   Future<GameState> loadGame() async {
-    GameState _localState = await getSavedGame();
-    Puzzle _puzzle = _localState.puzzle;
+    final GameState _localState = await getSavedGame();
+    final Puzzle _puzzle = _localState.puzzle;
     final _gameResult = _localState.puzzle.result;
     if (_gameResult == PuzzleResult.win || _gameResult == PuzzleResult.lose) {
       if (_puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
@@ -67,7 +67,8 @@ class GameService extends IGameService {
     } else {
       /// If the game is inprogress and the puzzle is not saved by any chance
       /// get a new puzzle
-      if (_puzzle.moves == 0 && _puzzle.puzzle.isEmpty) {
+      if ((_puzzle.moves == 0 && _puzzle.puzzle.isEmpty) ||
+          _localState.cells[0][0].character.isEmpty) {
         _gameState = await getNewGameState();
       }
       return _gameState;
@@ -103,7 +104,7 @@ class GameService extends IGameService {
   }
 
   Future<void> _saveCurrentState(GameState state) async {
-    var st = state.toJson();
+    final st = state.toJson();
     final map = json.encode(st);
     _sharedPreferences.setString(kGameState, map);
   }
