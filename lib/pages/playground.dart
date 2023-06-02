@@ -319,7 +319,7 @@ class _PlayGroundState extends State<PlayGround>
                           icon: const Icon(Icons.share)),
                       IconButton(
                           onPressed: () {
-                            Navigate.push(context, const SettingsPage());
+                            Navigate.push(context, SettingsPage());
                           },
                           icon: const Icon(Icons.settings)),
                     ],
