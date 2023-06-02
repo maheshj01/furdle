@@ -12,6 +12,7 @@ import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/service/iservice.dart';
+import 'package:furdle/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameService extends IGameService {
@@ -21,7 +22,7 @@ class GameService extends IGameService {
   // Make SettingsService a private variable so it is not used directly.
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  Logger _logger = Logger('GameService');
   GameState get gameState => _gameState;
 
   set gameState(GameState state) {
@@ -88,12 +89,13 @@ class GameService extends IGameService {
     late Puzzle puzzle;
     if (challenge == null) {
       puzzle = Puzzle.initialize();
-      DocumentReference<Map<String, dynamic>> _docRef =
+      final DocumentReference<Map<String, dynamic>> _docRef =
           _firestore.collection(collectionProd).doc(statsProd);
       final snapshot = await _docRef.get();
       if (snapshot.exists) {
         puzzle = puzzle.fromSnapshot(snapshot);
       } else {
+        _logger.e('Loading random puzzle locally');
         puzzle = puzzle.getRandomPuzzle();
       }
     } else {

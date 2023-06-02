@@ -33,19 +33,13 @@ class SettingsController extends ChangeNotifier {
     return false;
   }
 
+  ThemeMode get themeMode => _settings.themeMode;
+
   Stats get stats => _settings.stats;
 
   // Make ThemeMode a private variable so it is not updated directly without
   // also persisting the changes with the SettingsService.
-  ThemeMode? _themeMode;
-
-  Difficulty get difficulty => _settings.difficulty;
-
-  set difficulty(Difficulty value) {
-    _settings.difficulty = value;
-    _settingsService!.setDifficulty(value);
-    notifyListeners();
-  }
+  // Difficulty get difficulty => _settings.difficulty;
 
   bool get isFurdleMode => _settingsService!.isFurdleMode;
 
@@ -55,7 +49,6 @@ class SettingsController extends ChangeNotifier {
   }
 
   // Allow Widgets to read the user's preferred ThemeMode.
-  ThemeMode? get themeMode => _themeMode;
 
   /// Load the user's settings from the SettingsService. It may load from a
   /// local database or the internet. The controller only knows it can load the
@@ -65,7 +58,7 @@ class SettingsController extends ChangeNotifier {
     _settingsService = SettingsService();
     await _settingsService!.init();
     _settings = Settings.initialize();
-    _themeMode = await getTheme();
+    _settings.themeMode = await getTheme();
     _settings.difficulty = await getDifficulty();
     _settings.stats = await _settingsService!.getStats();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -74,21 +67,28 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<ThemeMode> getTheme() async {
-    return _settingsService!.getTheme();
-  }
-
   Future<Difficulty> getDifficulty() async {
     return _settingsService!.getDifficulty();
+  }
+
+  Future<void> setDifficulty(Difficulty diff) async {
+    if (diff == _settings.difficulty) return;
+    _settings.difficulty = diff;
+    notifyListeners();
+    _settingsService!.setDifficulty(diff);
+  }
+
+  Future<ThemeMode> getTheme() async {
+    return await _settingsService!.getTheme();
   }
 
   /// Update and persist the ThemeMode based on the user's selection.
   Future<void> updateThemeMode(ThemeMode? newThemeMode) async {
     // Dot not perform any work if null or new and old ThemeMode are identical
-    if (newThemeMode == null || (newThemeMode == _themeMode)) return;
+    if (newThemeMode == null || (newThemeMode == _settings.themeMode)) return;
 
     // Otherwise, store the new theme mode in memory
-    _themeMode = newThemeMode;
+    _settings.themeMode = newThemeMode;
 
     // Important! Inform listeners a change has occurred.
     notifyListeners();
@@ -106,12 +106,21 @@ class SettingsController extends ChangeNotifier {
   }
 
   Future<Stats> getStats() async {
-    _settings.stats = await _settingsService!.getStats();
-    return _settings.stats;
+    return _settingsService!.getStats();
   }
 
   Future<void> updateStats(Stats st) async {
+    _settings.stats = st;
+    notifyListeners();
     await _settingsService!.updateStats(st);
+  }
+
+  Map<String, dynamic> getLocalSettings() {
+    return {
+      'theme': true,
+      'difficulty': false,
+      'stats': true,
+    };
   }
 
   Future<void> clear() async {

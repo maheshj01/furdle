@@ -101,7 +101,7 @@ class GameState extends ChangeNotifier {
   }
 
   factory GameState.instance() {
-    final _difficulty = settingsController.difficulty;
+    final _difficulty = Difficulty.medium;
     final _cells = _difficulty.toDefaultcells();
     return GameState(
         row: 0,
@@ -120,7 +120,8 @@ class GameState extends ChangeNotifier {
     for (int i = 0; i < puzzleSize.height; i++) {
       List<FCellState> list = [];
       for (int j = 0; j < puzzleSize.width; j++) {
-        FCellState cell = FCellState.fromJson((map['$i']! as List<dynamic>)[j]);
+        final FCellState cell =
+            FCellState.fromJson((map['$i']! as List<dynamic>)[j]);
         list.add(cell);
       }
       cellList.add(list);
@@ -166,6 +167,8 @@ class GameState extends ChangeNotifier {
     _isAlreadyPlayed = false;
     isGameOver = false;
     _kState = _KState.initialize();
+    row = 0;
+    column = 0;
     _initCells();
     notifyListeners();
     return this;
@@ -225,7 +228,7 @@ class GameState extends ChangeNotifier {
   }
 
   KeyState characterToState(String letter, int count, int i) {
-    int index = indexOf(letter);
+    final int index = indexOf(letter);
     final bool hasNoDuplicateLetters =
         count == 1 && currentWord.contains(letter);
     if (index < 0) {
@@ -255,7 +258,7 @@ class GameState extends ChangeNotifier {
   void addCell(String character) {
     if (column == puzzle.size.width) return;
 
-    FCellState cell =
+    final FCellState cell =
         FCellState(character: character, state: KeyState.isDefault);
     if (column < puzzle.size.width) {
       cells[row][column] = cell;
@@ -292,7 +295,7 @@ class GameState extends ChangeNotifier {
         final char = word[i];
         final occurence = puzzle.puzzle.split(char).toList().length - 1;
         final state = characterToState(char, occurence, i);
-        FCellState _cell = FCellState(character: char, state: state);
+        final FCellState _cell = FCellState(character: char, state: state);
         cells[row][i] = _cell;
       }
 
@@ -328,7 +331,7 @@ class GameState extends ChangeNotifier {
 
   /// Share furdle grid
   void generateFurdleGrid() {
-    int attempts = isPuzzleCracked ? row : 0;
+    final int attempts = isPuzzleCracked ? row : 0;
     String generatedFurdle =
         '#${settingsController.stats.number} $attempts/${puzzle.size.height.toInt()}\n\n';
     for (int i = 0; i < puzzle.size.height; i++) {
@@ -399,7 +402,7 @@ class GameState extends ChangeNotifier {
   }
 
   KeyState characterToKeyboardState(String letter, KeyState? currentState) {
-    int index = indexOf(letter);
+    final int index = indexOf(letter);
     if (index < 0) {
       return KeyState.notExists;
     } else if (isRightPosition(index, letter)) {

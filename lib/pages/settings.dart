@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/extensions.dart';
 import 'package:furdle/main.dart';
 import 'package:furdle/models/models.dart';
-import 'package:furdle/utils/utility.dart';
 import 'package:http/http.dart' as http;
 
 import '../constants/strings.dart';
@@ -23,8 +23,8 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
-    super.initState();
     getStats();
+    super.initState();
   }
 
   Future<void> getStats() async {
@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
       final date = DateTime.parse(json['commit']['commit']['author']['date']);
       return date;
     } catch (e) {
-      rethrow;
+      throw Exception('Failed to load last update date');
     }
   }
 
@@ -79,13 +79,18 @@ class _SettingsPageState extends State<SettingsPage> {
         title: Text(widget.title),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-          stream: _firestore.collection('furdle').doc('features').snapshots(),
+          stream:
+              _firestore.collection(collectionProd).doc('features').snapshots(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
             }
-            final remoteSettings =
-                snapshot.data!.data() as Map<String, dynamic>;
+            Map<String, dynamic> remoteSettings;
+            if (snapshot.hasError) {
+              remoteSettings = settingsController.getLocalSettings();
+            } else {
+              remoteSettings = snapshot.data!.data() as Map<String, dynamic>;
+            }
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -109,12 +114,20 @@ class _SettingsPageState extends State<SettingsPage> {
                                 constraints: const BoxConstraints(
                                     minWidth: 80, minHeight: 40),
                                 onPressed: (int index) {
-                                  settingsController.updateThemeMode(index == 0
-                                      ? ThemeMode.light
-                                      : index == 1
-                                          ? ThemeMode.dark
-                                          : ThemeMode.system);
-                                  setState(() {});
+                                  print(index);
+                                  ThemeMode theme = ThemeMode.light;
+                                  switch (index) {
+                                    case 0:
+                                      theme = ThemeMode.light;
+                                      break;
+                                    case 1:
+                                      theme = ThemeMode.dark;
+                                      break;
+                                    case 2:
+                                      theme = ThemeMode.system;
+                                      break;
+                                  }
+                                  settingsController.updateThemeMode(theme);
                                 },
                                 isSelected: [
                                   settingsController.themeMode ==
@@ -127,54 +140,56 @@ class _SettingsPageState extends State<SettingsPage> {
                           ],
                         ),
                   !remoteSettings['theme'] ? const SizedBox() : const Divider(),
-                  !remoteSettings['difficulty']
-                      ? const SizedBox()
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _subtitle('Difficulty'),
-                            ToggleButtons(
-                                constraints: const BoxConstraints(
-                                    minWidth: 80, minHeight: 40),
-                                children: const [
-                                  Text('Easy'),
-                                  Text('Medium'),
-                                  Text('Hard'),
-                                ],
-                                onPressed: (int index) {
-                                  final _selectedDifficulty =
-                                      Difficulty.fromToggleIndex(index);
-                                  final _puzzle =
-                                      gameController.gameState.puzzle;
-                                  if (_selectedDifficulty !=
-                                      settingsController.difficulty) {
-                                    /// If game has not started change the settings
-                                    if (_puzzle.result == PuzzleResult.none) {
-                                      settingsController.difficulty =
-                                          _selectedDifficulty;
-                                      gameController.gameState.puzzle =
-                                          _puzzle.copyWith(
-                                              difficulty: _selectedDifficulty);
-                                    } else {
-                                      Utility.showMessage(context,
-                                          "The settings will be applied to the next puzzle");
-                                    }
-                                  }
-                                  setState(() {});
-                                },
-                                isSelected: [
-                                  settingsController.difficulty ==
-                                      Difficulty.easy,
-                                  settingsController.difficulty ==
-                                      Difficulty.medium,
-                                  settingsController.difficulty ==
-                                      Difficulty.hard,
-                                ]),
-                          ],
-                        ),
-                  !remoteSettings['difficulty']
-                      ? const SizedBox()
-                      : const Divider(),
+                  // !remoteSettings['difficulty']
+                  //     ? const SizedBox()
+                  //     : Row(
+                  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //         children: [
+                  //           _subtitle('Difficulty'),
+                  //           ToggleButtons(
+                  //               constraints: const BoxConstraints(
+                  //                   minWidth: 80, minHeight: 40),
+                  //               children: const [
+                  //                 Text('Easy'),
+                  //                 Text('Medium'),
+                  //                 Text('Hard'),
+                  //               ],
+                  //               onPressed: (int index) {
+                  //                 print(index);
+                  //                 final _selectedDifficulty =
+                  //                     Difficulty.fromToggleIndex(index);
+                  //                 final _puzzle =
+                  //                     gameController.gameState.puzzle;
+                  //                 if (_selectedDifficulty !=
+                  //                     Difficulty.medium) {
+                  //                   /// If game has not started change the settings
+                  //                   if (_puzzle.result == PuzzleResult.none) {
+                  //                     settingsController
+                  //                         .setDifficulty(_selectedDifficulty);
+                  //                     gameController.gameState.puzzle =
+                  //                         _puzzle.copyWith(
+                  //                             difficulty: _selectedDifficulty);
+                  //                     gameController.gameState =
+                  //                         gameController.gameState;
+                  //                   } else {
+                  //                     Utility.showMessage(context,
+                  //                         "The settings will be applied to the next puzzle");
+                  //                   }
+                  //                 }
+                  //               },
+                  //               isSelected: [
+                  //                 settingsController.difficulty ==
+                  //                     Difficulty.easy,
+                  //                 settingsController.difficulty ==
+                  //                     Difficulty.medium,
+                  //                 settingsController.difficulty ==
+                  //                     Difficulty.hard,
+                  //               ]),
+                  //         ],
+                  //       ),
+                  // !remoteSettings['difficulty']
+                  //     ? const SizedBox()
+                  //     : const Divider(),
                   !remoteSettings['stats']
                       ? const SizedBox()
                       : Column(

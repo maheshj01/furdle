@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/extensions.dart';
-import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
 
 import '../constants/constants.dart';
@@ -187,7 +186,7 @@ class Puzzle {
       nextRun: (snapshot.get('nextRun') as Timestamp).toDate().toLocal(),
       isOffline: false,
       result: PuzzleResult.none,
-      size: settingsController.difficulty.toGridSize(),
+      size: Difficulty.medium.toGridSize(),
       difficulty: Difficulty.medium,
       moves: 0,
     );
@@ -277,7 +276,7 @@ class Puzzle {
     Puzzle _newPuzzle = Puzzle.initialize();
     final randomNumber = Random().nextInt(maxWords);
     final word = furdleList[randomNumber];
-    final _difficulty = settingsController.difficulty;
+    final _difficulty = Difficulty.medium;
     _newPuzzle = _newPuzzle.copyWith(
         puzzle: word,
         difficulty: _difficulty,
