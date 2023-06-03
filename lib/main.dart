@@ -37,6 +37,10 @@ class MyApp extends StatelessWidget {
 
   final _router = GoRouter(
     initialLocation: '/',
+    errorPageBuilder: (context, state) => MaterialPage<void>(
+      key: state.pageKey,
+      child: ErrorPage(),
+    ),
     routes: [
       GoRoute(
         path: '/',
@@ -84,5 +88,39 @@ class MyApp extends StatelessWidget {
             routerDelegate: _router.routerDelegate,
           );
         });
+  }
+}
+
+class ErrorPage extends StatefulWidget {
+  const ErrorPage({Key? key}) : super(key: key);
+
+  @override
+  State<ErrorPage> createState() => _ErrorPageState();
+}
+
+class _ErrorPageState extends State<ErrorPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
+        ),
+        body: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Uh oh!\n You have lost your way.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              TextButton(
+                child: const Text('Go Home 🏠'),
+                onPressed: () => context.replace(PlayGround.path),
+              )
+            ],
+          ),
+        ));
   }
 }
