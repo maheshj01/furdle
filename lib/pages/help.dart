@@ -7,7 +7,7 @@ import 'package:furdle/utils/utility.dart';
 class HelpPage extends StatelessWidget {
   const HelpPage({Key? key}) : super(key: key);
   static String title = helpTitle;
-
+  static String path = '/how-to-play';
   @override
   Widget build(BuildContext context) {
     final String description = """

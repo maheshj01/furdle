@@ -15,11 +15,12 @@ import 'package:furdle/pages/settings.dart';
 import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/utility.dart';
 import 'package:furdle/widgets/dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 class PlayGround extends StatefulWidget {
-  const PlayGround({Key? key, required this.title}) : super(key: key);
-
+  const PlayGround({Key? key, this.title = appTitle}) : super(key: key);
+  static String path = '/';
   final String title;
 
   @override
@@ -116,8 +117,7 @@ class _PlayGroundState extends State<PlayGround>
       final deviceId = settingsController.deviceId;
       if (deviceId.isEmpty) {
         settingsController.registerDevice();
-        Navigate.push(context, HelpPage(),
-            slideTransitionType: TransitionType.btt);
+        context.push('${HelpPage.path}');
       }
     });
   }
@@ -299,13 +299,10 @@ class _PlayGroundState extends State<PlayGround>
                   top: Utility.screenSize.width > 600 ? 0 : kToolbarHeight / 2,
                   // alignment: Alignment.topCenter,
                   child: FurdleBar(
-                    title: 'Furdle',
+                    title: appTitle,
                     leading: IconButton(
                         onPressed: () {
-                          Navigate.push(
-                            context,
-                            HelpPage(),
-                          );
+                          context.push('${HelpPage.path}');
                         },
                         icon: const Icon(Icons.help)),
                     actions: [
@@ -332,7 +329,7 @@ class _PlayGroundState extends State<PlayGround>
                           icon: const Icon(Icons.share)),
                       IconButton(
                           onPressed: () {
-                            Navigate.push(context, SettingsPage());
+                            context.push('${SettingsPage.path}');
                           },
                           icon: const Icon(Icons.settings)),
                     ],

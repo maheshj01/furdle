@@ -8,6 +8,7 @@ import 'package:furdle/controller/settings_controller.dart';
 import 'package:furdle/firebase_options.dart';
 import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/playground.dart';
+import 'package:furdle/pages/settings.dart';
 import 'package:go_router/go_router.dart';
 
 import 'constants/constants.dart';
@@ -48,12 +49,19 @@ class MyApp extends StatelessWidget {
         ),
       ),
       GoRoute(
-          path: '/${HelpPage.title}',
+          path: '${HelpPage.path}',
           name: 'help',
           pageBuilder: (context, state) => MaterialPage<void>(
                 key: state.pageKey,
                 child: HelpPage(),
               )),
+      GoRoute(
+          path: '${SettingsPage.path}',
+          name: 'settings',
+          pageBuilder: (context, state) => MaterialPage<void>(
+                key: state.pageKey,
+                child: SettingsPage(),
+              ))
     ],
   );
 

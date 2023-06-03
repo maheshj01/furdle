@@ -12,8 +12,8 @@ import 'package:http/http.dart' as http;
 import '../constants/strings.dart';
 
 class SettingsPage extends StatefulWidget {
-  final String title = settingsTitle;
-
+  static String title = settingsTitle;
+  static String path = '/settings';
   const SettingsPage({Key? key}) : super(key: key);
 
   @override
@@ -76,7 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(SettingsPage.title),
       ),
       body: StreamBuilder<DocumentSnapshot>(
           stream:
