@@ -83,7 +83,7 @@ class _PlayGroundState extends State<PlayGround>
                   furdleNotifier.isLoading = true;
                   _state = await gameController.getNewGame();
                   gameController.gameState = _state;
-                  gameController.gameState.updateKeyboard();
+                  gameController.gameState.initKeyboard();
                   settingsController.stats.number = _state.puzzle.number;
                   furdleNotifier.isLoading = false;
                   Navigate.popView(context);
@@ -206,9 +206,7 @@ class _PlayGroundState extends State<PlayGround>
       gameController.timeLeft = durationLeft;
       _state.isAlreadyPlayed = true;
       showFurdleDialog(
-        title: gameAlreadyPlayed,
-        message: 'Next puzzle in',
-      );
+          title: gameAlreadyPlayed, message: 'Next puzzle in', showTimer: true);
       return;
     }
     final character = x.toLowerCase();
@@ -224,6 +222,7 @@ class _PlayGroundState extends State<PlayGround>
         _currentPuzzle.moves = _state.row;
         _currentPuzzle.result = PuzzleResult.win;
         _state.puzzle = _currentPuzzle;
+        _state.isAlreadyPlayed = true;
         gameController.onGameOver(_state);
         Future.delayed(const Duration(milliseconds: 500), (() {
           showFurdleDialog(isSuccess: true);

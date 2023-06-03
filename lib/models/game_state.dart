@@ -191,6 +191,10 @@ class GameState extends ChangeNotifier {
     }
   }
 
+  void initKeyboard() {
+    _initCells();
+  }
+
   void updateKeyState(FCellState cellState) {
     _kState.updateKey(cellState);
     notifyListeners();

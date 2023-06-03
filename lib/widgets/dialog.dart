@@ -26,7 +26,7 @@ class _FurdleDialogState extends State<FurdleDialog> {
   // appends 0 to timer if less than 10
   String toTimer(int time) {
     if (time < 10) {
-      return '0' + time.toString();
+      return '0$time';
     } else {
       return time.toString();
     }
@@ -79,7 +79,7 @@ class _FurdleDialogState extends State<FurdleDialog> {
                           },
                           builder: (BuildContext context, Duration value,
                               Widget? child) {
-                            int hours = value.inHours;
+                            final int hours = value.inHours;
                             int minutes = value.inMinutes;
                             final seconds = value.inSeconds % 60;
                             if (minutes > 60) {
