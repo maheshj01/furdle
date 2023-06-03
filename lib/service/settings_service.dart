@@ -5,6 +5,7 @@ import 'package:furdle/constants/strings.dart';
 import 'package:furdle/extensions.dart';
 import 'package:furdle/models/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 /// A service that stores and retrieves user settings.
 ///
@@ -16,6 +17,7 @@ class SettingsService {
   late SharedPreferences _sharedPreferences;
   final String _kDefaultDifficulty = 'medium';
   final String _kDefaultTheme = 'system';
+
   bool _isFurdleMode = false;
 
   bool get isFurdleMode => _isFurdleMode;
@@ -72,6 +74,42 @@ class SettingsService {
       _stats = Stats.fromJson(stats);
     }
     return _stats;
+  }
+
+  Future<void> setDeviceId(String id) async {
+    _sharedPreferences.setString(kDeviceIdKey, id);
+  }
+
+  Future<String?> getDeviceId() async {
+    final id = _sharedPreferences.getString(kDeviceIdKey);
+    print('Fetched Unique deviceId $id');
+    return id;
+  }
+
+  /// Generates a unique device id based on the device's hardware.
+  Future<String> getUniqueDeviceId() async {
+    final Uuid uuid = Uuid();
+    final String deviceIdentifier = uuid.v4();
+    return deviceIdentifier;
+    // final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    // if (kIsWeb) {
+    //   // final WebBrowserInfo webInfo = await deviceInfo.webBrowserInfo;
+    //   // deviceIdentifier = webInfo.vendor! +
+    //   //     webInfo.userAgent! +
+    //   //     webInfo.hardwareConcurrency.toString();
+    // } else {
+    //   if (Platform.isAndroid) {
+    //     final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    //     deviceIdentifier = androidInfo.id;
+    //   } else if (Platform.isIOS) {
+    //     final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    //     deviceIdentifier = iosInfo.identifierForVendor!;
+    //   } else if (Platform.isLinux) {
+    //     final LinuxDeviceInfo linuxInfo = await deviceInfo.linuxInfo;
+    //     deviceIdentifier = linuxInfo.machineId!;
+    //   }
+    // }
+    // return deviceIdentifier;
   }
 
   Future<void> updateStats(Stats stats) async {

@@ -10,6 +10,7 @@ const String kFurdleKey = 'furdle';
 const String isAlreadyPlayeKey = 'isAlreadyPlayed';
 const String kMatchHistoryKey = 'kMatchHistoryKey';
 const String kStatsKey = 'kStatsKey';
+final String kDeviceIdKey = 'kDeviceIdKey';
 const String kDifficultyKey = 'kDifficultyKey';
 const String kGameState = 'kGameState';
 

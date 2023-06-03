@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
           name: 'help',
           pageBuilder: (context, state) => MaterialPage<void>(
                 key: state.pageKey,
-                child: const HelpPage(),
+                child: HelpPage(),
               )),
     ],
   );

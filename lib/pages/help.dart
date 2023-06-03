@@ -10,12 +10,8 @@ class HelpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String description = """
-  Your goal is to guess a 5 letter word in N tries.
-  N can be 5,6,7 based on the Difficulty level.
-   - 5: Hard
-   - 6: Medium (default)
-   - 7: Easy
+    final String description = """
+  Your goal is to guess a 5 letter word in 6 tries.
 
   Each guess must be a valid five-letter word. Hit the enter button to submit.
 

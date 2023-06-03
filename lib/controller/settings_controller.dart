@@ -18,6 +18,8 @@ class SettingsController extends ChangeNotifier {
   String _version = '';
 
   String get version => _version;
+  String? _deviceId;
+  String get deviceId => _deviceId ?? '';
 
   set version(String value) {
     _version = value;
@@ -63,8 +65,15 @@ class SettingsController extends ChangeNotifier {
     _settings.stats = await _settingsService!.getStats();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     version = packageInfo.version;
+    _deviceId = await _settingsService!.getDeviceId();
     // Important! Inform listeners a change has occurred.
     notifyListeners();
+  }
+
+  Future<void> registerDevice() async {
+    if (_deviceId != null) return;
+    _deviceId = await _settingsService!.getUniqueDeviceId();
+    await _settingsService!.setDeviceId(_deviceId!);
   }
 
   Future<Difficulty> getDifficulty() async {

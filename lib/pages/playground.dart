@@ -106,6 +106,20 @@ class _PlayGroundState extends State<PlayGround>
     _initAnimation();
     loadGame();
     analytics.setCurrentScreen(screenName: 'Furdle');
+    setUp();
+  }
+
+  /// New Device? show How to play
+  Future<void> setUp() async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await Future.delayed(const Duration(milliseconds: 1500));
+      final deviceId = settingsController.deviceId;
+      if (deviceId.isEmpty) {
+        settingsController.registerDevice();
+        Navigate.push(context, HelpPage(),
+            slideTransitionType: TransitionType.btt);
+      }
+    });
   }
 
   Future<void> loadGame() async {
@@ -291,7 +305,7 @@ class _PlayGroundState extends State<PlayGround>
                         onPressed: () {
                           Navigate.push(
                             context,
-                            const HelpPage(),
+                            HelpPage(),
                           );
                         },
                         icon: const Icon(Icons.help)),
