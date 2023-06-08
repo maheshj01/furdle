@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
-import 'package:furdle/utils/navigator.dart';
 import 'package:furdle/utils/utility.dart';
+import 'package:go_router/go_router.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({Key? key}) : super(key: key);
@@ -44,7 +44,7 @@ class HelpPage extends StatelessWidget {
           actions: [
             IconButton(
                 onPressed: () {
-                  Navigate.popView(context);
+                  context.pop(true);
                 },
                 icon: const Icon(Icons.close))
           ]),
