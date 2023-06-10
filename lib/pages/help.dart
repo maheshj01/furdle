@@ -4,6 +4,7 @@ import 'package:furdle/exports.dart';
 import 'package:furdle/pages/webview.dart';
 import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({Key? key}) : super(key: key);
@@ -101,7 +102,9 @@ class HelpPage extends StatelessWidget {
                         height: 10,
                       ),
                       'Github'.toLink(onTap: () {
-                        Utility.launch(sourceUrl);
+                        Utility.launch(
+                          sourceUrl,
+                        );
                       })
                     ],
                   )),
@@ -110,7 +113,8 @@ class HelpPage extends StatelessWidget {
                   child: 'Privacy Policy'.toLink(
                     onTap: () {
                       if (kIsWeb) {
-                        Utility.launch(PRIVACY_POLICY);
+                        Utility.launch(PRIVACY_POLICY,
+                            mode: LaunchMode.inAppWebView);
                       } else {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => WebViewPage(

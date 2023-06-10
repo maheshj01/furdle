@@ -17,7 +17,8 @@ class Utility {
   }
 
   static Future<void> launch(String url,
-      {bool isNewTab = true, LaunchMode mode = LaunchMode.inAppWebView}) async {
+      {bool isNewTab = true,
+      LaunchMode mode = LaunchMode.externalApplication}) async {
     await launchUrl(
       Uri.parse(url),
       mode: mode,
