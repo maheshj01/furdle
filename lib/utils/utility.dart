@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 

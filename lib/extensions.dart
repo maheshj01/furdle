@@ -107,8 +107,7 @@ extension DateOnlyCompare on DateTime {
     final now = DateTime.now().toLocal();
     final DateTime nextPuzzleTime =
         toLocal().add(const Duration(hours: hoursUntilNextFurdle));
-    bool result = now.isAfter(nextPuzzleTime);
-    return result;
+    return now.isAfter(nextPuzzleTime);
   }
 
   String formatDate() {

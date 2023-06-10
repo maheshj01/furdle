@@ -79,7 +79,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
         final widthFactor = widget.isFurdleMode ? 11 : 18;
         final size = constraints.maxWidth / widthFactor;
         final keysize = size.clamp(20.0, 50.0);
-        Size keySize = Size(keysize, keysize);
+        final Size keySize = Size(keysize, keysize);
 
         Widget buildKeyRow(String string,
             {Map<String, SpecialKey>? specialKeys}) {
@@ -120,7 +120,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
           return KeyBuilder(
               keyLabel: 'Space',
               keySize: keySize,
-              onPressed: (String character) => updateBindrr(character),
+              onPressed: updateBindrr,
               isPressed: isKeyPressed(' '),
               isSpaceKey: true);
         }
@@ -194,7 +194,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                         widget.isFurdleMode
                             ? KeyBuilder(
                                 keyLabel: 'Enter',
-                                onPressed: (x) => updateBindrr(x),
+                                onPressed: updateBindrr,
                                 isPressed: isKeyPressed('Enter'),
                                 keySize:
                                     Size(keySize.width * 1.4, keySize.height),
@@ -217,7 +217,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
                         widget.isFurdleMode
                             ? KeyBuilder(
                                 keyLabel: 'delete',
-                                onPressed: (x) => updateBindrr(x),
+                                onPressed: updateBindrr,
                                 isPressed: isKeyPressed('Backspace'),
                                 keySize:
                                     Size(keySize.width * 1.4, keySize.height))
@@ -294,12 +294,12 @@ class _KeyBuilderState extends State<KeyBuilder> {
   @override
   Widget build(BuildContext context) {
     final double _keySize = widget.keySize.width;
-    bool isDark = settingsController.themeMode == ThemeMode.dark;
+    final bool isDark = settingsController.themeMode == ThemeMode.dark;
     final color =
         isDark ? Theme.of(context).splashColor : Colors.grey.withOpacity(0.5);
-    double scaleFactor = _keySize / 60;
-    bool isSpecialKey = widget.keyLabel.length > 1;
-    GameState state = gameController.gameState;
+    final double scaleFactor = _keySize / 60;
+    final bool isSpecialKey = widget.keyLabel.length > 1;
+    final GameState state = gameController.gameState;
     final keyState =
         state.kState.keyboardState[widget.keyLabel.toLowerCase()] ??
             KeyState.isDefault;

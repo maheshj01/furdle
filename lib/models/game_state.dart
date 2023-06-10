@@ -116,9 +116,9 @@ class GameState extends ChangeNotifier {
     final puzzleSize = _difficulty.toGridSize();
 
     final map = (json['cells'] as Map<String, dynamic>);
-    List<List<FCellState>> cellList = [];
+    const List<List<FCellState>> cellList = [];
     for (int i = 0; i < puzzleSize.height; i++) {
-      List<FCellState> list = [];
+      const List<FCellState> list = [];
       for (int j = 0; j < puzzleSize.width; j++) {
         final FCellState cell =
             FCellState.fromJson((map['$i']! as List<dynamic>)[j]);
@@ -221,7 +221,7 @@ class GameState extends ChangeNotifier {
   Map<String, List<Map<String, String>>> cellsToMap() {
     final Map<String, List<Map<String, String>>> result = {};
     for (int i = 0; i < cells.length; i++) {
-      List<Map<String, String>> list = [];
+      const List<Map<String, String>> list = [];
       for (int j = 0; j < cells[0].length; j++) {
         final json = cells[i][j].toJson();
         list.add(json);
