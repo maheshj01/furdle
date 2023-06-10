@@ -96,7 +96,8 @@ class HelpPage extends StatelessWidget {
                   child: Column(
                     children: [
                       'Email'.toLink(onTap: () {
-                        Utility.launch(emailSource);
+                        Utility.launch(emailSource,
+                            isNewTab: true, mode: LaunchMode.platformDefault);
                       }),
                       const SizedBox(
                         height: 10,
