@@ -32,10 +32,10 @@ class FurdleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
-    Size? gridSize = state.puzzle.size;
-    bool isPlayed = state.puzzle.moves > 0;
-    bool isGameOver = state.isGameOver;
-    double cellSize = _size.width < 600 ? 65 : 70;
+    final gridSize = state.puzzle.size;
+    final bool isPlayed = state.puzzle.moves > 0;
+    final bool isGameOver = state.isGameOver;
+    final double cellSize = _size.width < 600 ? _size.width / 6.5 : 70;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -110,7 +110,6 @@ class _FurdleCellState extends State<FurdleCell>
   late Animation<double> _animation;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _controller = AnimationController(
       vsync: this,
