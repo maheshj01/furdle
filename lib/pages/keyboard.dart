@@ -90,7 +90,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
             setState(() {
               bindrr.character = character;
             });
-            HapticFeedback.heavyImpact();
+            HapticFeedback.vibrate();
             widget.onKeyEvent(bindrr.character, false);
           });
 
@@ -314,8 +314,7 @@ class _KeyBuilderState extends State<KeyBuilder> {
         onTap: () => widget.onPressed(widget.keyLabel),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          height:
-              isSpecialKey ? min(widget.keySize.height, _keySize) : _keySize,
+          height: isSpecialKey ? min(widget.keySize.height, _keySize) : 48,
           margin: const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
           decoration: BoxDecoration(
               color: widget.isPressed ? Colors.grey[600] : keyColor,
