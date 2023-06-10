@@ -90,7 +90,7 @@ class _KeyBoardViewState extends State<KeyBoardView> {
             setState(() {
               bindrr.character = character;
             });
-            HapticFeedback.vibrate();
+            HapticFeedback.heavyImpact();
             widget.onKeyEvent(bindrr.character, false);
           });
 
