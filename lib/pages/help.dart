@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
+import 'package:furdle/pages/webview.dart';
 import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 
@@ -90,7 +91,7 @@ class HelpPage extends StatelessWidget {
                     )),
               subTitle('Report a bug', fontSize: 16),
               Padding(
-                  padding: const EdgeInsets.only(bottom: 50.0),
+                  padding: const EdgeInsets.only(bottom: 10.0),
                   child: Column(
                     children: [
                       'Email'.toLink(onTap: () {
@@ -103,6 +104,22 @@ class HelpPage extends StatelessWidget {
                         Utility.launch(sourceUrl);
                       })
                     ],
+                  )),
+              Padding(
+                  padding: EdgeInsets.only(bottom: 50.0),
+                  child: 'Privacy Policy'.toLink(
+                    onTap: () {
+                      if (kIsWeb) {
+                        Utility.launch(PRIVACY_POLICY);
+                      } else {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => WebViewPage(
+                            title: PRIVACY_POLICY_TITLE,
+                            url: PRIVACY_POLICY,
+                          ),
+                        ));
+                      }
+                    },
                   )),
             ],
           ),

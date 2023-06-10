@@ -31,3 +31,5 @@ String gameUrl = 'https://furdle.web.app';
 const String lastCommitApi =
     'https://api.github.com/repos/maheshmnj/furdle/branches/master';
 String kEnterKey = 'enter';
+const PRIVACY_POLICY = 'https://maheshjamdade.com/furdle/privacy';
+  const PRIVACY_POLICY_TITLE = 'Privacy Policy';

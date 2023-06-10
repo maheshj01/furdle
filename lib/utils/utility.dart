@@ -16,9 +16,11 @@ class Utility {
     _screenSize = screenSize;
   }
 
-  static Future<void> launch(String url, {bool isNewTab = true}) async {
+  static Future<void> launch(String url,
+      {bool isNewTab = true, LaunchMode mode = LaunchMode.inAppWebView}) async {
     await launchUrl(
       Uri.parse(url),
+      mode: mode,
       webOnlyWindowName: isNewTab ? '_blank' : '_self',
     );
   }

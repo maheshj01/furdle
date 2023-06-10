@@ -1,4 +1,10 @@
-### v0.3.5 [Jun 02, 2023]
+### v0.3.7 [Jun 10, 2023]
+
+- Improve keyboard keys for typing on mobile device.
+- [Fixes Issue 12](https://github.com/maheshmnj/furdle/issues/12) Add deep link support for sharing puzzle.
+- Add privacy policy page.
+
+### v0.3.6 [Jun 02, 2023]
 
 - Show How to Play on first launch
 - Fix: Show GameTimer on GameOver.
