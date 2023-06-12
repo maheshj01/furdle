@@ -113,17 +113,7 @@ class HelpPage extends StatelessWidget {
                   padding: EdgeInsets.only(bottom: 50.0),
                   child: 'Privacy Policy'.toLink(
                     onTap: () {
-                      if (kIsWeb) {
-                        Utility.launch(PRIVACY_POLICY,
-                            mode: LaunchMode.inAppWebView);
-                      } else {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => WebViewPage(
-                            title: PRIVACY_POLICY_TITLE,
-                            url: PRIVACY_POLICY,
-                          ),
-                        ));
-                      }
+                      context.push(WebViewPage.routeName);
                     },
                   )),
             ],

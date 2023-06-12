@@ -9,6 +9,7 @@ import 'package:furdle/firebase_options.dart';
 import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/playground.dart';
 import 'package:furdle/pages/settings.dart';
+import 'package:furdle/pages/webview.dart';
 import 'package:go_router/go_router.dart';
 
 import 'constants/constants.dart';
@@ -65,7 +66,17 @@ class MyApp extends StatelessWidget {
           pageBuilder: (context, state) => MaterialPage<void>(
                 key: state.pageKey,
                 child: SettingsPage(),
-              ))
+              )),
+      GoRoute(
+          path: '${WebViewPage.routeName}',
+          name: 'Privacy Policy',
+          pageBuilder: (context, state) => MaterialPage<void>(
+                key: state.pageKey,
+                child: WebViewPage(
+                  title: 'Privacy Policy',
+                  url: PRIVACY_POLICY,
+                ),
+              )),
     ],
   );
 
