@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/constants.dart';
+import 'package:furdle/controller/settings_notifier.dart';
 import 'package:furdle/models/game_state.dart';
 import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/pages/help.dart';
@@ -138,11 +139,15 @@ class _PlayGroundState extends ConsumerState<PlayGround>
     } else if (key == 'Backspace') {
       _state.removeCell();
     } else {
+      final settingsRef = ref.read(appSettingsProvider);
+      if (settingsRef.sound) {
+        SystemSound.play(SystemSoundType.click);
+      }
       _state.addCell(key);
     }
   }
 
-  bool isPaused = true;
+  bool isPaused = false;
   @override
   Widget build(BuildContext context) {
     Utility.screenSize = MediaQuery.of(context).size;

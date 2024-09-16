@@ -83,104 +83,104 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               SizedBox(
                 height: 16,
               ),
-              false // !remoteSettings['theme']
-                  ? const SizedBox()
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _subtitle('Theme'),
-                        ToggleButtons(
-                            children: const [
-                              Text('Light'),
-                              Text('Dark'),
-                              Text('System'),
-                            ],
-                            constraints: const BoxConstraints(
-                                minWidth: 80, minHeight: 40),
-                            onPressed: (int index) {
-                              print(index);
-                              ThemeMode theme = ThemeMode.light;
-                              switch (index) {
-                                case 0:
-                                  theme = ThemeMode.light;
-                                  break;
-                                case 1:
-                                  theme = ThemeMode.dark;
-                                  break;
-                                case 2:
-                                  theme = ThemeMode.system;
-                                  break;
-                              }
-                              // settingsController.updateThemeMode(theme);
-                              ref
-                                  .read(appThemeProvider.notifier)
-                                  .setTheme(theme);
-                            },
-                            isSelected: [
-                              themeMode == ThemeMode.light,
-                              themeMode == ThemeMode.dark,
-                              themeMode == ThemeMode.system,
-                            ]),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                _subtitle('Keyboard Sound'),
+                Switch(
+                    value: settings.sound,
+                    onChanged: (bool value) {
+                      // settingsController.updateSound(value);
+                      ref.read(appSettingsProvider.notifier).toggleSound();
+                    }),
+              ]),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _subtitle('Theme'),
+                  ToggleButtons(
+                      children: const [
+                        Text('Light'),
+                        Text('Dark'),
+                        Text('System'),
                       ],
-                    ),
-              false ? const SizedBox() : const Divider(),
-              false
-                  ? const SizedBox()
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _subtitle('Difficulty'),
-                        ToggleButtons(
-                            constraints: const BoxConstraints(
-                                minWidth: 80, minHeight: 40),
-                            children: const [
-                              Text('Easy'),
-                              Text('Medium'),
-                              Text('Hard'),
-                            ],
-                            onPressed: (int index) {
-                              print(index);
-                              final _selectedDifficulty =
-                                  Difficulty.fromToggleIndex(index);
-                              if (_selectedDifficulty != settings.difficulty) {
-                                /// If game has not started change the settings
-                                // if (_puzzle.result == PuzzleResult.none) {
-                                //   settingsController
-                                //       .setDifficulty(_selectedDifficulty);
-                                //   gameController.gameState.puzzle =
-                                //       _puzzle.copyWith(
-                                //           difficulty: _selectedDifficulty);
-                                //   gameController.gameState =
-                                //       gameController.gameState;
-                                ref
-                                    .read(appSettingsProvider.notifier)
-                                    .updateDifficulty(_selectedDifficulty);
-                              }
-                              Utility.showMessage(context,
-                                  "The settings will be applied to the next puzzle");
-                            },
-                            isSelected: [
-                              settings.difficulty == Difficulty.easy,
-                              settings.difficulty == Difficulty.medium,
-                              settings.difficulty == Difficulty.hard,
-                            ]),
+                      constraints:
+                          const BoxConstraints(minWidth: 80, minHeight: 40),
+                      onPressed: (int index) {
+                        print(index);
+                        ThemeMode theme = ThemeMode.light;
+                        switch (index) {
+                          case 0:
+                            theme = ThemeMode.light;
+                            break;
+                          case 1:
+                            theme = ThemeMode.dark;
+                            break;
+                          case 2:
+                            theme = ThemeMode.system;
+                            break;
+                        }
+                        // settingsController.updateThemeMode(theme);
+                        ref.read(appThemeProvider.notifier).setTheme(theme);
+                      },
+                      isSelected: [
+                        themeMode == ThemeMode.light,
+                        themeMode == ThemeMode.dark,
+                        themeMode == ThemeMode.system,
+                      ]),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _subtitle('Difficulty'),
+                  ToggleButtons(
+                      constraints:
+                          const BoxConstraints(minWidth: 80, minHeight: 40),
+                      children: const [
+                        Text('Easy'),
+                        Text('Medium'),
+                        Text('Hard'),
                       ],
-                    ),
-              // !remoteSettings['difficulty']
-              //     ? const SizedBox()
-              //     : const Divider(),
-              false // !remoteSettings['stats']
-                  ? const SizedBox()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _subtitle('Score'),
-                        _stats('Played', '${settings.stats.total}'),
-                        _stats('Win', '${settings.stats.won}'),
-                        _stats('Lose', '${settings.stats.lost}'),
-                        const Divider(),
-                      ],
-                    ),
+                      onPressed: (int index) {
+                        print(index);
+                        final _selectedDifficulty =
+                            Difficulty.fromToggleIndex(index);
+                        if (_selectedDifficulty != settings.difficulty) {
+                          /// If game has not started change the settings
+                          // if (_puzzle.result == PuzzleResult.none) {
+                          //   settingsController
+                          //       .setDifficulty(_selectedDifficulty);
+                          //   gameController.gameState.puzzle =
+                          //       _puzzle.copyWith(
+                          //           difficulty: _selectedDifficulty);
+                          //   gameController.gameState =
+                          //       gameController.gameState;
+                          ref
+                              .read(appSettingsProvider.notifier)
+                              .updateDifficulty(_selectedDifficulty);
+                        }
+                        Utility.showMessage(context,
+                            "The settings will be applied to the next puzzle");
+                      },
+                      isSelected: [
+                        settings.difficulty == Difficulty.easy,
+                        settings.difficulty == Difficulty.medium,
+                        settings.difficulty == Difficulty.hard,
+                      ]),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _subtitle('Score'),
+                  _stats('Played', '${settings.stats.total}'),
+                  _stats('Win', '${settings.stats.won}'),
+                  _stats('Lose', '${settings.stats.lost}'),
+                  SizedBox(height: 8.0),
+                ],
+              ),
               const Expanded(child: SizedBox()),
               !kIsWeb
                   ? const SizedBox()
