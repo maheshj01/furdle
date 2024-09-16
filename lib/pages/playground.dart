@@ -142,6 +142,7 @@ class _PlayGroundState extends ConsumerState<PlayGround>
     }
   }
 
+  bool isPaused = true;
   @override
   Widget build(BuildContext context) {
     Utility.screenSize = MediaQuery.of(context).size;
@@ -190,80 +191,86 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                     icon: const Icon(Icons.settings)),
               ],
             )),
-        Positioned(
-          top: -100,
-          left: Utility.screenSize.width / 2,
-          child: ConfettiWidget(
-            confettiController: confettiController,
-            blastDirection: 0,
-            blastDirectionality: BlastDirectionality.explosive,
-            particleDrag: 0.05,
-            emissionFrequency: 0.35,
-            minimumSize: const Size(10, 10),
-            maximumSize: const Size(50, 50),
-            numberOfParticles: 5,
-            gravity: 0.2,
-          ),
-        ),
-        Align(
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(
-                height: 50,
+        isPaused
+            ? SizedBox()
+            : Positioned(
+                top: -100,
+                left: Utility.screenSize.width / 2,
+                child: ConfettiWidget(
+                  confettiController: confettiController,
+                  blastDirection: 0,
+                  blastDirectionality: BlastDirectionality.explosive,
+                  particleDrag: 0.05,
+                  emissionFrequency: 0.35,
+                  minimumSize: const Size(10, 10),
+                  maximumSize: const Size(50, 50),
+                  numberOfParticles: 5,
+                  gravity: 0.2,
+                ),
               ),
-              ValueListenableBuilder<bool>(
-                  valueListenable: loadingNotifier,
-                  builder: (x, bool isLoading, z) {
-                    if (isLoading) {
-                      return Container(
-                        height: 200,
-                        alignment: Alignment.center,
-                        child: const CircularProgressIndicator(
-                            strokeWidth: 2.0, color: AppColors.primary),
-                      );
-                    }
-                    return AnimatedBuilder(
-                        animation: _shakeAnimation,
-                        builder: (BuildContext context, Widget? child) {
-                          return Container(
-                              padding: EdgeInsets.only(
-                                  left: _shakeAnimation.value + 24.0,
-                                  right: 24.0 - _shakeAnimation.value),
-                              child: FurdleGrid());
-                        });
-                  }),
-              const SizedBox(
-                height: 24,
-              ),
-              TweenAnimationBuilder<Offset>(
-                  tween: Tween<Offset>(
-                      begin: const Offset(0, 200), end: const Offset(0, 0)),
-                  duration: const Duration(milliseconds: 1000),
-                  builder:
-                      (BuildContext context, Offset offset, Widget? child) {
-                    return Transform.translate(
-                      offset: offset,
-                      child: AnimatedContainer(
-                        margin: EdgeInsets.symmetric(
-                            vertical: true //settingsController.isFurdleMode
-                                ? 40.0
-                                : 10.0),
-                        duration: const Duration(milliseconds: 500),
-                        child: KeyBoardView(
-                          keyboardFocus: keyboardFocusNode,
-                          controller: textController,
-                          isFurdleMode: true,
-                          onKeyEvent: onKeyEvent,
-                        ),
-                      ),
-                    );
-                  }),
-            ],
-          ),
-          // duration: Duration(milliseconds: 500)
-        )
+        isPaused
+            ? Center(child: Text("Under Maintenance, Come back soon!"))
+            : Align(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    ValueListenableBuilder<bool>(
+                        valueListenable: loadingNotifier,
+                        builder: (x, bool isLoading, z) {
+                          if (isLoading) {
+                            return Container(
+                              height: 200,
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2.0, color: AppColors.primary),
+                            );
+                          }
+                          return AnimatedBuilder(
+                              animation: _shakeAnimation,
+                              builder: (BuildContext context, Widget? child) {
+                                return Container(
+                                    padding: EdgeInsets.only(
+                                        left: _shakeAnimation.value + 24.0,
+                                        right: 24.0 - _shakeAnimation.value),
+                                    child: FurdleGrid());
+                              });
+                        }),
+                    const SizedBox(
+                      height: 24,
+                    ),
+                    TweenAnimationBuilder<Offset>(
+                        tween: Tween<Offset>(
+                            begin: const Offset(0, 200),
+                            end: const Offset(0, 0)),
+                        duration: const Duration(milliseconds: 1000),
+                        builder: (BuildContext context, Offset offset,
+                            Widget? child) {
+                          return Transform.translate(
+                            offset: offset,
+                            child: AnimatedContainer(
+                              margin: EdgeInsets.symmetric(
+                                  vertical:
+                                      true //settingsController.isFurdleMode
+                                          ? 40.0
+                                          : 10.0),
+                              duration: const Duration(milliseconds: 500),
+                              child: KeyBoardView(
+                                keyboardFocus: keyboardFocusNode,
+                                controller: textController,
+                                isFurdleMode: true,
+                                onKeyEvent: onKeyEvent,
+                              ),
+                            ),
+                          );
+                        }),
+                  ],
+                ),
+                // duration: Duration(milliseconds: 500)
+              )
       ],
     ));
   }
