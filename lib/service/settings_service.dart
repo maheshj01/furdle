@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/extensions.dart';
 import 'package:furdle/models/models.dart';
+import 'package:furdle/shared/extensions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 

@@ -1,7 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:furdle/main.dart';
 import 'package:furdle/models/puzzle.dart';
-import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/utils/word.dart';
 
 import '../constants/strings.dart';
@@ -11,35 +9,35 @@ import '../constants/strings.dart';
 /// state is the state of the character entered in the cell
 class FCellState {
   String character;
-  KeyState state;
+  Cell state;
 
-  FCellState({this.character = '', this.state = KeyState.isDefault});
+  FCellState({this.character = '', this.state = Cell.empty});
 
   FCellState.defaultState()
       : character = '',
-        state = KeyState.isDefault;
+        state = Cell.empty;
 
   Map<String, String> toJson() {
     return {'character': character, 'state': state.name};
   }
 
   factory FCellState.fromJson(Map<String, dynamic> json) {
-    KeyState state = KeyState.isDefault;
+    Cell state = Cell.empty;
     switch (json['state']) {
-      case 'isDefault':
-        state = KeyState.isDefault;
+      case 'empty':
+        state = Cell.empty;
         break;
       case 'match':
-        state = KeyState.match;
+        state = Cell.match;
         break;
       case 'misplaced':
-        state = KeyState.misplaced;
+        state = Cell.misplaced;
         break;
       case 'notExists':
-        state = KeyState.notExists;
+        state = Cell.notExists;
         break;
       default:
-        state = KeyState.notExists;
+        state = Cell.notExists;
         break;
     }
     return FCellState(
@@ -47,6 +45,29 @@ class FCellState {
       state: state,
     );
   }
+}
+
+enum Cell {
+  /// letter is present in the right spot
+  /// green color
+  match(3),
+
+  /// letter is present in the wrong spot
+  /// orange color
+  misplaced(2),
+
+  /// letter is not present in any spot
+  /// black color
+  notExists(1),
+
+  /// letter is empty
+  /// grey color
+  empty(0);
+
+  final int priority;
+  const Cell(this.priority);
+
+  int toPriority() => priority;
 }
 
 enum Word {
@@ -63,11 +84,25 @@ enum Word {
   match
 }
 
+enum GameStatus {
+// User has submitted atleast one row
+  inprogress,
+  // All letters are in right position
+  win,
+  // User has exhausted all attempts
+  lose,
+// Game has not started yet
+  none
+}
+
 class GameState extends ChangeNotifier {
+  // row is the current row of the grid
   int row;
+  // column is the current column of the grid
   int column;
 
-  bool isGameOver;
+  // status of the game
+  GameStatus status;
 
   /// the puzzle to be solved
   Puzzle puzzle;
@@ -81,12 +116,12 @@ class GameState extends ChangeNotifier {
 
   _KState get kState => _kState;
 
-  bool get isPuzzleCracked => (puzzle.result == PuzzleResult.win && isGameOver);
+  bool get isGameOver => status == GameStatus.win || status == GameStatus.lose;
 
   GameState(
       {this.row = 0,
       this.column = 0,
-      this.isGameOver = false,
+      this.status = GameStatus.inprogress,
       this.cells = const [],
       required this.puzzle});
 
@@ -94,7 +129,7 @@ class GameState extends ChangeNotifier {
     return {
       'row': row,
       'column': column,
-      'isGameOver': isGameOver,
+      'status': status.name,
       'puzzle': puzzle.toJson(),
       'cells': cellsToMap(),
     };
@@ -104,11 +139,7 @@ class GameState extends ChangeNotifier {
     final _difficulty = Difficulty.medium;
     final _cells = _difficulty.toDefaultcells();
     return GameState(
-        row: 0,
-        column: 0,
-        isGameOver: false,
-        cells: _cells,
-        puzzle: Puzzle.initialize());
+        row: 0, column: 0, cells: _cells, puzzle: Puzzle.initialize());
   }
 
   factory GameState.fromJson(Map<String, dynamic> json) {
@@ -131,7 +162,6 @@ class GameState extends ChangeNotifier {
         row: json['row'],
         cells: cellList,
         column: json['column'],
-        isGameOver: json['isGameOver'],
         puzzle: Puzzle.fromJson(json['puzzle']));
   }
 
@@ -165,7 +195,6 @@ class GameState extends ChangeNotifier {
   GameState initNewState(Puzzle pz) {
     puzzle = pz;
     _isAlreadyPlayed = false;
-    isGameOver = false;
     _kState = _KState.initialize();
     row = 0;
     column = 0;
@@ -183,7 +212,7 @@ class GameState extends ChangeNotifier {
     cells = <List<FCellState>>[];
     final gridSize = puzzle.difficulty.toGridSize();
     for (int i = 0; i < gridSize.height; i++) {
-      List<FCellState> row = [];
+      final List<FCellState> row = [];
       for (int j = 0; j < gridSize.width; j++) {
         row.add(FCellState.defaultState());
       }
@@ -221,7 +250,7 @@ class GameState extends ChangeNotifier {
   Map<String, List<Map<String, String>>> cellsToMap() {
     final Map<String, List<Map<String, String>>> result = {};
     for (int i = 0; i < cells.length; i++) {
-      List<Map<String, String>> list = [];
+      final List<Map<String, String>> list = [];
       for (int j = 0; j < cells[0].length; j++) {
         final json = cells[i][j].toJson();
         list.add(json);
@@ -231,19 +260,19 @@ class GameState extends ChangeNotifier {
     return result;
   }
 
-  KeyState characterToState(String letter, int count, int i) {
+  Cell characterToCell(String letter, int count, int i) {
     final int index = indexOf(letter);
     final bool hasNoDuplicateLetters =
         count == 1 && currentWord.contains(letter);
     if (index < 0) {
-      return KeyState.notExists;
+      return Cell.empty;
     } else if (isRightPosition(i, letter)) {
-      return KeyState.match;
+      return Cell.match;
     } else {
       if (hasNoDuplicateLetters) {
-        return KeyState.misplaced;
+        return Cell.misplaced;
       } else {
-        return KeyState.notExists;
+        return Cell.notExists;
       }
     }
   }
@@ -262,8 +291,7 @@ class GameState extends ChangeNotifier {
   void addCell(String character) {
     if (column == puzzle.size.width) return;
 
-    final FCellState cell =
-        FCellState(character: character, state: KeyState.isDefault);
+    final FCellState cell = FCellState(character: character, state: Cell.empty);
     if (column < puzzle.size.width) {
       cells[row][column] = cell;
       _currentWord += character;
@@ -285,6 +313,21 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Cell characterToCellState(String letter, int count, int i) {
+    final int index = indexOf(letter);
+    final bool hasNoDuplicateLetters =
+        count == 1 && currentWord.contains(letter);
+    if (index < 0) {
+      return Cell.empty;
+    } else if (isRightPosition(i, letter)) {
+      return Cell.match;
+    } else if (hasNoDuplicateLetters) {
+      return Cell.misplaced;
+    } else {
+      return Cell.notExists;
+    }
+  }
+
   /// check if word is valid and present in list of words
   Word submitWord() {
     final isComplete = isWordComplete();
@@ -298,46 +341,45 @@ class GameState extends ChangeNotifier {
       for (int i = 0; i < word.length; i++) {
         final char = word[i];
         final occurence = puzzle.puzzle.split(char).toList().length - 1;
-        final state = characterToState(char, occurence, i);
+        final state = characterToCellState(char, occurence, i);
         final FCellState _cell = FCellState(character: char, state: state);
         cells[row][i] = _cell;
       }
 
       /// when the first word is submitted mark game as inprogress
       if (row == 0) {
-        puzzle.result = PuzzleResult.inprogress;
+        status = GameStatus.inprogress;
       }
       _updateKeyBoardState(updateRow: true);
       _currentWord = '';
       column = 0;
       row++;
       if (word == puzzle.puzzle) {
-        puzzle.result = PuzzleResult.win;
-        isGameOver = true;
+        status = GameStatus.win;
       }
       notifyListeners();
-      return isPuzzleCracked ? Word.match : Word.valid;
+      return isGameOver ? Word.match : Word.valid;
     }
   }
 
-  String stateToGrid(KeyState state) {
+  String stateToGrid(Cell state) {
     switch (state) {
-      case KeyState.isDefault:
+      case Cell.empty:
         return '⬜️';
-      case KeyState.misplaced:
+      case Cell.misplaced:
         return '🟨';
-      case KeyState.match:
+      case Cell.match:
         return '🟩';
-      case KeyState.notExists:
+      case Cell.notExists:
         return '⬛️';
     }
   }
 
   /// Share furdle grid
   void generateFurdleGrid() {
-    final int attempts = isPuzzleCracked ? row : 0;
+    final int attempts = isGameOver ? row : 0;
     String generatedFurdle =
-        '#${settingsController.stats.number} $attempts/${puzzle.size.height.toInt()}\n\n';
+        '#${123} $attempts/${puzzle.size.height.toInt()}\n\n';
     for (int i = 0; i < puzzle.size.height; i++) {
       String currentRow = '';
       for (int j = 0; j < puzzle.size.width; j++) {
@@ -366,7 +408,7 @@ class GameState extends ChangeNotifier {
 
         /// get unsubmitted word
         if (j == row) {
-          if (cellState == KeyState.isDefault) {
+          if (cellState == Cell.empty) {
             _currentWord += letter;
           }
         }
@@ -387,32 +429,17 @@ class GameState extends ChangeNotifier {
         }
       }
     }
-    // } else {
-    //   /// update submitted row in furdle grid
-    //   for (int i = 0; i < puzzle.size.width; i++) {
-    //     final letter = cells[row][i].character;
-    //     final furdleState = cells[row][i].state;
-    //     final keyState = kState.keyboardState[letter];
-
-    //     /// if Key is misplaced or is not enetered
-    //     if (keyState == KeyState.misplaced || keyState == KeyState.isDefault) {
-    //       //   final state = characterToKeyboardState(letter, currentState);
-    //       kState.keyboardState[letter] = furdleState;
-    //     }
-    //   }
-    // }
     notifyListeners();
-    // print('update keyboard state\n ${kState.keyboardState}');
   }
 
-  KeyState characterToKeyboardState(String letter, KeyState? currentState) {
+  Cell characterToKeyboardState(String letter, Cell? currentState) {
     final int index = indexOf(letter);
     if (index < 0) {
-      return KeyState.notExists;
+      return Cell.notExists;
     } else if (isRightPosition(index, letter)) {
-      return KeyState.match;
+      return Cell.match;
     } else {
-      return KeyState.misplaced;
+      return Cell.misplaced;
     }
   }
 
@@ -420,17 +447,21 @@ class GameState extends ChangeNotifier {
     cells.clear();
     notifyListeners();
   }
+
+  void notify() {
+    notifyListeners();
+  }
 }
 
 class _KState {
-  final Map<String, KeyState> _keyboardState = {};
+  final Map<String, Cell> _keyboardState = {};
 
-  Map<String, KeyState> get keyboardState => _keyboardState;
+  Map<String, Cell> get keyboardState => _keyboardState;
 
   _KState.initialize() {
     _keyboardState.clear();
     alphabets.split('').toList().forEach((element) {
-      final state = FCellState(character: element, state: KeyState.isDefault);
+      final state = FCellState(character: element, state: Cell.empty);
       updateKey(state);
     });
   }

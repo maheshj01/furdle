@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
 import 'package:furdle/pages/webview.dart';
+import 'package:furdle/shared/theme/colors.dart';
 import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,7 +18,7 @@ class HelpPage extends StatelessWidget {
 
   Each guess must be a valid five-letter word. Hit the enter button to submit.
 
-  After submitting each word, the color of the tiles will change to show how close your guess was to the word.
+  After submitting each word, the color of the tiles will change to indicate how close your guess was to the word.
   """;
 
     const String case1 = 'The letter E is in the word and in the correct spot';
@@ -70,14 +71,14 @@ class HelpPage extends StatelessWidget {
               ),
               const Divider(),
               subTitle('Examples'),
-              subTitle('Case 1', fontSize: 20),
+              subTitle('Case 1 (Green)', fontSize: 20),
               "GREAT".toWord(2),
               subTitle(case1, fontSize: 16),
-              subTitle('Case 2', fontSize: 20),
-              "PLANE".toWord(1, color: yellow),
+              subTitle('Case 2 (Orange)', fontSize: 20),
+              "PLANE".toWord(1, color: AppColors.yellow),
               subTitle(case2, fontSize: 16),
-              subTitle('Case 3', fontSize: 20),
-              "DAISY".toWord(4, color: black),
+              subTitle('Case 3 (Black)', fontSize: 20),
+              "DAISY".toWord(4, color: AppColors.black),
               subTitle(case3, fontSize: 16),
               if (kIsWeb)
                 Container(
@@ -141,7 +142,8 @@ extension WebLink on String {
 }
 
 extension ExampleWord on String {
-  Widget toWord(int index, {double boxSize = 40, Color color = green}) {
+  Widget toWord(int index,
+      {double boxSize = 40, Color color = AppColors.green}) {
     return Material(
       color: Colors.transparent,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -164,7 +166,7 @@ extension ExampleWord on String {
               ),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: i == index ? color : grey))
+                  color: i == index ? color : AppColors.grey))
       ]),
     );
   }

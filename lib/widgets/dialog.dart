@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/constants/colors.dart';
-import 'package:furdle/main.dart';
+import 'package:furdle/shared/theme/colors.dart';
 
 class FurdleDialog extends StatefulWidget {
   const FurdleDialog(
@@ -42,85 +41,77 @@ class _FurdleDialogState extends State<FurdleDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-        animation: settingsController,
-        builder: (context, snapshot) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0)),
-            elevation: 0.5,
-            child: Container(
-              height: 250,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    widget.message,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  _isAlreadyPlayed && widget.showTimer
-                      ? TweenAnimationBuilder<Duration>(
-                          duration: gameController.timeLeft,
-                          tween: Tween(
-                              begin: gameController.timeLeft,
-                              end: Duration.zero),
-                          onEnd: () {
-                            _isAlreadyPlayed = false;
-                            widget.onTimerComplete!();
-                          },
-                          builder: (BuildContext context, Duration value,
-                              Widget? child) {
-                            final int hours = value.inHours;
-                            int minutes = value.inMinutes;
-                            final seconds = value.inSeconds % 60;
-                            if (minutes > 60) {
-                              minutes = (minutes - hours * 60) % 60;
-                            }
-                            return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
-                                child: RichText(
-                                    text: TextSpan(
-                                  style: const TextStyle(
-                                      color: primaryBlue,
-                                      fontWeight: FontWeight.bold),
-                                  children: <TextSpan>[
-                                    const TextSpan(
-                                      text: '⏰ ',
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                    TextSpan(
-                                      text: toTimer(hours),
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                    const TextSpan(text: 'hrs '),
-                                    TextSpan(
-                                      text: toTimer(minutes),
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                    const TextSpan(text: 'mins '),
-                                    TextSpan(
-                                      text: toTimer(seconds),
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                    const TextSpan(text: 'secs'),
-                                  ],
-                                )));
-                          })
-                      : const SizedBox(),
-                ],
-              ),
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      elevation: 0.5,
+      child: Container(
+        height: 250,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text(
+              widget.title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-          );
-        });
+            Text(
+              widget.message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            _isAlreadyPlayed && widget.showTimer
+                ? TweenAnimationBuilder<Duration>(
+                    duration: Duration(seconds: 60), //gameController.timeLeft,
+                    tween: Tween(
+                        begin: Duration(seconds: 60), //gameController.timeLeft,
+                        end: Duration.zero),
+                    onEnd: () {
+                      _isAlreadyPlayed = false;
+                      widget.onTimerComplete!();
+                    },
+                    builder:
+                        (BuildContext context, Duration value, Widget? child) {
+                      final int hours = value.inHours;
+                      int minutes = value.inMinutes;
+                      final seconds = value.inSeconds % 60;
+                      if (minutes > 60) {
+                        minutes = (minutes - hours * 60) % 60;
+                      }
+                      return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: RichText(
+                              text: TextSpan(
+                            style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold),
+                            children: <TextSpan>[
+                              const TextSpan(
+                                text: '⏰ ',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              TextSpan(
+                                text: toTimer(hours),
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const TextSpan(text: 'hrs '),
+                              TextSpan(
+                                text: toTimer(minutes),
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const TextSpan(text: 'mins '),
+                              TextSpan(
+                                text: toTimer(seconds),
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const TextSpan(text: 'secs'),
+                            ],
+                          )));
+                    })
+                : const SizedBox(),
+          ],
+        ),
+      ),
+    );
   }
 }

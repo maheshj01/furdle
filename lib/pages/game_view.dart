@@ -1,36 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/exports.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/models/game_state.dart';
+import 'package:furdle/shared/providers/game_state_provider.dart';
+import 'package:furdle/shared/theme/colors.dart';
 
-enum KeyState {
-  /// letter is present in the right spot
-  /// green color
-  match(3),
-
-  /// letter is present in the wrong spot
-  /// orange color
-  misplaced(2),
-
-  /// letter is not present in any spot
-  /// black color
-  notExists(1),
-
-  /// letter is empty
-  /// grey color
-  isDefault(0);
-
-  final int priority;
-  const KeyState(this.priority);
-
-  int toPriority() => priority;
-}
-
-class FurdleGrid extends StatelessWidget {
-  const FurdleGrid({Key? key, required this.state}) : super(key: key);
-  final GameState state;
+class FurdleGrid extends ConsumerWidget {
+  const FurdleGrid({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final GameState state = ref.watch(gameStateProvider);
     final _size = MediaQuery.of(context).size;
     final gridSize = state.puzzle.size;
     final bool isPlayed = state.puzzle.moves > 0;
@@ -90,19 +71,19 @@ class FurdleCell extends StatefulWidget {
 
 class _FurdleCellState extends State<FurdleCell>
     with SingleTickerProviderStateMixin {
-  Color stateToColor(KeyState state, bool isSubmitted) {
+  Color stateToColor(Cell state, bool isSubmitted) {
     if (!isSubmitted) {
       return Colors.grey;
     }
     switch (state) {
-      case KeyState.match:
-        return green;
-      case KeyState.notExists:
-        return black;
-      case KeyState.misplaced:
-        return yellow;
-      case KeyState.isDefault:
-        return grey;
+      case Cell.match:
+        return AppColors.green;
+      case Cell.notExists:
+        return AppColors.black;
+      case Cell.misplaced:
+        return AppColors.yellow;
+      case Cell.empty:
+        return AppColors.grey;
     }
   }
 

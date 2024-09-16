@@ -7,17 +7,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/extensions.dart';
-import 'package:furdle/main.dart';
 import 'package:furdle/models/game_state.dart';
 import 'package:furdle/models/puzzle.dart';
 import 'package:furdle/service/iservice.dart';
+import 'package:furdle/shared/extensions.dart';
 import 'package:furdle/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GameService extends IGameService {
   late GameState _gameState;
-  late SharedPreferences _sharedPreferences;
+  SharedPreferences? _sharedPreferences;
 
   // Make SettingsService a private variable so it is not used directly.
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
@@ -33,7 +32,8 @@ class GameService extends IGameService {
   /// Get the last played puzzle
   /// returns the inprogress game if it was left inComplete
   static Puzzle getLastPlayedPuzzle() {
-    final lastPlayedPuzzle = settingsController.stats.puzzle;
+    final lastPlayedPuzzle = Puzzle.initialize();
+    // settingsController.stats.puzzle
     // if (lastPlayedPuzzle.moves > 0 &&
     //     lastPlayedPuzzle.result == PuzzleResult.inprogress) {
     // }
@@ -52,15 +52,14 @@ class GameService extends IGameService {
   Future<GameState> loadGame() async {
     final GameState _localState = await getSavedGame();
     final Puzzle _puzzle = _localState.puzzle;
-    final _gameResult = _localState.puzzle.result;
-    if (_gameResult == PuzzleResult.win || _gameResult == PuzzleResult.lose) {
+    if (_localState.isGameOver) {
       if (_puzzle.date!.hasSurpassedHoursUntilNextFurdle()) {
         _gameState = await getNewGameState();
       }
-      final durationLeft =
-          _localState.puzzle.nextRun!.difference(DateTime.now());
-      gameController.timeLeft = durationLeft;
-    } else if (_gameResult == PuzzleResult.none &&
+      final durationLeft = Duration.zero;
+      // _localState.puzzle.nextRun!.difference(DateTime.now());
+      // gameController.timeLeft = durationLeft;
+    } else if (_localState.status == GameStatus.none &&
         _localState.column == 0 &&
         _localState.row == 0) {
       _gameState = await getNewGameState();
@@ -89,8 +88,9 @@ class GameService extends IGameService {
     late Puzzle puzzle;
     if (challenge == null) {
       puzzle = Puzzle.initialize();
-      final DocumentReference<Map<String, dynamic>> _docRef =
-          _firestore.collection(collectionProd).doc(statsProd);
+      final DocumentReference<Map<String, dynamic>> _docRef = _firestore
+          .collection(AppConstants.collectionProd)
+          .doc(AppConstants.statsProd);
       final snapshot = await _docRef.get();
       if (snapshot.exists) {
         puzzle = puzzle.fromSnapshot(snapshot);
@@ -108,12 +108,15 @@ class GameService extends IGameService {
   Future<void> _saveCurrentState(GameState state) async {
     final st = state.toJson();
     final map = json.encode(st);
-    _sharedPreferences.setString(kGameState, map);
+    if (_sharedPreferences == null) {
+      _sharedPreferences = await SharedPreferences.getInstance();
+    }
+    _sharedPreferences!.setString(kGameState, map);
   }
 
   /// returns the last played puzzle
   Future<GameState> getSavedGame() async {
-    final String savedPuzzle = _sharedPreferences.getString(kGameState) ?? '';
+    final String savedPuzzle = _sharedPreferences!.getString(kGameState) ?? '';
     if (savedPuzzle.isEmpty) {
       final newState = GameState(puzzle: Puzzle.initialize());
       return newState;
@@ -125,16 +128,15 @@ class GameService extends IGameService {
 
   // clear this state when a new Puzzle is being loaded
   Future<void> clearLocalState() async {
-    _sharedPreferences.remove(kGameState);
+    _sharedPreferences!.remove(kGameState);
   }
 
   @override
   Future<void> onGameOver(GameState state) async {
-    await _analytics.logEvent(name: 'GameOver', parameters: {
-      'result': _gameState.puzzle.result.name,
-      'moves': _gameState.puzzle.moves
-    });
-    settingsController.addPuzzleToStats(_gameState.puzzle);
+    await _analytics.logEvent(
+        name: 'GameOver',
+        parameters: {'result': state.status, 'moves': _gameState.puzzle.moves});
+    // settingsController.addPuzzleToStats(_gameState.puzzle);
   }
 
   @override

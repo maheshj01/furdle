@@ -2,26 +2,11 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:furdle/extensions.dart';
 import 'package:furdle/models/game_state.dart';
+import 'package:furdle/shared/extensions.dart';
 
 import '../constants/constants.dart';
 import '../utils/word.dart';
-
-enum PuzzleResult {
-  /// User has won the game
-  win,
-
-  /// User has lost the game
-  lose,
-
-  /// The game is in progress when the user makes a first move
-  /// i.e move > 0
-  inprogress,
-
-  /// The game has not been played
-  none
-}
 
 enum Difficulty {
   easy(4),
@@ -104,13 +89,13 @@ enum Difficulty {
   Size toGridSize() {
     switch (this) {
       case Difficulty.easy:
-        return const Size(5.0, 7.0);
-      case Difficulty.medium:
-        return const Size(5.0, 6.0);
-      case Difficulty.hard:
         return const Size(5.0, 5.0);
+      case Difficulty.medium:
+        return const Size(5.0, 5.0);
+      case Difficulty.hard:
+        return const Size(5.0, 4.0);
       default:
-        return const Size(5.0, 7.0);
+        return const Size(5.0, 6.0);
     }
   }
 
@@ -129,7 +114,6 @@ enum Difficulty {
 class Puzzle {
   int number;
   String puzzle;
-  PuzzleResult result;
   int moves;
 
   /// size of the puzzle
@@ -137,15 +121,12 @@ class Puzzle {
   Size size;
   bool isOffline;
   DateTime? date;
-  DateTime? nextRun;
   Difficulty difficulty;
 
   Puzzle(
       {this.number = 0,
       this.puzzle = '',
       this.date,
-      this.nextRun,
-      this.result = PuzzleResult.none,
       this.moves = 0,
       this.size = const Size(5.0, 6.0),
       this.difficulty = Difficulty.medium,
@@ -155,12 +136,10 @@ class Puzzle {
     return Puzzle(
         number: 0,
         puzzle: '',
-        result: PuzzleResult.none,
         moves: 0,
         size: const Size(5.0, 6.0),
         difficulty: Difficulty.medium,
         date: DateTime.now(),
-        nextRun: DateTime.now().add(const Duration(days: 1)),
         isOffline: false);
   }
 
@@ -169,12 +148,10 @@ class Puzzle {
     return Puzzle(
         number: puzzle.number,
         puzzle: puzzle.puzzle,
-        result: PuzzleResult.none,
         moves: 0,
         size: puzzle.size,
         difficulty: puzzle.difficulty,
         date: puzzle.date,
-        nextRun: puzzle.date,
         isOffline: puzzle.isOffline);
   }
 
@@ -183,9 +160,7 @@ class Puzzle {
       puzzle: snapshot.get('word'),
       number: snapshot.get('number'),
       date: (snapshot.get('date') as Timestamp).toDate().toLocal(),
-      nextRun: (snapshot.get('nextRun') as Timestamp).toDate().toLocal(),
       isOffline: false,
-      result: PuzzleResult.none,
       size: Difficulty.medium.toGridSize(),
       difficulty: Difficulty.medium,
       moves: 0,
@@ -196,7 +171,6 @@ class Puzzle {
   Puzzle copyWith(
       {int? number,
       String? puzzle,
-      PuzzleResult? result,
       int? moves,
       Size? size,
       DateTime? date,
@@ -206,11 +180,9 @@ class Puzzle {
     return Puzzle(
         number: number ?? this.number,
         puzzle: puzzle ?? this.puzzle,
-        result: result ?? this.result,
         moves: moves ?? this.moves,
         size: size ?? this.size,
         date: date ?? this.date,
-        nextRun: nextRun ?? this.nextRun,
         difficulty: difficulty ?? this.difficulty,
         isOffline: isOffline ?? this.isOffline);
   }
@@ -238,11 +210,9 @@ class Puzzle {
   // }
 
   void onMatchPlayed(Puzzle puzzle) {
-    result = puzzle.result;
     moves = puzzle.moves;
     size = puzzle.size;
     date = DateTime.now();
-    nextRun = DateTime.now().add(const Duration(days: 1));
     difficulty = puzzle.difficulty;
   }
 
@@ -250,11 +220,9 @@ class Puzzle {
     return {
       'number': number,
       'puzzle': puzzle,
-      'result': result.name,
       'moves': moves,
       'size': '${size.width}x${size.height}',
       'date': date.toString(),
-      'nextRun': nextRun.toString(),
       'difficulty': difficulty.name
     };
   }
@@ -264,23 +232,20 @@ class Puzzle {
     return Puzzle(
         number: json['number'] as int,
         puzzle: json['puzzle'] as String,
-        result: json['result'].toString().toPuzzleResult(),
         moves: json['moves'] as int,
         size: difficulty.toGridSize(),
         date: DateTime.parse(json['date'] as String),
-        nextRun: DateTime.parse(json['nextRun']),
         difficulty: difficulty);
   }
 
   Puzzle getRandomPuzzle() {
     Puzzle _newPuzzle = Puzzle.initialize();
-    final randomNumber = Random().nextInt(maxWords);
+    final randomNumber = Random().nextInt(AppConstants.maxWords);
     final word = furdleList[randomNumber];
     final _difficulty = Difficulty.medium;
     _newPuzzle = _newPuzzle.copyWith(
         puzzle: word,
         difficulty: _difficulty,
-        result: PuzzleResult.none,
         isOffline: true,
         number: randomNumber,
         moves: 0,

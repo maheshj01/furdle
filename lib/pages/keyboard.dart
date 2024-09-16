@@ -2,11 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:furdle/main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/models/models.dart';
-import 'package:furdle/pages/game_view.dart';
+import 'package:furdle/shared/providers/game_state_provider.dart';
+import 'package:furdle/shared/theme/theme.dart';
 
-class KeyBoardView extends StatefulWidget {
+class KeyBoardView extends ConsumerStatefulWidget {
   /// defines whether the keyboard to be shown is for furdle mode
   final bool isFurdleMode;
   final Function(String, bool) onKeyEvent;
@@ -23,7 +24,7 @@ class KeyBoardView extends StatefulWidget {
   _KeyBoardViewState createState() => _KeyBoardViewState();
 }
 
-class _KeyBoardViewState extends State<KeyBoardView> {
+class _KeyBoardViewState extends ConsumerState<KeyBoardView> {
   late FocusNode keyboardFocus;
 
   @override
@@ -125,110 +126,101 @@ class _KeyBoardViewState extends State<KeyBoardView> {
               isSpaceKey: true);
         }
 
-        return AnimatedBuilder(
-            animation: settingsController,
-            builder: (context, child) {
-              return KeyboardListener(
-                focusNode: keyboardFocus,
-                autofocus: true,
-                onKeyEvent: (event) {
-                  if (event is KeyDownEvent) {
-                    final character = event.logicalKey.keyLabel;
-                    if (character == 'Backspace') {
-                      delete();
-                    } else if (character == 'Caps Lock') {
-                      isCapsLockOn = !isCapsLockOn;
-                    }
-                    setState(() {
-                      bindrr.isPressed = true;
-                      bindrr.character = character;
-                    });
-                    widget.onKeyEvent(bindrr.character, true);
-                  } else if (event is KeyUpEvent) {
-                    /// Delay for key fade animation
-                    Future.delayed(const Duration(milliseconds: 200), () {
-                      setState(() {
-                        bindrr.isPressed = false;
-                      });
-                    });
-                  }
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    widget.isFurdleMode
-                        ? const SizedBox()
-                        : buildKeyRow('`1234567890-=', specialKeys: {
-                            'Backspace': SpecialKey(
-                              character: 'delete',
-                              position: 13,
-                              size: Size(keySize.width * 1.9, keySize.height),
-                            ),
-                          }),
-                    buildKeyRow(
-                        widget.isFurdleMode ? 'qwertyuiop' : 'qwertyuiop[]\\',
-                        specialKeys: {
-                          'Tab': SpecialKey(
-                            character: 'tab',
-                            position: 0,
-                            size: Size(keySize.width * 1.9, keySize.height),
-                          ),
-                        }),
-                    buildKeyRow(
-                        widget.isFurdleMode ? 'asdfghjkl' : 'asdfghjkl;\'',
-                        specialKeys: {
-                          'Caps Lock': SpecialKey(
-                            character: 'Caps Lock',
-                            position: 0,
-                            size: Size(keySize.width * 2, keySize.height),
-                          ),
-                          'Enter': SpecialKey(
-                            character: 'return',
-                            position: 12,
-                            size: Size(keySize.width * 2, keySize.height),
-                          ),
-                        }),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        widget.isFurdleMode
-                            ? KeyBuilder(
-                                keyLabel: 'Enter',
-                                onPressed: updateBindrr,
-                                isPressed: isKeyPressed('Enter'),
-                                keySize:
-                                    Size(keySize.width * 1.4, keySize.height),
-                              )
-                            : const SizedBox(),
-                        buildKeyRow(
-                            widget.isFurdleMode ? 'zxcvbnm' : 'zxcvbnm,./',
-                            specialKeys: {
-                              'Shift Left': SpecialKey(
-                                character: 'Shift',
-                                position: 0,
-                                size: Size(keySize.width * 2.5, keySize.height),
-                              ),
-                              'Shift Right': SpecialKey(
-                                character: 'Shift',
-                                position: 11,
-                                size: Size(keySize.width * 2.5, keySize.height),
-                              ),
-                            }),
-                        widget.isFurdleMode
-                            ? KeyBuilder(
-                                keyLabel: 'delete',
-                                onPressed: updateBindrr,
-                                isPressed: isKeyPressed('Backspace'),
-                                keySize:
-                                    Size(keySize.width * 1.4, keySize.height))
-                            : const SizedBox(),
-                      ],
+        return KeyboardListener(
+          focusNode: keyboardFocus,
+          autofocus: true,
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent) {
+              final character = event.logicalKey.keyLabel;
+              if (character == 'Backspace') {
+                delete();
+              } else if (character == 'Caps Lock') {
+                isCapsLockOn = !isCapsLockOn;
+              }
+              setState(() {
+                bindrr.isPressed = true;
+                bindrr.character = character;
+              });
+              widget.onKeyEvent(bindrr.character, true);
+            } else if (event is KeyUpEvent) {
+              /// Delay for key fade animation
+              Future.delayed(const Duration(milliseconds: 200), () {
+                setState(() {
+                  bindrr.isPressed = false;
+                });
+              });
+            }
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              widget.isFurdleMode
+                  ? const SizedBox()
+                  : buildKeyRow('`1234567890-=', specialKeys: {
+                      'Backspace': SpecialKey(
+                        character: 'delete',
+                        position: 13,
+                        size: Size(keySize.width * 1.9, keySize.height),
+                      ),
+                    }),
+              buildKeyRow(widget.isFurdleMode ? 'qwertyuiop' : 'qwertyuiop[]\\',
+                  specialKeys: {
+                    'Tab': SpecialKey(
+                      character: 'tab',
+                      position: 0,
+                      size: Size(keySize.width * 1.9, keySize.height),
                     ),
-                    widget.isFurdleMode ? const SizedBox() : buildSpace()
-                  ],
-                ),
-              );
-            });
+                  }),
+              buildKeyRow(widget.isFurdleMode ? 'asdfghjkl' : 'asdfghjkl;\'',
+                  specialKeys: {
+                    'Caps Lock': SpecialKey(
+                      character: 'Caps Lock',
+                      position: 0,
+                      size: Size(keySize.width * 2, keySize.height),
+                    ),
+                    'Enter': SpecialKey(
+                      character: 'return',
+                      position: 12,
+                      size: Size(keySize.width * 2, keySize.height),
+                    ),
+                  }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  widget.isFurdleMode
+                      ? KeyBuilder(
+                          keyLabel: 'Enter',
+                          onPressed: updateBindrr,
+                          isPressed: isKeyPressed('Enter'),
+                          keySize: Size(keySize.width * 1.4, keySize.height),
+                        )
+                      : const SizedBox(),
+                  buildKeyRow(widget.isFurdleMode ? 'zxcvbnm' : 'zxcvbnm,./',
+                      specialKeys: {
+                        'Shift Left': SpecialKey(
+                          character: 'Shift',
+                          position: 0,
+                          size: Size(keySize.width * 2.5, keySize.height),
+                        ),
+                        'Shift Right': SpecialKey(
+                          character: 'Shift',
+                          position: 11,
+                          size: Size(keySize.width * 2.5, keySize.height),
+                        ),
+                      }),
+                  widget.isFurdleMode
+                      ? KeyBuilder(
+                          keyLabel: 'delete',
+                          onPressed: updateBindrr,
+                          isPressed: isKeyPressed('Backspace'),
+                          keySize: Size(keySize.width * 1.4, keySize.height))
+                      : const SizedBox(),
+                ],
+              ),
+              widget.isFurdleMode ? const SizedBox() : buildSpace()
+            ],
+          ),
+        );
       },
     );
   }
@@ -251,7 +243,7 @@ extension on String {
           .toList();
 }
 
-class KeyBuilder extends StatefulWidget {
+class KeyBuilder extends ConsumerStatefulWidget {
   const KeyBuilder(
       {Key? key,
       required this.keyLabel,
@@ -274,19 +266,19 @@ class KeyBuilder extends StatefulWidget {
   final Size keySize;
 
   @override
-  State<KeyBuilder> createState() => _KeyBuilderState();
+  ConsumerState<KeyBuilder> createState() => _KeyBuilderState();
 }
 
-class _KeyBuilderState extends State<KeyBuilder> {
-  Color stateToColor(KeyState state) {
+class _KeyBuilderState extends ConsumerState<KeyBuilder> {
+  Color stateToColor(Cell state) {
     switch (state) {
-      case KeyState.match:
+      case Cell.match:
         return Colors.green;
-      case KeyState.notExists:
+      case Cell.notExists:
         return Colors.black87;
-      case KeyState.misplaced:
+      case Cell.misplaced:
         return Colors.yellow[800]!;
-      case KeyState.isDefault:
+      case Cell.empty:
         return Colors.transparent;
     }
   }
@@ -294,15 +286,15 @@ class _KeyBuilderState extends State<KeyBuilder> {
   @override
   Widget build(BuildContext context) {
     final double _keySize = widget.keySize.width;
-    final bool isDark = settingsController.themeMode == ThemeMode.dark;
+    final themeMode = ref.watch(appThemeProvider);
+    final bool isDark = themeMode == ThemeMode.dark;
     final color =
         isDark ? Theme.of(context).splashColor : Colors.grey.withOpacity(0.5);
     final double scaleFactor = _keySize / 60;
     final bool isSpecialKey = widget.keyLabel.length > 1;
-    final GameState state = gameController.gameState;
+    final GameState state = ref.watch(gameStateProvider);
     final keyState =
-        state.kState.keyboardState[widget.keyLabel.toLowerCase()] ??
-            KeyState.isDefault;
+        state.kState.keyboardState[widget.keyLabel.toLowerCase()] ?? Cell.empty;
     final keyColor = stateToColor(keyState);
 
     return Material(
@@ -324,10 +316,10 @@ class _KeyBuilderState extends State<KeyBuilder> {
           alignment: Alignment.center,
           child: Text(
             widget.keyLabel,
-            textScaleFactor: scaleFactor,
+            textScaler: TextScaler.linear(scaleFactor),
             style: TextStyle(
                 fontSize: isSpecialKey ? 10 : 25,
-                color: keyState == KeyState.notExists ? Colors.white : null),
+                color: keyState == Cell.notExists ? Colors.white : null),
           ),
         ),
       ),

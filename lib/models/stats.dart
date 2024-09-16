@@ -7,7 +7,6 @@ class Stats {
   int total;
   int won;
   int lost;
-  int averageTime;
 
   Stats({
     required this.puzzles,
@@ -16,7 +15,6 @@ class Stats {
     required this.total,
     required this.won,
     required this.lost,
-    required this.averageTime,
   });
 
   Stats.initialStats()
@@ -25,8 +23,7 @@ class Stats {
         number = 0,
         puzzles = [],
         lost = 0,
-        total = 0,
-        averageTime = 0;
+        total = 0;
 
   /// to json for saving to disk
 
@@ -38,7 +35,6 @@ class Stats {
       'total': total,
       'won': won,
       'lost': lost,
-      'averageTime': averageTime,
     };
   }
 
@@ -54,7 +50,6 @@ class Stats {
       total: json['total'] as int,
       won: json['won'] as int,
       lost: json['lost'] as int,
-      averageTime: json['averageTime'] as int,
     );
   }
 
@@ -62,7 +57,7 @@ class Stats {
   void setPuzzles(List<Puzzle> value) {
     puzzles = value;
     total = puzzles.length;
-    won = puzzles.where((p) => p.result == PuzzleResult.win).length;
+    won = 0;
     lost = total - won;
   }
 }

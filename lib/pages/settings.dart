@@ -3,33 +3,29 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:furdle/constants/const.dart';
-import 'package:furdle/extensions.dart';
-import 'package:furdle/main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/controller/settings_notifier.dart';
 import 'package:furdle/models/models.dart';
+import 'package:furdle/shared/extensions.dart';
+import 'package:furdle/shared/theme/theme.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:http/http.dart' as http;
 
 import '../constants/strings.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   static String title = settingsTitle;
   static String path = '/settings';
   const SettingsPage({Key? key}) : super(key: key);
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
-    getStats();
     super.initState();
-  }
-
-  Future<void> getStats() async {
-    stats = settingsController.stats;
-    setState(() {});
   }
 
   Future<DateTime> getLastUpdateDateTime() async {
@@ -49,7 +45,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late Stats stats;
   @override
   Widget build(BuildContext context) {
     Widget _stats(String key, String value) {
@@ -74,172 +69,153 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     }
 
+    final themeMode = ref.watch(appThemeProvider);
+    final settings = ref.watch(appSettingsProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(SettingsPage.title),
-      ),
-      body: StreamBuilder<DocumentSnapshot>(
-          stream:
-              _firestore.collection(collectionProd).doc('features').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-            Map<String, dynamic> remoteSettings;
-            if (snapshot.hasError) {
-              remoteSettings = settingsController.getLocalSettings();
-            } else {
-              remoteSettings = snapshot.data!.data() as Map<String, dynamic>;
-            }
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 16,
-                  ),
-                  !remoteSettings['theme']
-                      ? const SizedBox()
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _subtitle('Theme'),
-                            ToggleButtons(
-                                children: const [
-                                  Text('Light'),
-                                  Text('Dark'),
-                                  Text('System'),
-                                ],
-                                constraints: const BoxConstraints(
-                                    minWidth: 80, minHeight: 40),
-                                onPressed: (int index) {
-                                  print(index);
-                                  ThemeMode theme = ThemeMode.light;
-                                  switch (index) {
-                                    case 0:
-                                      theme = ThemeMode.light;
-                                      break;
-                                    case 1:
-                                      theme = ThemeMode.dark;
-                                      break;
-                                    case 2:
-                                      theme = ThemeMode.system;
-                                      break;
-                                  }
-                                  settingsController.updateThemeMode(theme);
-                                },
-                                isSelected: [
-                                  settingsController.themeMode ==
-                                      ThemeMode.light,
-                                  settingsController.themeMode ==
-                                      ThemeMode.dark,
-                                  settingsController.themeMode ==
-                                      ThemeMode.system,
-                                ]),
-                          ],
-                        ),
-                  !remoteSettings['theme'] ? const SizedBox() : const Divider(),
-                  // !remoteSettings['difficulty']
-                  //     ? const SizedBox()
-                  //     : Row(
-                  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //         children: [
-                  //           _subtitle('Difficulty'),
-                  //           ToggleButtons(
-                  //               constraints: const BoxConstraints(
-                  //                   minWidth: 80, minHeight: 40),
-                  //               children: const [
-                  //                 Text('Easy'),
-                  //                 Text('Medium'),
-                  //                 Text('Hard'),
-                  //               ],
-                  //               onPressed: (int index) {
-                  //                 print(index);
-                  //                 final _selectedDifficulty =
-                  //                     Difficulty.fromToggleIndex(index);
-                  //                 final _puzzle =
-                  //                     gameController.gameState.puzzle;
-                  //                 if (_selectedDifficulty !=
-                  //                     Difficulty.medium) {
-                  //                   /// If game has not started change the settings
-                  //                   if (_puzzle.result == PuzzleResult.none) {
-                  //                     settingsController
-                  //                         .setDifficulty(_selectedDifficulty);
-                  //                     gameController.gameState.puzzle =
-                  //                         _puzzle.copyWith(
-                  //                             difficulty: _selectedDifficulty);
-                  //                     gameController.gameState =
-                  //                         gameController.gameState;
-                  //                   } else {
-                  //                     Utility.showMessage(context,
-                  //                         "The settings will be applied to the next puzzle");
-                  //                   }
-                  //                 }
-                  //               },
-                  //               isSelected: [
-                  //                 settingsController.difficulty ==
-                  //                     Difficulty.easy,
-                  //                 settingsController.difficulty ==
-                  //                     Difficulty.medium,
-                  //                 settingsController.difficulty ==
-                  //                     Difficulty.hard,
-                  //               ]),
-                  //         ],
-                  //       ),
-                  // !remoteSettings['difficulty']
-                  //     ? const SizedBox()
-                  //     : const Divider(),
-                  !remoteSettings['stats']
-                      ? const SizedBox()
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _subtitle('Score'),
-                            _stats('Played', '${stats.total}'),
-                            _stats('Win', '${stats.won}'),
-                            _stats('Lose', '${stats.lost}'),
-                            const Divider(),
-                          ],
-                        ),
-                  const Expanded(child: SizedBox()),
-                  !kIsWeb
-                      ? const SizedBox()
-                      : Center(
-                          child: FutureBuilder(
-                            builder: (BuildContext context,
-                                AsyncSnapshot<DateTime> snapshot) {
-                              if (snapshot.hasData) {
-                                return Text(
-                                  'Last Updated: ${snapshot.data?.toLocal().standardDate()}',
-                                  // style: Theme.of(context).textTheme.titleSmall!,
-                                );
+        appBar: AppBar(
+          title: Text(SettingsPage.title),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 16,
+              ),
+              false // !remoteSettings['theme']
+                  ? const SizedBox()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _subtitle('Theme'),
+                        ToggleButtons(
+                            children: const [
+                              Text('Light'),
+                              Text('Dark'),
+                              Text('System'),
+                            ],
+                            constraints: const BoxConstraints(
+                                minWidth: 80, minHeight: 40),
+                            onPressed: (int index) {
+                              print(index);
+                              ThemeMode theme = ThemeMode.light;
+                              switch (index) {
+                                case 0:
+                                  theme = ThemeMode.light;
+                                  break;
+                                case 1:
+                                  theme = ThemeMode.dark;
+                                  break;
+                                case 2:
+                                  theme = ThemeMode.system;
+                                  break;
                               }
-                              return const SizedBox();
+                              // settingsController.updateThemeMode(theme);
+                              ref
+                                  .read(appThemeProvider.notifier)
+                                  .setTheme(theme);
                             },
-                            future: getLastUpdateDateTime(),
-                          ),
-                        ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Copyright © 2022 Widget Media Labs ',
-                          style: Theme.of(context).textTheme.bodyMedium!),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 50,
-                    child: Align(
-                        alignment: Alignment.center,
-                        child: Text('v${settingsController.version}')),
-                  )
+                            isSelected: [
+                              themeMode == ThemeMode.light,
+                              themeMode == ThemeMode.dark,
+                              themeMode == ThemeMode.system,
+                            ]),
+                      ],
+                    ),
+              false ? const SizedBox() : const Divider(),
+              false
+                  ? const SizedBox()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _subtitle('Difficulty'),
+                        ToggleButtons(
+                            constraints: const BoxConstraints(
+                                minWidth: 80, minHeight: 40),
+                            children: const [
+                              Text('Easy'),
+                              Text('Medium'),
+                              Text('Hard'),
+                            ],
+                            onPressed: (int index) {
+                              print(index);
+                              final _selectedDifficulty =
+                                  Difficulty.fromToggleIndex(index);
+                              if (_selectedDifficulty != settings.difficulty) {
+                                /// If game has not started change the settings
+                                // if (_puzzle.result == PuzzleResult.none) {
+                                //   settingsController
+                                //       .setDifficulty(_selectedDifficulty);
+                                //   gameController.gameState.puzzle =
+                                //       _puzzle.copyWith(
+                                //           difficulty: _selectedDifficulty);
+                                //   gameController.gameState =
+                                //       gameController.gameState;
+                                ref
+                                    .read(appSettingsProvider.notifier)
+                                    .updateDifficulty(_selectedDifficulty);
+                              }
+                              Utility.showMessage(context,
+                                  "The settings will be applied to the next puzzle");
+                            },
+                            isSelected: [
+                              settings.difficulty == Difficulty.easy,
+                              settings.difficulty == Difficulty.medium,
+                              settings.difficulty == Difficulty.hard,
+                            ]),
+                      ],
+                    ),
+              // !remoteSettings['difficulty']
+              //     ? const SizedBox()
+              //     : const Divider(),
+              false // !remoteSettings['stats']
+                  ? const SizedBox()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _subtitle('Score'),
+                        _stats('Played', '${settings.stats.total}'),
+                        _stats('Win', '${settings.stats.won}'),
+                        _stats('Lose', '${settings.stats.lost}'),
+                        const Divider(),
+                      ],
+                    ),
+              const Expanded(child: SizedBox()),
+              !kIsWeb
+                  ? const SizedBox()
+                  : Center(
+                      child: FutureBuilder(
+                        builder: (BuildContext context,
+                            AsyncSnapshot<DateTime> snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              'Last Updated: ${snapshot.data?.toLocal().standardDate()}',
+                              // style: Theme.of(context).textTheme.titleSmall!,
+                            );
+                          }
+                          return const SizedBox();
+                        },
+                        future: getLastUpdateDateTime(),
+                      ),
+                    ),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Copyright © 2022 Widget Media Labs ',
+                      style: Theme.of(context).textTheme.bodyMedium!),
                 ],
               ),
-            );
-          }),
-    );
+              SizedBox(
+                height: 50,
+                child:
+                    Align(alignment: Alignment.center, child: Text('v1.0.0')),
+              )
+            ],
+          ),
+        ));
   }
 }

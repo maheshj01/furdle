@@ -2,20 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'models.dart';
 
-class Settings {
+class Settings extends ChangeNotifier {
   Difficulty difficulty;
-  ThemeMode themeMode;
   Stats stats;
 
   Settings({
     required this.difficulty,
-    required this.themeMode,
     required this.stats,
   });
 
   Settings.initialize()
       : difficulty = Difficulty.medium,
-        themeMode = ThemeMode.system,
         stats = Stats.initialStats();
 
   Settings copyWith({
@@ -25,14 +22,31 @@ class Settings {
   }) {
     return Settings(
       difficulty: difficulty ?? this.difficulty,
-      themeMode: themeMode ?? this.themeMode,
       stats: stats ?? this.stats,
     );
   }
 
   void init() {
     difficulty = Difficulty.medium;
-    themeMode = ThemeMode.system;
     stats = Stats.initialStats();
   }
+
+  void updateStats(Stats stats) {
+    this.stats = stats;
+    notifyListeners();
+  }
+
+  void updateDifficulty(Difficulty difficulty) {
+    this.difficulty = difficulty;
+    notifyListeners();
+  }
+
+  Settings.fromJson(Map json)
+      : difficulty = Difficulty.values[json['difficulty']],
+        stats = Stats.fromJson(json['stats']);
+
+  Map<String, dynamic> toJson() => {
+        'difficulty': difficulty.name,
+        'stats': stats.toJson(),
+      };
 }

@@ -47,3 +47,4 @@
 - The number will be replaced from the server if the user generates a new number.
 
 
+https://github.com/Uuttssaavv/flutter-clean-architecture-riverpod/blob/master/lib/shared/theme/app_theme.dart
