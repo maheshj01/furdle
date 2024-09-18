@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/constants.dart';
+import 'package:furdle/controller/game_notifier.dart';
 import 'package:furdle/controller/settings_notifier.dart';
-import 'package:furdle/models/game_state.dart';
+import 'package:furdle/models/game.dart';
 import 'package:furdle/pages/game_view.dart';
 import 'package:furdle/pages/help.dart';
 import 'package:furdle/pages/keyboard.dart';
 import 'package:furdle/pages/settings.dart';
 import 'package:furdle/shared/extensions.dart';
-import 'package:furdle/shared/providers/game_state_provider.dart';
 import 'package:furdle/shared/theme/colors.dart';
 import 'package:furdle/utils/utility.dart';
 import 'package:furdle/widgets/dialog.dart';
@@ -66,6 +66,7 @@ class _PlayGroundState extends ConsumerState<PlayGround>
       String? message,
       bool isSuccess = false,
       bool showTimer = true}) {
+    final _state = ref.read(gameStateProvider);
     title ??= isSuccess
         ? 'Congratulations! 🎉'
         : '${_state.puzzle.puzzle.toUpperCase()} 😞';
@@ -80,7 +81,7 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                 title: title!,
                 message: message!,
                 showTimer: showTimer,
-                isAlreadyPlayed: _state.isAlreadyPlayed,
+                isAlreadyPlayed: _state.isGameOver,
                 onTimerComplete: () async {
                   // loadingNotifier.isLoading = true;
                   // _state = await gameController.getNewGame();
@@ -131,19 +132,24 @@ class _PlayGroundState extends ConsumerState<PlayGround>
   late final Animation<double> _shakeAnimation;
   FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   ConfettiController confettiController = ConfettiController();
-  late GameState _state;
 
   void onKeyEvent(String key, bool isPhysicalKeyEvent) {
     if (key == 'Enter') {
-      _state.submitWord();
+      Word word = ref.read(gameStateProvider.notifier).submitWord();
+      if (word == Word.incomplete) {
+        shakeFurdle();
+        Utility.showMessage(context, "Incomplete word");
+      } else if (word == Word.match) {
+        confettiController.play();
+      }
     } else if (key == 'Backspace') {
-      _state.removeCell();
+      ref.read(gameStateProvider.notifier).removeCell();
     } else {
       final settingsRef = ref.read(appSettingsProvider);
       if (settingsRef.sound) {
         SystemSound.play(SystemSoundType.click);
       }
-      _state.addCell(key);
+      ref.read(gameStateProvider.notifier).addCell(key);
     }
   }
 
@@ -151,8 +157,11 @@ class _PlayGroundState extends ConsumerState<PlayGround>
   @override
   Widget build(BuildContext context) {
     Utility.screenSize = MediaQuery.of(context).size;
-    _state = ref.watch(gameStateProvider);
-    // settingsController.clear();
+    final _state = ref.watch(gameStateProvider);
+    final state = ref.read(gameStateProvider.notifier);
+    if (_state.isGameOver) {
+      showFurdleDialog(isSuccess: _state.status == GameStatus.win);
+    }
     return Scaffold(
         body: Stack(
       fit: StackFit.expand,
@@ -171,9 +180,8 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                 IconButton(
                     onPressed: () async {
                       if (_state.isGameOver) {
-                        _state.generateFurdleGrid();
-                        final furdleScoreShareMessage =
-                            '#FURDLE ${_state.shareFurdle}';
+                        final result = state.generateFurdleGrid();
+                        final furdleScoreShareMessage = '#FURDLE ${result}';
                         if (!kIsWeb) {
                           await Share.share(furdleScoreShareMessage);
                         } else {
@@ -196,23 +204,21 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                     icon: const Icon(Icons.settings)),
               ],
             )),
-        isPaused
-            ? SizedBox()
-            : Positioned(
-                top: -100,
-                left: Utility.screenSize.width / 2,
-                child: ConfettiWidget(
-                  confettiController: confettiController,
-                  blastDirection: 0,
-                  blastDirectionality: BlastDirectionality.explosive,
-                  particleDrag: 0.05,
-                  emissionFrequency: 0.35,
-                  minimumSize: const Size(10, 10),
-                  maximumSize: const Size(50, 50),
-                  numberOfParticles: 5,
-                  gravity: 0.2,
-                ),
-              ),
+        Positioned(
+          top: -100,
+          left: Utility.screenSize.width / 2,
+          child: ConfettiWidget(
+            confettiController: confettiController,
+            blastDirection: 0,
+            blastDirectionality: BlastDirectionality.explosive,
+            particleDrag: 0.05,
+            emissionFrequency: 0.35,
+            minimumSize: const Size(10, 10),
+            maximumSize: const Size(50, 50),
+            numberOfParticles: 5,
+            gravity: 0.2,
+          ),
+        ),
         isPaused
             ? Center(child: Text("Under Maintenance, Come back soon!"))
             : Align(
@@ -247,6 +253,11 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                     const SizedBox(
                       height: 24,
                     ),
+                    ElevatedButton(
+                        onPressed: () {
+                          ref.read(gameStateProvider.notifier).resetGame();
+                        },
+                        child: Text('reset')),
                     TweenAnimationBuilder<Offset>(
                         tween: Tween<Offset>(
                             begin: const Offset(0, 200),
@@ -257,17 +268,13 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                           return Transform.translate(
                             offset: offset,
                             child: AnimatedContainer(
-                              margin: EdgeInsets.symmetric(
-                                  vertical:
-                                      true //settingsController.isFurdleMode
-                                          ? 40.0
-                                          : 10.0),
                               duration: const Duration(milliseconds: 500),
                               child: KeyBoardView(
                                 keyboardFocus: keyboardFocusNode,
                                 controller: textController,
                                 isFurdleMode: true,
-                                onKeyEvent: onKeyEvent,
+                                onKeyEvent: (key, isPhysicalKeyEvent) =>
+                                    onKeyEvent(key, isPhysicalKeyEvent),
                               ),
                             ),
                           );

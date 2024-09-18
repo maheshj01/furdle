@@ -1,4 +1,5 @@
-import 'package:furdle/models/game_state.dart';
+import 'package:furdle/controller/game_notifier.dart';
+import 'package:furdle/models/game.dart';
 
 abstract class IGameService {
   Future<GameState> loadGame();

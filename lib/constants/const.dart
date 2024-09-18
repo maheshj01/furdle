@@ -16,4 +16,5 @@ class AppConstants {
   static const String statsDev = 'stats_dev';
   static const String APP_THEME_STORAGE_KEY = 'app_theme';
   static const String APP_SETTINGS_STORAGE_KEY = 'app_settings';
+  static const String APP_GAME_STATE_STORAGE_KEY = 'app_game_state';
 }

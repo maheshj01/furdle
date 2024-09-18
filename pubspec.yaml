@@ -18,16 +18,16 @@ dependencies:
   confetti: ^0.7.0
   shared_preferences: ^2.3.2
   share_plus: ^10.0.2
-  firebase_core: ^3.4.1
-  cloud_firestore: ^5.4.1
+  firebase_core: ^3.5.0
+  cloud_firestore: ^5.4.2
   package_info_plus: ^8.0.2
-  firebase_analytics: ^11.3.1
+  firebase_analytics: ^11.3.2
   url_launcher: ^6.3.0
   animations: ^2.0.11
   http: ^1.2.2
   device_info_plus: ^10.1.2
   uuid: ^4.5.0
-  webview_flutter: ^4.2.2
+  webview_flutter: ^4.9.0
   webview_flutter_web: ^0.2.3
   flutter_riverpod: ^2.5.1
 

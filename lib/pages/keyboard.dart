@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/models/game.dart';
 import 'package:furdle/models/models.dart';
-import 'package:furdle/shared/providers/game_state_provider.dart';
 import 'package:furdle/shared/theme/theme.dart';
 
 class KeyBoardView extends ConsumerStatefulWidget {
@@ -294,7 +294,8 @@ class _KeyBuilderState extends ConsumerState<KeyBuilder> {
     final bool isSpecialKey = widget.keyLabel.length > 1;
     final GameState state = ref.watch(gameStateProvider);
     final keyState =
-        state.kState.keyboardState[widget.keyLabel.toLowerCase()] ?? Cell.empty;
+        state.keyboardState?.keyboardState[widget.keyLabel.toLowerCase()] ??
+            Cell.empty;
     final keyColor = stateToColor(keyState);
 
     return Material(

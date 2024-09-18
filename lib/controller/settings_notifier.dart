@@ -5,6 +5,7 @@ import 'package:furdle/constants/const.dart';
 import 'package:furdle/models/models.dart';
 import 'package:furdle/service/storage_service.dart';
 import 'package:furdle/shared/providers/storage_service_provider.dart';
+import 'package:uuid/uuid.dart';
 
 final appSettingsProvider = StateNotifierProvider<SettingsNotifier, Settings>(
   (ref) {
@@ -41,6 +42,38 @@ class SettingsNotifier extends StateNotifier<Settings> {
         stats: Stats.initialStats(),
       );
     }
+    await registerDevice();
+  }
+
+  Future<String> getUniqueDeviceId() async {
+    final Uuid uuid = Uuid();
+    final String deviceIdentifier = uuid.v4();
+    return deviceIdentifier;
+    // final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    // if (kIsWeb) {
+    //   // final WebBrowserInfo webInfo = await deviceInfo.webBrowserInfo;
+    //   // deviceIdentifier = webInfo.vendor! +
+    //   //     webInfo.userAgent! +
+    //   //     webInfo.hardwareConcurrency.toString();
+    // } else {
+    //   if (Platform.isAndroid) {
+    //     final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    //     deviceIdentifier = androidInfo.id;
+    //   } else if (Platform.isIOS) {
+    //     final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    //     deviceIdentifier = iosInfo.identifierForVendor!;
+    //   } else if (Platform.isLinux) {
+    //     final LinuxDeviceInfo linuxInfo = await deviceInfo.linuxInfo;
+    //     deviceIdentifier = linuxInfo.machineId!;
+    //   }
+    // }
+    // return deviceIdentifier;
+  }
+
+  Future<void> registerDevice() async {
+    if (state.deviceId != null && state.deviceId.isNotEmpty) return;
+    final deviceId = await getUniqueDeviceId();
+    state = state.copyWith(deviceId: deviceId);
   }
 
   void updateStats(Stats stats) {

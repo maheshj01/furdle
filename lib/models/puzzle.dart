@@ -2,16 +2,16 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:furdle/models/game_state.dart';
+import 'package:furdle/models/game.dart';
 import 'package:furdle/shared/extensions.dart';
 
 import '../constants/constants.dart';
 import '../utils/word.dart';
 
 enum Difficulty {
-  easy(4),
-  medium(5),
-  hard(6);
+  easy(7),
+  medium(6),
+  hard(5);
 
   final int difficulty;
   const Difficulty(this.difficulty);
@@ -89,11 +89,11 @@ enum Difficulty {
   Size toGridSize() {
     switch (this) {
       case Difficulty.easy:
-        return const Size(5.0, 5.0);
+        return const Size(5.0, 7.0);
       case Difficulty.medium:
-        return const Size(5.0, 5.0);
+        return const Size(5.0, 6.0);
       case Difficulty.hard:
-        return const Size(5.0, 4.0);
+        return const Size(5.0, 5.0);
       default:
         return const Size(5.0, 6.0);
     }

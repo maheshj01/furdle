@@ -1,6 +1,6 @@
 library models;
 
-export 'game_state.dart';
+export '../controller/game_notifier.dart';
 export 'key.dart';
 export 'puzzle.dart';
 export 'settings.dart';

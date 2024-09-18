@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/models/game_state.dart';
-import 'package:furdle/shared/providers/game_state_provider.dart';
+import 'package:furdle/controller/game_notifier.dart';
+import 'package:furdle/models/game.dart';
 import 'package:furdle/shared/theme/colors.dart';
 
 class FurdleGrid extends ConsumerWidget {
@@ -11,7 +11,7 @@ class FurdleGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final GameState state = ref.watch(gameStateProvider);
+    final state = ref.watch(gameStateProvider);
     final _size = MediaQuery.of(context).size;
     final gridSize = state.puzzle.size;
     final bool isPlayed = state.puzzle.moves > 0;
