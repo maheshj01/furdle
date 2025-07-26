@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/models/models.dart';
 
-class AppConstants {
+class Constants {
+  Constants._();
+
   /// length of words in list
   static const int maxWords = 2334;
 

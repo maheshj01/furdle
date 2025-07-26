@@ -24,7 +24,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
   Future<void> initGameState() async {
     final stateJson =
-        await storageService.get(AppConstants.APP_GAME_STATE_STORAGE_KEY);
+        await storageService.get(Constants.APP_GAME_STATE_STORAGE_KEY);
     if (stateJson != null) {
       try {
         final Map<String, dynamic> jsonMap = json.decode(stateJson as String);
@@ -40,8 +40,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
   Future<void> saveGameState() async {
     final stateJson = json.encode(state.toJson());
-    await storageService.set(
-        AppConstants.APP_GAME_STATE_STORAGE_KEY, stateJson);
+    await storageService.set(Constants.APP_GAME_STATE_STORAGE_KEY, stateJson);
   }
 
   void updateGameState(GameState newState) {
@@ -110,7 +109,20 @@ class GameStateNotifier extends StateNotifier<GameState> {
     state.cells[row][column].character = char;
     state.column++;
     saveGameState();
-    print(state.cells);
+    print(cellsToMap());
+  }
+
+  Map<String, List<Map<String, String>>> cellsToMap() {
+    final Map<String, List<Map<String, String>>> result = {};
+    for (int i = 0; i < state.cells.length; i++) {
+      final List<Map<String, String>> list = [];
+      for (int j = 0; j < state.cells[0].length; j++) {
+        final json = state.cells[i][j].toJson();
+        list.add(json);
+      }
+      result['$i'] = list;
+    }
+    return result;
   }
 
   void removeCell() {

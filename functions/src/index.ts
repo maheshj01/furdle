@@ -16,7 +16,7 @@ function randomWord(arr: string[]) {
 }
 
 // Runs every 24 hours UTC
-exports.scheduledFunction = functions.pubsub
+export const scheduledFunction = functions.pubsub
   .schedule("0 0 * * *") // midnight every day
   // Coordinated Universal Time (UTC) is the primary time standard by which
   // the world regulates clocks and time. It is within about 1 second of mean
@@ -24,6 +24,8 @@ exports.scheduledFunction = functions.pubsub
   .timeZone("UTC")
   .onRun(async () => {
     const docRef = await admin.firestore().collection("furdle").doc("stats");
+    const data = await docRef.get();
+    console.log("Running scheduled function", data);
     const now = admin.firestore.Timestamp.now();
     // next run is 24 hours from now
     const nextRun = now.toMillis() + 24 * 60 * 60 * 1000;

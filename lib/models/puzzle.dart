@@ -240,7 +240,7 @@ class Puzzle {
 
   Puzzle getRandomPuzzle() {
     Puzzle _newPuzzle = Puzzle.initialize();
-    final randomNumber = Random().nextInt(AppConstants.maxWords);
+    final randomNumber = Random().nextInt(Constants.maxWords);
     final word = furdleList[randomNumber];
     final _difficulty = Difficulty.medium;
     _newPuzzle = _newPuzzle.copyWith(

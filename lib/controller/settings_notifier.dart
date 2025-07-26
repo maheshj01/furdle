@@ -33,7 +33,7 @@ class SettingsNotifier extends StateNotifier<Settings> {
 
   Future<void> getCurrentSettings() async {
     final settingsJson =
-        await storageService.get(AppConstants.APP_SETTINGS_STORAGE_KEY);
+        await storageService.get(Constants.APP_SETTINGS_STORAGE_KEY);
     if (settingsJson != null) {
       state = Settings.fromJson(json.decode(settingsJson as String) as Map);
     } else {
@@ -81,18 +81,18 @@ class SettingsNotifier extends StateNotifier<Settings> {
       stats: stats,
     );
     storageService.set(
-        AppConstants.APP_SETTINGS_STORAGE_KEY, json.encode(state.toJson()));
+        Constants.APP_SETTINGS_STORAGE_KEY, json.encode(state.toJson()));
   }
 
   void toggleSound() {
     state = state.copyWith(sound: !state.sound);
     storageService.set(
-        AppConstants.APP_SETTINGS_STORAGE_KEY, json.encode(state.toJson()));
+        Constants.APP_SETTINGS_STORAGE_KEY, json.encode(state.toJson()));
   }
 
   void updateDifficulty(Difficulty difficulty) {
     state = state.copyWith(sound: state.sound, difficulty: difficulty);
     storageService.set(
-        AppConstants.APP_SETTINGS_STORAGE_KEY, json.encode(state.toJson()));
+        Constants.APP_SETTINGS_STORAGE_KEY, json.encode(state.toJson()));
   }
 }

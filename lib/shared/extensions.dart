@@ -94,7 +94,7 @@ extension DateOnlyCompare on DateTime {
   bool hasSurpassedHoursUntilNextFurdle() {
     final now = DateTime.now().toLocal();
     final DateTime nextPuzzleTime =
-        toLocal().add(const Duration(hours: AppConstants.hoursUntilNextFurdle));
+        toLocal().add(const Duration(hours: Constants.hoursUntilNextFurdle));
     return now.isAfter(nextPuzzleTime);
   }
 
