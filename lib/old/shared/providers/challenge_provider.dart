@@ -9,8 +9,8 @@ import 'package:furdle/old/shared/providers/storage_service_provider.dart';
 
 /// Storage keys for challenge-specific local state
 class ChallengeStorageKeys {
-  static const String currentProgress = Constants.CHALLENGE_PROGRESS_KEY;
-  static const String completedSet = Constants.CHALLENGE_COMPLETED_IDS_KEY;
+  static const String currentProgress = Constants.challengeProgressKey;
+  static const String completedSet = Constants.challengeCompletedIdsKey;
 }
 
 /// Repository that reads the daily challenge doc and manages local progress

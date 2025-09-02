@@ -134,7 +134,7 @@ class _PlayGroundState extends ConsumerState<PlayGround>
   ConfettiController confettiController = ConfettiController();
 
   void onKeyEvent(String key, bool isPhysicalKeyEvent) {
-    if (key == Constants.KEYBOARD_ENTER_KEY) {
+    if (key == Constants.keyboardEnterKey) {
       final word = ref.read(gameStateProvider.notifier).submitWord();
       if (word == SubmitWordResult.incomplete) {
         shakeFurdle();
@@ -142,7 +142,7 @@ class _PlayGroundState extends ConsumerState<PlayGround>
       } else if (word == SubmitWordResult.match) {
         confettiController.play();
       }
-    } else if (key == Constants.KEYBOARD_BACKSPACE_KEY) {
+    } else if (key == Constants.keyboardBackspaceKey) {
       ref.read(gameStateProvider.notifier).removeCell();
     } else {
       final settingsRef = ref.read(appSettingsProvider);

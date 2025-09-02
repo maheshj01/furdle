@@ -24,7 +24,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
   Future<void> initGameState() async {
     final stateJson =
-        await storageService.get(Constants.APP_GAME_STATE_STORAGE_KEY);
+        await storageService.get(Constants.appGameStateKey);
     if (stateJson != null) {
       try {
         final Map<String, dynamic> jsonMap = json.decode(stateJson as String);
@@ -41,7 +41,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
   Future<void> saveGameState() async {
     print('saveGameState: ${state.toJson()}');
     final stateJson = json.encode(state.toJson());
-    await storageService.set(Constants.APP_GAME_STATE_STORAGE_KEY, stateJson);
+    await storageService.set(Constants.appGameStateKey, stateJson);
   }
 
   void updateGameState(GameState newState) {
