@@ -1,9 +1,11 @@
 # FURDLE REBUILD - Implementation Plan
 
 ## Project Overview
+
 Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state management, and robust offline/online functionality.
 
 ### Core Requirements
+
 - 5-letter word guessing game (configurable in future)
 - 6 attempts max (configurable in future)
 - Daily puzzles from Firebase Functions
@@ -11,27 +13,39 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 - Stats tracking (games played, win streak)
 - State persistence for resuming games
 
+#### Basic Features
+
+- [ ] Logical and Phsyical key should be sync
+- [ ] Keyabord layout should be responsive
+- [ ] Keyboard state can be preserved locally
+
+- [ ] Game state should be persisted locally for offline mode
+
 ## 1. ARCHITECTURE & DEPENDENCIES
 
 ### State Management
-- [X] Flutter Riverpod 2.6.1+ for state management
-- [X] Implement Repository pattern for data sources
-- [X] Use AsyncNotifier for complex state management
-- [X] Separate UI state from business logic
+
+- [x] Flutter Riverpod 2.6.1+ for state management
+- [x] Implement Repository pattern for data sources
+- [x] Use AsyncNotifier for complex state management
+- [x] Separate UI state from business logic
 
 ### Local Storage
+
 - [ ] Add Drift (SQLite) for local database
 - [ ] Implement Repository pattern for local storage
 - [ ] Add SharedPreferences for simple settings
 - [ ] Add device_info_plus for device identification
 
 ### Network & Firebase
-- [X] Keep existing Firebase Core and Firestore
+
+- [x] Keep existing Firebase Core and Firestore
 - [ ] Add connectivity_plus for network status
 - [ ] Implement proper error handling for network failures
 - [ ] Add retry mechanisms for failed requests
 
 ### Additional Dependencies
+
 - [ ] Add freezed for immutable data classes
 - [ ] Add json_annotation for JSON serialization
 - [ ] Add equatable for value equality
@@ -41,6 +55,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 2. DATA LAYER
 
 ### Models (with Freezed)
+
 - [ ] Create GameState model (current game progress)
 - [ ] Create Puzzle model (word + metadata)
 - [ ] Create Stats model (user statistics)
@@ -49,6 +64,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 - [ ] Create KeyboardState model (keyboard colors)
 
 ### Data Sources
+
 - [ ] LocalDataSource (Drift database)
   - [ ] Puzzles table (cached daily puzzles)
   - [ ] GameState table (current game state)
@@ -62,6 +78,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
   - [ ] Random offline puzzle generation
 
 ### Repositories
+
 - [ ] PuzzleRepository
   - [ ] getTodaysPuzzle() -> online first, fallback to cached
   - [ ] getRandomPuzzle() -> for offline mode
@@ -83,6 +100,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 3. BUSINESS LOGIC LAYER
 
 ### Use Cases
+
 - [ ] GetTodaysPuzzleUseCase
   - [ ] Check network connectivity
   - [ ] Fetch from remote if online
@@ -104,6 +122,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
   - [ ] Handle sync failures gracefully
 
 ### Providers (Riverpod)
+
 - [ ] puzzleProvider -> current puzzle state
 - [ ] gameStateProvider -> current game progress
 - [ ] statsProvider -> user statistics
@@ -114,6 +133,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 4. PRESENTATION LAYER
 
 ### State Notifiers
+
 - [ ] GameNotifier
   - [ ] Manages game state
   - [ ] Handles user input
@@ -133,6 +153,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
   - [ ] Stores game configurations
 
 ### UI Screens
+
 - [ ] GameScreen (main gameplay)
   - [ ] Grid widget for letter tiles
   - [ ] Virtual keyboard
@@ -152,6 +173,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
   - [ ] Tips and tricks
 
 ### Widgets
+
 - [ ] GameGrid widget
 - [ ] LetterTile widget
 - [ ] VirtualKeyboard widget
@@ -161,6 +183,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 5. FIREBASE FUNCTIONS
 
 ### Update Existing Function
+
 - [ ] Fix randomWord() implementation in functions/src/index.ts
 - [ ] Add proper error handling
 - [ ] Add logging for debugging
@@ -168,6 +191,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 - [ ] Add puzzle validation
 
 ### Enhanced Function Features
+
 - [ ] Add puzzle difficulty metadata
 - [ ] Add puzzle themes (future)
 - [ ] Add admin controls for manual puzzle setting
@@ -176,18 +200,21 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 6. OFFLINE/ONLINE STRATEGY
 
 ### Online Mode (Preferred)
+
 - [ ] Fetch daily puzzle from Firebase
 - [ ] Cache puzzle locally
 - [ ] Sync stats periodically
 - [ ] Show network status indicator
 
 ### Offline Mode (Fallback)
+
 - [ ] Use cached daily puzzle if available
 - [ ] Generate random puzzle from word list
 - [ ] Store progress locally
 - [ ] Sync when connection restored
 
 ### Connectivity Handling
+
 - [ ] Monitor network status
 - [ ] Graceful degradation
 - [ ] Automatic sync on reconnection
@@ -196,6 +223,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 7. GAME LOGIC ENHANCEMENTS
 
 ### Core Game Mechanics
+
 - [ ] Configurable word length (default: 5)
 - [ ] Configurable attempt count (default: 6)
 - [ ] Difficulty modes (easy: 7 attempts, medium: 6, hard: 5)
@@ -203,12 +231,14 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 - [ ] Color coding (green: correct position, yellow: wrong position, gray: not in word)
 
 ### State Management
+
 - [ ] Persist game state on every move
 - [ ] Resume interrupted games
 - [ ] Handle multiple game sessions
 - [ ] Validate state integrity
 
 ### Statistics Tracking
+
 - [ ] Games played
 - [ ] Games won
 - [ ] Current win streak
@@ -219,6 +249,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ## 8. DATA PERSISTENCE
 
 ### Local Database Schema (Drift)
+
 ```sql
 -- Puzzles table
 CREATE TABLE puzzles (
@@ -265,6 +296,7 @@ CREATE TABLE settings (
 ```
 
 ### SharedPreferences Keys
+
 - [ ] user_device_id
 - [ ] theme_mode
 - [ ] sound_enabled
@@ -274,18 +306,21 @@ CREATE TABLE settings (
 ## 9. ERROR HANDLING & RESILIENCE
 
 ### Network Errors
+
 - [ ] Graceful degradation to offline mode
 - [ ] Retry mechanisms with exponential backoff
 - [ ] User-friendly error messages
 - [ ] Automatic recovery when connection restored
 
 ### Data Integrity
+
 - [ ] Validate loaded game states
 - [ ] Handle corrupted data gracefully
 - [ ] Backup and restore mechanisms
 - [ ] State migration for app updates
 
 ### User Experience
+
 - [ ] Loading states for async operations
 - [ ] Progress indicators
 - [ ] Offline mode indicators
@@ -294,17 +329,20 @@ CREATE TABLE settings (
 ## 10. TESTING STRATEGY
 
 ### Unit Tests
+
 - [ ] Repository tests
 - [ ] Use case tests
 - [ ] Model serialization tests
 - [ ] Game logic tests
 
 ### Widget Tests
+
 - [ ] Screen widget tests
 - [ ] Custom widget tests
 - [ ] User interaction tests
 
 ### Integration Tests
+
 - [ ] End-to-end game flow
 - [ ] Offline/online transitions
 - [ ] Data persistence tests
@@ -313,18 +351,21 @@ CREATE TABLE settings (
 ## 11. PERFORMANCE OPTIMIZATIONS
 
 ### State Management
+
 - [ ] Efficient provider scoping
 - [ ] Minimize rebuilds
 - [ ] Lazy loading for heavy operations
 - [ ] Proper disposal of resources
 
 ### Data Operations
+
 - [ ] Batch database operations
 - [ ] Efficient JSON parsing
 - [ ] Image asset optimization
 - [ ] Memory management
 
 ### UI Performance
+
 - [ ] Optimized animations
 - [ ] Efficient grid rendering
 - [ ] Smooth transitions
@@ -333,18 +374,21 @@ CREATE TABLE settings (
 ## 12. MIGRATION FROM CURRENT VERSION
 
 ### Data Migration
+
 - [ ] Export current user stats
 - [ ] Migrate game state format
 - [ ] Convert existing settings
 - [ ] Preserve user progress
 
 ### Feature Parity
+
 - [ ] Maintain existing UI/UX
 - [ ] Keep current color scheme
 - [ ] Preserve game mechanics
 - [ ] Maintain Firebase compatibility
 
 ### Gradual Rollout
+
 - [ ] Feature flags for new functionality
 - [ ] A/B testing for major changes
 - [ ] Fallback to legacy code if needed
@@ -353,30 +397,35 @@ CREATE TABLE settings (
 ## Implementation Priority
 
 ### Phase 1: Foundation (Week 1-2)
+
 1. Set up new dependencies
 2. Create core models with Freezed
 3. Set up Drift database
 4. Implement basic repositories
 
 ### Phase 2: Core Functionality (Week 3-4)
+
 1. Implement game logic
 2. Create game state management
 3. Build basic UI screens
 4. Add offline word list
 
 ### Phase 3: Online Integration (Week 5)
+
 1. Integrate Firebase functions
 2. Implement sync logic
 3. Add connectivity handling
 4. Test online/offline transitions
 
 ### Phase 4: Polish & Testing (Week 6)
+
 1. Add animations and polish
 2. Implement comprehensive testing
 3. Performance optimization
 4. User feedback integration
 
 ### Phase 5: Migration & Deployment (Week 7)
+
 1. Data migration tools
 2. Gradual feature rollout
 3. Production deployment

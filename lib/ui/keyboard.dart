@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/constants/colors.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 
+enum KeyEventType {
+  keyDown,
+  keyUp,
+  keyCancel,
+}
+
 class FurdleKeyboard extends ConsumerStatefulWidget {
-  final Function(String, bool)? onKeyPressed;
+  final Function(String key, KeyEventType event, bool physicalKey)?
+      onKeyPressed;
   final bool? autoFocus;
   const FurdleKeyboard({this.onKeyPressed, this.autoFocus = true, super.key});
 
@@ -17,18 +25,27 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
   Widget build(BuildContext context) {
     final keyboardNotifier = ref.read(keyboardProvider.notifier);
 
+    // Listen to the last key event and call the onKeyPressed callback
+    ref.listen<KeyState?>(lastKeyEventProvider, (previous, next) {
+      if (next != null && widget.onKeyPressed != null) {
+        widget.onKeyPressed!.call(
+          next.key,
+          next.event,
+          next.isPhysicalKey,
+        );
+      }
+    });
+
     return KeyboardListener(
       autofocus: widget.autoFocus!,
       focusNode: FocusNode(),
       onKeyEvent: (event) {
         if (event is KeyDownEvent) {
           final key = _getKeyLabel(event.logicalKey);
-          keyboardNotifier.onKeyPressed(key, true);
-          widget.onKeyPressed?.call(key, true);
+          keyboardNotifier.onKeyPressed(key, KeyEventType.keyDown, true);
         } else if (event is KeyUpEvent) {
           final key = _getKeyLabel(event.logicalKey);
-          keyboardNotifier.onKeyPressed(key, false);
-          widget.onKeyPressed?.call(key, false);
+          keyboardNotifier.onKeyPressed(key, KeyEventType.keyUp, true);
         }
       },
       child: Column(
@@ -90,16 +107,19 @@ class _Key extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final keyState = ref.watch(keyStateProvider(character));
     final keyboardNotifier = ref.read(keyboardProvider.notifier);
-
+    final isPressed = keyState.event == KeyEventType.keyDown;
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: InkWell(
-        onTap: () {
-          keyboardNotifier.onKeyPressed(character, true);
-          // Simulate key release after a short delay
-          Future.delayed(const Duration(milliseconds: 100), () {
-            keyboardNotifier.onKeyPressed(character, false);
-          });
+        onTapDown: (details) {
+          keyboardNotifier.onKeyPressed(character, KeyEventType.keyDown, false);
+        },
+        onTapUp: (details) {
+          keyboardNotifier.onKeyPressed(character, KeyEventType.keyUp, false);
+        },
+        onTapCancel: () {
+          keyboardNotifier.onKeyPressed(
+              character, KeyEventType.keyCancel, false);
         },
         child: Container(
           width: 40,
@@ -108,8 +128,8 @@ class _Key extends ConsumerWidget {
             color: _getKeyColor(keyState),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: keyState.isPressed ? Colors.blue : Colors.grey,
-              width: keyState.isPressed ? 2 : 1,
+              color: isPressed ? Colors.blue : Colors.grey,
+              width: isPressed ? 2 : 1,
             ),
           ),
           alignment: Alignment.center,
@@ -117,8 +137,7 @@ class _Key extends ConsumerWidget {
             character,
             style: TextStyle(
               color: _getTextColor(keyState),
-              fontWeight:
-                  keyState.isPressed ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isPressed ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ),
@@ -127,15 +146,17 @@ class _Key extends ConsumerWidget {
   }
 
   Color _getKeyColor(KeyState keyState) {
-    if (keyState.isPressed) {
+    if (keyState.event == KeyEventType.keyDown) {
       return Colors.blue.withValues(alpha: 0.3);
     }
 
     switch (keyState.letterStatus) {
       case LetterStatus.present:
-        return Colors.green.withValues(alpha: 0.3);
+        return AppColors.green;
       case LetterStatus.notPresent:
-        return Colors.red.withValues(alpha: 0.3);
+        return AppColors.black;
+      case LetterStatus.wrongPosition:
+        return AppColors.yellow;
       case LetterStatus.unknown:
       default:
         return Colors.grey.withValues(alpha: 0.1);
@@ -143,7 +164,7 @@ class _Key extends ConsumerWidget {
   }
 
   Color _getTextColor(KeyState keyState) {
-    if (keyState.isPressed) {
+    if (keyState.event == KeyEventType.keyDown) {
       return Colors.blue;
     }
 

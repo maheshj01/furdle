@@ -1,5 +1,5 @@
 import 'package:confetti/confetti.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide KeyEvent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/old/pages/help.dart';
 import 'package:furdle/ui/keyboard.dart';
@@ -42,8 +42,10 @@ class _HomeState extends ConsumerState<Home> {
             Align(
               alignment: Alignment.bottomCenter,
               child: FurdleKeyboard(
-                onKeyPressed: (character, isPressed) {
-                  print(character);
+                onKeyPressed:
+                    (String character, KeyEventType event, bool physicalKey) {
+                  print(
+                      "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
                 },
               ),
             ),
