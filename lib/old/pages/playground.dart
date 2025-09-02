@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/constants/constants.dart';
+import 'package:furdle/constants/constants.dart' hide AppColors;
 import 'package:furdle/old/controller/game_state_notifier.dart';
 import 'package:furdle/old/controller/settings_notifier.dart';
 import 'package:furdle/old/models/game.dart';

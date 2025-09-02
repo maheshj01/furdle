@@ -5,9 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:furdle/firebase_options.dart';
+import 'package:furdle/old/shared/theme/theme.dart';
 import 'package:furdle/router.dart';
-import 'package:furdle/shared/theme/colors.dart';
-import 'package:furdle/shared/theme/theme.dart';
 
 import 'constants/constants.dart';
 
@@ -25,10 +24,16 @@ Future<void> main() async {
   runApp(ProviderScope(child: MyApp()));
 }
 
-class MyApp extends ConsumerWidget {
-  MyApp({Key? key}) : super(key: key);
+class MyApp extends ConsumerStatefulWidget {
+  const MyApp({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(appThemeProvider);
     return MaterialApp.router(
       title: appTitle,

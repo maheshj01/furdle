@@ -1,0 +1,72 @@
+import 'package:confetti/confetti.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/old/pages/help.dart';
+import 'package:furdle/ui/keyboard.dart';
+import 'package:furdle/ui/title_bar.dart';
+import 'package:go_router/go_router.dart';
+
+class Home extends ConsumerStatefulWidget {
+  static String route = '/';
+  final String title;
+  const Home({super.key, required this.title});
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeState();
+}
+
+class _HomeState extends ConsumerState<Home> {
+  final ConfettiController confettiController = ConfettiController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: confettiController,
+                blastDirection: 0,
+                blastDirectionality: BlastDirectionality.explosive,
+                particleDrag: 0.05,
+                emissionFrequency: 0.1,
+                minimumSize: const Size(10, 10),
+                maximumSize: const Size(50, 50),
+                numberOfParticles: 5,
+                gravity: 0.2,
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: FurdleKeyboard(
+                onKeyPressed: (character, isPressed) {
+                  print(character);
+                },
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: TitleBar(
+                title: widget.title,
+                leading: IconButton(
+                    onPressed: () {
+                      context.go(HelpPage.path);
+                    },
+                    icon: const Icon(Icons.help)),
+                actions: [
+                  IconButton(
+                      onPressed: () async {}, icon: const Icon(Icons.share)),
+                  IconButton(
+                      onPressed: () {}, icon: const Icon(Icons.settings)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

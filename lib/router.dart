@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/pages/error_page.dart';
-import 'package:furdle/pages/help.dart';
-import 'package:furdle/pages/playground.dart';
-import 'package:furdle/pages/settings.dart';
-import 'package:furdle/pages/webview.dart';
+import 'package:furdle/old/pages/error_page.dart';
+import 'package:furdle/old/pages/help.dart';
+import 'package:furdle/old/pages/settings.dart';
+import 'package:furdle/old/pages/webview.dart';
+import 'package:furdle/ui/home.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -15,38 +15,39 @@ final router = GoRouter(
   ),
   routes: [
     GoRoute(
-      path: '/',
-      name: 'home',
-      pageBuilder: (context, state) => MaterialPage<void>(
-        key: state.pageKey,
-        child: const PlayGround(
-          title: appTitle,
-        ),
-      ),
-    ),
-    GoRoute(
-        path: '${HelpPage.path}',
-        name: 'help',
+        path: '/',
+        name: 'home',
         pageBuilder: (context, state) => MaterialPage<void>(
               key: state.pageKey,
-              child: HelpPage(),
-            )),
-    GoRoute(
-        path: '${SettingsPage.path}',
-        name: 'settings',
-        pageBuilder: (context, state) => MaterialPage<void>(
-              key: state.pageKey,
-              child: SettingsPage(),
-            )),
-    GoRoute(
-        path: '${WebViewPage.routeName}',
-        name: 'Privacy Policy',
-        pageBuilder: (context, state) => MaterialPage<void>(
-              key: state.pageKey,
-              child: WebViewPage(
-                title: 'Privacy Policy',
-                url: PRIVACY_POLICY,
+              child: const Home(
+                title: appTitle,
               ),
-            )),
+            ),
+        routes: [
+          GoRoute(
+              path: '${HelpPage.path}',
+              name: 'help',
+              pageBuilder: (context, state) => MaterialPage<void>(
+                    key: state.pageKey,
+                    child: HelpPage(),
+                  )),
+          GoRoute(
+              path: '${SettingsPage.path}',
+              name: 'settings',
+              pageBuilder: (context, state) => MaterialPage<void>(
+                    key: state.pageKey,
+                    child: SettingsPage(),
+                  )),
+          GoRoute(
+              path: '${WebViewPage.routeName}',
+              name: 'Privacy Policy',
+              pageBuilder: (context, state) => MaterialPage<void>(
+                    key: state.pageKey,
+                    child: WebViewPage(
+                      title: 'Privacy Policy',
+                      url: PRIVACY_POLICY,
+                    ),
+                  )),
+        ]),
   ],
 );
