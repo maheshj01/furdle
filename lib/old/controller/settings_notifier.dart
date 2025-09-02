@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
-import 'package:furdle/models/models.dart';
-import 'package:furdle/service/storage_service.dart';
-import 'package:furdle/shared/providers/storage_service_provider.dart';
+import 'package:furdle/old/models/models.dart';
+import 'package:furdle/old/service/storage_service.dart';
+import 'package:furdle/old/shared/providers/storage_service_provider.dart';
 import 'package:uuid/uuid.dart';
 
 final appSettingsProvider = StateNotifierProvider<SettingsNotifier, Settings>(

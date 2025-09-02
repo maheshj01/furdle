@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/constants.dart';
-import 'package:furdle/controller/game_notifier.dart';
-import 'package:furdle/controller/settings_notifier.dart';
-import 'package:furdle/models/game.dart';
-import 'package:furdle/pages/game_view.dart';
-import 'package:furdle/pages/help.dart';
-import 'package:furdle/pages/keyboard.dart';
-import 'package:furdle/pages/settings.dart';
-import 'package:furdle/shared/extensions.dart';
-import 'package:furdle/shared/theme/colors.dart';
-import 'package:furdle/utils/utility.dart';
-import 'package:furdle/widgets/dialog.dart';
+import 'package:furdle/old/controller/game_state_notifier.dart';
+import 'package:furdle/old/controller/settings_notifier.dart';
+import 'package:furdle/old/models/game.dart';
+import 'package:furdle/old/pages/game_view.dart';
+import 'package:furdle/old/pages/help.dart';
+import 'package:furdle/old/pages/keyboard.dart';
+import 'package:furdle/old/pages/settings.dart';
+import 'package:furdle/old/shared/theme/colors.dart';
+import 'package:furdle/old/utils/extensions.dart';
+import 'package:furdle/old/utils/utility.dart';
+import 'package:furdle/old/widgets/dialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -134,15 +134,15 @@ class _PlayGroundState extends ConsumerState<PlayGround>
   ConfettiController confettiController = ConfettiController();
 
   void onKeyEvent(String key, bool isPhysicalKeyEvent) {
-    if (key == 'Enter') {
-      Word word = ref.read(gameStateProvider.notifier).submitWord();
-      if (word == Word.incomplete) {
+    if (key == Constants.KEYBOARD_ENTER_KEY) {
+      final word = ref.read(gameStateProvider.notifier).submitWord();
+      if (word == SubmitWordResult.incomplete) {
         shakeFurdle();
         Utility.showMessage(context, "Incomplete word");
-      } else if (word == Word.match) {
+      } else if (word == SubmitWordResult.match) {
         confettiController.play();
       }
-    } else if (key == 'Backspace') {
+    } else if (key == Constants.KEYBOARD_BACKSPACE_KEY) {
       ref.read(gameStateProvider.notifier).removeCell();
     } else {
       final settingsRef = ref.read(appSettingsProvider);
@@ -153,7 +153,6 @@ class _PlayGroundState extends ConsumerState<PlayGround>
     }
   }
 
-  bool isPaused = false;
   @override
   Widget build(BuildContext context) {
     Utility.screenSize = MediaQuery.of(context).size;
@@ -183,7 +182,8 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                         final result = state.generateFurdleGrid();
                         final furdleScoreShareMessage = '#FURDLE ${result}';
                         if (!kIsWeb) {
-                          await Share.share(furdleScoreShareMessage);
+                          await SharePlus.instance.share(
+                              ShareParams(text: furdleScoreShareMessage));
                         } else {
                           await Clipboard.setData(
                               ClipboardData(text: furdleScoreShareMessage));
@@ -219,70 +219,65 @@ class _PlayGroundState extends ConsumerState<PlayGround>
             gravity: 0.2,
           ),
         ),
-        isPaused
-            ? Center(child: Text("Under Maintenance, Come back soon!"))
-            : Align(
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      height: 50,
-                    ),
-                    ValueListenableBuilder<bool>(
-                        valueListenable: loadingNotifier,
-                        builder: (x, bool isLoading, z) {
-                          if (isLoading) {
-                            return Container(
-                              height: 200,
-                              alignment: Alignment.center,
-                              child: const CircularProgressIndicator(
-                                  strokeWidth: 2.0, color: AppColors.primary),
-                            );
-                          }
-                          return AnimatedBuilder(
-                              animation: _shakeAnimation,
-                              builder: (BuildContext context, Widget? child) {
-                                return Container(
-                                    padding: EdgeInsets.only(
-                                        left: _shakeAnimation.value + 24.0,
-                                        right: 24.0 - _shakeAnimation.value),
-                                    child: FurdleGrid());
-                              });
-                        }),
-                    const SizedBox(
-                      height: 24,
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-                          ref.read(gameStateProvider.notifier).resetGame();
-                        },
-                        child: Text('reset')),
-                    TweenAnimationBuilder<Offset>(
-                        tween: Tween<Offset>(
-                            begin: const Offset(0, 200),
-                            end: const Offset(0, 0)),
-                        duration: const Duration(milliseconds: 1000),
-                        builder: (BuildContext context, Offset offset,
-                            Widget? child) {
-                          return Transform.translate(
-                            offset: offset,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              child: KeyBoardView(
-                                keyboardFocus: keyboardFocusNode,
-                                controller: textController,
-                                isFurdleMode: true,
-                                onKeyEvent: (key, isPhysicalKeyEvent) =>
-                                    onKeyEvent(key, isPhysicalKeyEvent),
-                              ),
-                            ),
-                          );
-                        }),
-                  ],
-                ),
-                // duration: Duration(milliseconds: 500)
-              )
+        Align(
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 50,
+              ),
+              ValueListenableBuilder<bool>(
+                  valueListenable: loadingNotifier,
+                  builder: (x, bool isLoading, z) {
+                    if (isLoading) {
+                      return Container(
+                        height: 200,
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator(
+                            strokeWidth: 2.0, color: AppColors.primary),
+                      );
+                    }
+                    return AnimatedBuilder(
+                        animation: _shakeAnimation,
+                        builder: (BuildContext context, Widget? child) {
+                          return Container(
+                              padding: EdgeInsets.only(
+                                  left: _shakeAnimation.value + 24.0,
+                                  right: 24.0 - _shakeAnimation.value),
+                              child: FurdleGrid());
+                        });
+                  }),
+              const SizedBox(
+                height: 24,
+              ),
+              TweenAnimationBuilder<Offset>(
+                  tween: Tween<Offset>(
+                      begin: const Offset(0, 200), end: const Offset(0, 0)),
+                  duration: const Duration(milliseconds: 1000),
+                  builder:
+                      (BuildContext context, Offset offset, Widget? child) {
+                    return Transform.translate(
+                      offset: offset,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        child: KeyBoardView(
+                          keyboardFocus: keyboardFocusNode,
+                          controller: textController,
+                          isFurdleMode: true,
+                          onKeyEvent: (String key, bool isPhysicalKeyEvent) {
+                            print(
+                                'key: $key, isPhysicalKeyEvent: $isPhysicalKeyEvent');
+                            onKeyEvent(key, isPhysicalKeyEvent);
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+            ],
+          ),
+          // duration: Duration(milliseconds: 500)
+        )
       ],
     ));
   }

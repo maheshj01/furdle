@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/models/game.dart';
-import 'package:furdle/models/models.dart';
-import 'package:furdle/shared/theme/theme.dart';
+import 'package:furdle/old/models/game.dart';
+import 'package:furdle/old/models/models.dart';
+import 'package:furdle/old/shared/theme/theme.dart';
+import 'package:furdle/old/utils/extensions.dart';
 
 class KeyBoardView extends ConsumerStatefulWidget {
   /// defines whether the keyboard to be shown is for furdle mode
@@ -41,7 +42,6 @@ class _KeyBoardViewState extends ConsumerState<KeyBoardView> {
   }
 
   late final TextEditingController? controller;
-
   void delete() {
     final text = controller!.text;
     if (text.isEmpty) {
@@ -224,23 +224,6 @@ class _KeyBoardViewState extends ConsumerState<KeyBoardView> {
       },
     );
   }
-}
-
-extension on String {
-  List<Widget> buildKeys(KeyBindrr keyBindrr,
-          {Function(String)? onPressed, Size? keySize}) =>
-      split('')
-          .map((e) => KeyBuilder(
-                keyLabel: e,
-                keySize: keySize!,
-                isPressed:
-                    keyBindrr.character.toLowerCase() == e.toLowerCase() &&
-                            keyBindrr.isPressed
-                        ? true
-                        : false,
-                onPressed: (String character) => onPressed!(character),
-              ))
-          .toList();
 }
 
 class KeyBuilder extends ConsumerStatefulWidget {

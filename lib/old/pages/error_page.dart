@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/pages/playground.dart';
+import 'package:furdle/old/pages/playground.dart';
 import 'package:go_router/go_router.dart';
 
 class ErrorPage extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/models/game.dart';
+import 'package:furdle/old/models/game.dart';
 
 class KState{
   final Map<String, Cell> _keyboardState = {};

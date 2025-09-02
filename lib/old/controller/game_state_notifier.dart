@@ -4,9 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/models/game.dart';
-import 'package:furdle/service/storage_service.dart';
-import 'package:furdle/shared/providers/storage_service_provider.dart';
+import 'package:furdle/old/models/game.dart';
+import 'package:furdle/old/service/storage_service.dart';
+import 'package:furdle/old/shared/providers/storage_service_provider.dart';
 
 final gameStateProvider = StateNotifierProvider<GameStateNotifier, GameState>(
   (ref) {
@@ -39,6 +39,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 
   Future<void> saveGameState() async {
+    print('saveGameState: ${state.toJson()}');
     final stateJson = json.encode(state.toJson());
     await storageService.set(Constants.APP_GAME_STATE_STORAGE_KEY, stateJson);
   }
@@ -53,22 +54,22 @@ class GameStateNotifier extends StateNotifier<GameState> {
     saveGameState();
   }
 
-  Word submitWord() {
+  SubmitWordResult submitWord() {
     final size = state.puzzle.size;
     final column = state.column;
     final row = state.row;
     if (column < size.width - 1) {
-      return Word.incomplete;
+      return SubmitWordResult.incomplete;
     } else if (column == size.width) {
       final currentWord =
           state.cells[row].sublist(0, column).map((e) => e.character).join();
       if (currentWord == state.puzzle.puzzle) {
         state.status = GameStatus.win;
         saveGameState();
-        return Word.match;
+        return SubmitWordResult.match;
       }
     }
-    return Word.valid;
+    return SubmitWordResult.valid;
   }
 
   String stateToGrid(Cell cell) {
@@ -102,9 +103,11 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 
   void addCell(String char) {
+    print('addCell: $char');
     final size = state.puzzle.size;
     final column = state.column;
     final row = state.row;
+    print('addCell: $column, $row, $size');
     if (column >= size.width) return;
     state.cells[row][column].character = char;
     state.column++;

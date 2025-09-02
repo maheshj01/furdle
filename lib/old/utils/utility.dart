@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/widgets/widgets.dart';
+import 'package:furdle/old/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// State Color for either furdle or Keyboard

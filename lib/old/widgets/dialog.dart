@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/shared/theme/colors.dart';
+import 'package:furdle/old/shared/theme/colors.dart';
 
 class FurdleDialog extends StatefulWidget {
   const FurdleDialog(

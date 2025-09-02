@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:furdle/exports.dart';
-import 'package:furdle/pages/webview.dart';
-import 'package:furdle/shared/theme/colors.dart';
-import 'package:furdle/utils/utility.dart';
+import 'package:furdle/old/pages/webview.dart';
+import 'package:furdle/old/shared/theme/colors.dart';
+import 'package:furdle/old/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 

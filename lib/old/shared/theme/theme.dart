@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
-import 'package:furdle/service/storage_service.dart';
-import 'package:furdle/shared/providers/storage_service_provider.dart';
-import 'package:furdle/shared/theme/colors.dart';
+import 'package:furdle/old/service/storage_service.dart';
+import 'package:furdle/old/shared/providers/storage_service_provider.dart';
+import 'package:furdle/old/shared/theme/colors.dart';
 
 final appThemeProvider = StateNotifierProvider<AppThemeModeNotifier, ThemeMode>(
   (ref) {

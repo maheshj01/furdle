@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:furdle/models/game.dart';
-import 'package:furdle/shared/extensions.dart';
+import 'package:furdle/old/models/game.dart';
+import 'package:furdle/old/utils/extensions.dart';
 
-import '../constants/constants.dart';
+import '../../constants/constants.dart';
 import '../utils/word.dart';
 
 enum Difficulty {

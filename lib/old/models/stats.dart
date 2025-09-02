@@ -1,4 +1,4 @@
-import 'package:furdle/models/puzzle.dart';
+import 'package:furdle/old/models/puzzle.dart';
 
 class Stats {
   List<Puzzle> puzzles;

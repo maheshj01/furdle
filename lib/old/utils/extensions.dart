@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/const.dart';
-import 'package:furdle/shared/theme/colors.dart';
+import 'package:furdle/old/pages/keyboard.dart';
+import 'package:furdle/old/shared/theme/colors.dart';
 import 'package:intl/intl.dart';
 
 import '../models/models.dart';
@@ -78,6 +79,21 @@ extension FurdleTitle on String {
                           : AppColors.primary))
       ]),
     );
+  }
+
+  List<Widget> buildKeys(KeyBindrr keyBindrr,
+      {Function(String)? onPressed, Size? keySize}) {
+    return split('')
+        .map((e) => KeyBuilder(
+              keyLabel: e,
+              keySize: keySize!,
+              isPressed: keyBindrr.character.toLowerCase() == e.toLowerCase() &&
+                      keyBindrr.isPressed
+                  ? true
+                  : false,
+              onPressed: (String character) => onPressed!(character),
+            ))
+        .toList();
   }
 }
 

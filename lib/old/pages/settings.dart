@@ -4,14 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/controller/settings_notifier.dart';
-import 'package:furdle/models/models.dart';
-import 'package:furdle/shared/extensions.dart';
-import 'package:furdle/shared/theme/theme.dart';
-import 'package:furdle/utils/utility.dart';
+import 'package:furdle/old/controller/settings_notifier.dart';
+import 'package:furdle/old/models/models.dart';
+import 'package:furdle/old/utils/extensions.dart';
+import 'package:furdle/old/shared/theme/theme.dart';
+import 'package:furdle/old/utils/utility.dart';
 import 'package:http/http.dart' as http;
 
-import '../constants/strings.dart';
+import '../../constants/strings.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   static String title = settingsTitle;

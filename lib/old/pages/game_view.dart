@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/controller/game_notifier.dart';
-import 'package:furdle/models/game.dart';
-import 'package:furdle/shared/theme/colors.dart';
+import 'package:furdle/old/controller/game_state_notifier.dart';
+import 'package:furdle/old/models/game.dart';
+import 'package:furdle/old/shared/theme/colors.dart';
 
 class FurdleGrid extends ConsumerWidget {
   const FurdleGrid({

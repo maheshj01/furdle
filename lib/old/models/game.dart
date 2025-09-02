@@ -1,5 +1,5 @@
-import 'package:furdle/models/keyboard.dart';
-import 'package:furdle/models/puzzle.dart';
+import 'package:furdle/old/models/keyboard.dart';
+import 'package:furdle/old/models/puzzle.dart';
 
 /// Class to represent the state of a cell in the grid
 /// character is the letter in the cell
@@ -67,7 +67,7 @@ enum Cell {
   int toPriority() => priority;
 }
 
-enum Word {
+enum SubmitWordResult {
   /// length is less than 5
   valid,
 

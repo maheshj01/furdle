@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:furdle/service/storage_service.dart';
+import 'package:furdle/old/service/storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefsService implements StorageService {
