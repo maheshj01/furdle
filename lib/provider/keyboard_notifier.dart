@@ -1,5 +1,6 @@
 // Enum for letter status in the word
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/ui/keyboard.dart';
 
 enum LetterStatus {
@@ -18,6 +19,10 @@ class KeyState {
   /// Whether the key is a physical key
   final bool isPhysicalKey;
 
+  /// Whether the key is a special key
+  /// like space, backspace, enter
+  final bool isSpecial;
+
   /// The status of the letter in the word
   final LetterStatus letterStatus;
   final DateTime? timeStamp;
@@ -29,6 +34,7 @@ class KeyState {
     this.isPhysicalKey = false,
     this.letterStatus = LetterStatus.unknown,
     this.timeStamp,
+    this.isSpecial = false,
   });
 
   KeyState copyWith({
@@ -37,6 +43,8 @@ class KeyState {
     bool? isPhysicalKey,
     LetterStatus? letterStatus,
     DateTime? timeStamp,
+    bool? isSpecial,
+    int? widthCount,
   }) {
     return KeyState(
       key: key ?? this.key,
@@ -44,6 +52,7 @@ class KeyState {
       isPhysicalKey: isPhysicalKey ?? this.isPhysicalKey,
       letterStatus: letterStatus ?? this.letterStatus,
       timeStamp: timeStamp ?? this.timeStamp,
+      isSpecial: isSpecial ?? this.isSpecial,
     );
   }
 
@@ -55,7 +64,8 @@ class KeyState {
         other.event == event &&
         other.isPhysicalKey == isPhysicalKey &&
         other.letterStatus == letterStatus &&
-        other.timeStamp == timeStamp;
+        other.timeStamp == timeStamp &&
+        other.isSpecial == isSpecial;
   }
 
   @override
@@ -64,7 +74,8 @@ class KeyState {
       event.hashCode ^
       isPhysicalKey.hashCode ^
       letterStatus.hashCode ^
-      timeStamp.hashCode;
+      timeStamp.hashCode ^
+      isSpecial.hashCode;
 }
 
 // Class to manage the entire keyboard state
@@ -103,10 +114,13 @@ class KeyboardState {
   KeyboardState setKeyPressed(String key, KeyEventType event,
       {bool isPhysicalKey = false, DateTime? timeStamp}) {
     final currentState = getKeyState(key);
+    final isSpecial = isSpecialKey(key);
     final newState = currentState.copyWith(
       key: key,
       event: event,
       isPhysicalKey: isPhysicalKey,
+      isSpecial: isSpecial,
+      widthCount: isSpecial ? 2 : 1,
       timeStamp: timeStamp ?? DateTime.now(),
     );
 
@@ -117,6 +131,22 @@ class KeyboardState {
     return updateKeyState(key, newState).copyWith(
       keyEventHistory: newEventHistory,
     );
+  }
+
+  bool isSpecialKey(String key) {
+    switch (key) {
+      case Constants.keyboardBackspaceKey:
+      case Constants.keyboardEnterKey:
+      case Constants.keyboardSpaceKey:
+      case Constants.keyboardShiftKey:
+      case Constants.keyboardCapsLockKey:
+      case Constants.keyboardTabKey:
+      case Constants.keyboardDeleteKey:
+      case Constants.keyboardEscapeKey:
+        return true;
+      default:
+        return false;
+    }
   }
 
   // Helper method to set letter status
@@ -169,16 +199,18 @@ class KeyboardNotifier extends StateNotifier<KeyboardState> {
     }
 
     // Initialize special keys
-    keyStates[' '] = const KeyState(key: ' '); // Space
-    keyStates['Backspace'] = const KeyState(key: 'Backspace');
-    keyStates['Enter'] = const KeyState(key: 'Enter');
+    // keyStates[Constants.keyboardSpaceKey] = const KeyState(key: ' '); // Space
+    keyStates[Constants.keyboardBackspaceKey] =
+        const KeyState(key: Constants.keyboardBackspaceKey, isSpecial: true);
+    keyStates[Constants.keyboardEnterKey] =
+        const KeyState(key: Constants.keyboardEnterKey, isSpecial: true);
 
     return KeyboardState(keyStates: keyStates, keyEventHistory: []);
   }
 
   // Method to handle key press
   void onKeyPressed(String key, KeyEventType event, bool isPhysicalKey,
-      {DateTime? timestamp}) {
+      {bool isSpecial = false, int widthCount = 1, DateTime? timestamp}) {
     state = state.setKeyPressed(key, event,
         isPhysicalKey: isPhysicalKey, timeStamp: timestamp ?? DateTime.now());
   }

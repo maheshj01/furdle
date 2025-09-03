@@ -15,8 +15,26 @@ class Home extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _HomeState();
 }
 
-class _HomeState extends ConsumerState<Home> {
+class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   final ConfettiController confettiController = ConfettiController();
+  late AnimationController slideController;
+  late Animation<double> slideAnimation;
+  @override
+  void initState() {
+    super.initState();
+    slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    slideAnimation = Tween<double>(begin: 0, end: 1).animate(slideController);
+    slideController.forward();
+  }
+
+  @override
+  void dispose() {
+    slideController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,12 +59,24 @@ class _HomeState extends ConsumerState<Home> {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: FurdleKeyboard(
-                onKeyPressed:
-                    (String character, KeyEventType event, bool physicalKey) {
-                  print(
-                      "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
-                },
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 100),
+                child: SlideTransition(
+                  position:
+                      Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                          .animate(slideController),
+                  child: FurdleKeyboard(
+                    onKeyPressed: (String character, KeyEventType event,
+                        bool physicalKey) {
+                      if (event == KeyEventType.keyCancel) {
+                        return;
+                      }
+
+                      print(
+                          "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
+                    },
+                  ),
+                ),
               ),
             ),
             Align(

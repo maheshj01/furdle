@@ -10,6 +10,7 @@ class _DeviceSize {
 }
 
 const double kDesignWidth = 375.0;
+const double kDesignHeight = 812.0;
 
 /// Extension to handle responsive font sizing
 extension ResponsiveSize on BuildContext {
@@ -19,6 +20,7 @@ extension ResponsiveSize on BuildContext {
   Size get _screenSize => MediaQuery.of(this).size;
   // Base dimensions for scaling calculation (Figma)
   static const double _baseWidth = kDesignWidth;
+  static const double _baseHeight = kDesignHeight;
   // Mobile device size ranges
   static const _DeviceSize _compactPhone = _DeviceSize(
     maxWidth: 375.0, // Common Android (Samsung A series, Pixel)
@@ -60,12 +62,27 @@ extension ResponsiveSize on BuildContext {
     } else if (width <= _tablet.maxWidth && height <= _tablet.maxHeight) {
       return (scale * dprAdjustment).clamp(1.1, 1.2);
     } else if (width <= _desktop.maxWidth && height <= _desktop.maxHeight) {
-      return (scale * dprAdjustment).clamp(1.2, 1.3);
+      return (scale * dprAdjustment).clamp(1.4, 1.5);
     }
     // Fallback for any other device size
-    return (scale * dprAdjustment).clamp(1.1, 1.2);
+    return (scale * dprAdjustment).clamp(1.4, 1.5);
   }
 
   // Scale fonts and spaces based on device
   double sp(double size) => size * _scaleFactor;
+
+  double wp(double size) => size * _screenSize.width / _baseWidth;
+
+  double hp(double size) => size * _screenSize.height / _baseHeight;
+  // Calculate max width based on screen size
+
+  /// max width of the keyboard
+  double maxKeyboardWidth() {
+    // For small screens, use full width
+    if (_screenSize.width < 600) {
+      return _screenSize.width;
+    }
+
+    return 600;
+  }
 }
