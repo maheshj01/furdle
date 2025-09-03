@@ -22,6 +22,11 @@ extension ResponsiveSize on BuildContext {
   static const double _baseWidth = kDesignWidth;
   static const double _baseHeight = kDesignHeight;
   // Mobile device size ranges
+
+  double get width => _screenSize.width;
+
+  double get height => _screenSize.height;
+
   static const _DeviceSize _compactPhone = _DeviceSize(
     maxWidth: 375.0, // Common Android (Samsung A series, Pixel)
     maxHeight: 740.0, // Typical height for 16:9 compact phones

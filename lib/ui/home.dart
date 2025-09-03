@@ -60,7 +60,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 100),
+                padding: EdgeInsets.only(bottom: 50),
                 child: SlideTransition(
                   position:
                       Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
