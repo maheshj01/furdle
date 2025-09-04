@@ -2,6 +2,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart' hide KeyEvent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/old/pages/help.dart';
+import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:go_router/go_router.dart';
@@ -36,6 +37,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  void playConfetti() {
+    confettiController.play();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,41 +64,49 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 50),
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+              child: Column(
+                children: [
+                  Expanded(child: GridBoard()),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 50),
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                              begin: const Offset(0, 1), end: Offset.zero)
                           .animate(slideController),
-                  child: FurdleKeyboard(
-                    onKeyPressed: (String character, KeyEventType event,
-                        bool physicalKey) {
-                      if (event == KeyEventType.keyCancel) {
-                        return;
-                      }
+                      child: FurdleKeyboard(
+                        onKeyPressed: (String character, KeyEventType event,
+                            bool physicalKey) {
+                          if (event == KeyEventType.keyCancel) {
+                            return;
+                          }
 
-                      print(
-                          "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
-                    },
+                          print(
+                              "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
+                        },
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
             Align(
               alignment: Alignment.topCenter,
-              child: TitleBar(
-                title: widget.title,
-                leading: IconButton(
-                    onPressed: () {
-                      context.go(HelpPage.path);
-                    },
-                    icon: const Icon(Icons.help)),
-                actions: [
-                  IconButton(
-                      onPressed: () async {}, icon: const Icon(Icons.share)),
-                  IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.settings)),
-                ],
+              child: GestureDetector(
+                onTap: playConfetti,
+                child: TitleBar(
+                  title: widget.title,
+                  leading: IconButton(
+                      onPressed: () {
+                        context.go(HelpPage.path);
+                      },
+                      icon: const Icon(Icons.help)),
+                  actions: [
+                    IconButton(
+                        onPressed: () async {}, icon: const Icon(Icons.share)),
+                    IconButton(
+                        onPressed: () {}, icon: const Icon(Icons.settings)),
+                  ],
+                ),
               ),
             ),
           ],
