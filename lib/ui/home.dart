@@ -49,20 +49,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           fit: StackFit.expand,
           children: [
             Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                confettiController: confettiController,
-                blastDirection: 0,
-                blastDirectionality: BlastDirectionality.explosive,
-                particleDrag: 0.05,
-                emissionFrequency: 0.1,
-                minimumSize: const Size(10, 10),
-                maximumSize: const Size(50, 50),
-                numberOfParticles: 5,
-                gravity: 0.2,
-              ),
-            ),
-            Align(
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
@@ -91,22 +77,33 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             ),
             Align(
               alignment: Alignment.topCenter,
-              child: GestureDetector(
-                onTap: playConfetti,
-                child: TitleBar(
-                  title: widget.title,
-                  leading: IconButton(
-                      onPressed: () {
-                        context.go(HelpPage.path);
-                      },
-                      icon: const Icon(Icons.help)),
-                  actions: [
-                    IconButton(
-                        onPressed: () async {}, icon: const Icon(Icons.share)),
-                    IconButton(
-                        onPressed: () {}, icon: const Icon(Icons.settings)),
-                  ],
-                ),
+              child: ConfettiWidget(
+                confettiController: confettiController,
+                blastDirection: 0,
+                blastDirectionality: BlastDirectionality.explosive,
+                particleDrag: 0.05,
+                emissionFrequency: 0.1,
+                minimumSize: const Size(10, 10),
+                maximumSize: const Size(50, 50),
+                numberOfParticles: 5,
+                gravity: 0.2,
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: TitleBar(
+                title: widget.title,
+                leading: IconButton(
+                    onPressed: () {
+                      context.go(HelpPage.path);
+                    },
+                    icon: const Icon(Icons.help)),
+                actions: [
+                  IconButton(
+                      onPressed: () async {}, icon: const Icon(Icons.share)),
+                  IconButton(
+                      onPressed: () {}, icon: const Icon(Icons.settings)),
+                ],
               ),
             ),
           ],
