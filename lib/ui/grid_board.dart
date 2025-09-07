@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/old/controller/game_state_notifier.dart';
 import 'package:furdle/old/models/game.dart';
 import 'package:furdle/old/shared/theme/colors.dart';
+import 'package:furdle/utils/extensions.dart';
 
 class GridBoard extends ConsumerWidget {
   const GridBoard({
@@ -11,12 +11,22 @@ class GridBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(gameStateProvider);
-    final _size = MediaQuery.of(context).size;
-    final gridSize = state.puzzle.size;
-    final bool isPlayed = state.puzzle.moves > 0;
-    final bool isGameOver = state.isGameOver;
-    final double cellSize = _size.width < 600 ? _size.width / 6.5 : 70;
+    final gridSize = Size(5, 5);
+
+    final screenWidth = context.width;
+
+    // Calculate cell size to fit the grid nicely on the screen
+    // Account for margins (2px on each side) and padding
+    final horizontalPadding = 32.0; // 16px on each side
+    final cellMargin = 4.0; // 2px margin on each side of cell
+    final availableWidth = screenWidth - horizontalPadding;
+    final cellSize =
+        (availableWidth - (gridSize.width - 1) * cellMargin) / gridSize.width;
+
+    final minCellSize = 40.0;
+    final maxCellSize = 65.0;
+    final responsiveCellSize = cellSize.clamp(minCellSize, maxCellSize);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -29,9 +39,7 @@ class GridBoard extends ConsumerWidget {
                 GridCell(
                   i: i,
                   j: j,
-                  cellSize: cellSize,
-                  isSubmitted: isGameOver ? i <= state.row : i < state.row,
-                  isAlreadyPlayed: isPlayed,
+                  cellSize: responsiveCellSize,
                 ),
             ],
           ),
@@ -45,19 +53,7 @@ class GridCell extends StatefulWidget {
   final int j;
   final double cellSize;
 
-  /// whether or not a word is submitted
-  /// if true it will show the colors
-  /// of the submitted word in the grid
-  bool isSubmitted = false;
-  bool isAlreadyPlayed = false;
-
-  GridCell(
-      {Key? key,
-      required this.i,
-      required this.j,
-      this.isSubmitted = false,
-      this.isAlreadyPlayed = false,
-      this.cellSize = 80})
+  GridCell({Key? key, required this.i, required this.j, this.cellSize = 80})
       : super(key: key);
 
   @override
@@ -96,9 +92,6 @@ class _GridCellState extends State<GridCell>
       parent: _controller,
       curve: Curves.bounceIn,
     ));
-    if (widget.isAlreadyPlayed) {
-      _controller.forward();
-    }
   }
 
   @override
@@ -127,7 +120,7 @@ class _GridCellState extends State<GridCell>
               child: Text(
                 'A',
                 style: TextStyle(
-                    fontSize: widget.cellSize * 0.4 * _animation.value,
+                    fontSize: widget.cellSize * 1.5 * _animation.value,
                     color: Colors.white),
               ));
         });
