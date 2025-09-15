@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/old/models/game.dart';
 import 'package:furdle/old/shared/theme/colors.dart';
+import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/utils/extensions.dart';
 
 class GridBoard extends ConsumerWidget {
@@ -11,7 +11,7 @@ class GridBoard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gridSize = Size(5, 5);
+    final gridSize = ref.read(gameStateProvider).size;
 
     final screenWidth = context.width;
 
@@ -26,7 +26,6 @@ class GridBoard extends ConsumerWidget {
     final minCellSize = 40.0;
     final maxCellSize = 65.0;
     final responsiveCellSize = cellSize.clamp(minCellSize, maxCellSize);
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -48,7 +47,7 @@ class GridBoard extends ConsumerWidget {
   }
 }
 
-class GridCell extends StatefulWidget {
+class GridCell extends ConsumerStatefulWidget {
   final int i;
   final int j;
   final double cellSize;
@@ -57,15 +56,12 @@ class GridCell extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<GridCell> createState() => _GridCellState();
+  ConsumerState<GridCell> createState() => _GridCellState();
 }
 
-class _GridCellState extends State<GridCell>
+class _GridCellState extends ConsumerState<GridCell>
     with SingleTickerProviderStateMixin {
-  Color stateToColor(Cell state, bool isSubmitted) {
-    if (!isSubmitted) {
-      return Colors.grey;
-    }
+  Color stateToColor(Cell state) {
     switch (state) {
       case Cell.match:
         return AppColors.green;
@@ -74,7 +70,10 @@ class _GridCellState extends State<GridCell>
       case Cell.misplaced:
         return AppColors.yellow;
       case Cell.empty:
+      case Cell.unknown:
         return AppColors.grey;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -107,6 +106,8 @@ class _GridCellState extends State<GridCell>
 
   @override
   Widget build(BuildContext context) {
+    final gameState = ref.watch(gameStateProvider);
+    final cellState = gameState.cells[widget.i][widget.j];
     return AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
@@ -116,9 +117,10 @@ class _GridCellState extends State<GridCell>
               margin: const EdgeInsets.all(2),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: Colors.grey, borderRadius: BorderRadius.circular(6)),
+                  color: stateToColor(cellState.cellType),
+                  borderRadius: BorderRadius.circular(6)),
               child: Text(
-                'A',
+                cellState.character,
                 style: TextStyle(
                     fontSize: widget.cellSize * 1.5 * _animation.value,
                     color: Colors.white),

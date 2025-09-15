@@ -1,7 +1,9 @@
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart' hide KeyEvent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/old/pages/help.dart';
+import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/title_bar.dart';
@@ -20,6 +22,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   final ConfettiController confettiController = ConfettiController();
   late AnimationController slideController;
   late Animation<double> slideAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +32,9 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     );
     slideAnimation = Tween<double>(begin: 0, end: 1).animate(slideController);
     slideController.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(gameStateProvider.notifier).startGame();
+    });
   }
 
   @override
@@ -41,8 +47,34 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     confettiController.play();
   }
 
+  void handleKeyPress(String character, KeyEventType event, bool physicalKey) {
+    final gameStateNotifier = ref.read(gameStateProvider.notifier);
+    if (event == KeyEventType.keyCancel) {
+      return;
+    } else if (event == KeyEventType.keyUp) {
+      switch (character) {
+        case Constants.keyboardBackspaceKey:
+          gameStateNotifier.deleteLetter();
+          break;
+        case Constants.keyboardEnterKey:
+          final result = gameStateNotifier.submitWord();
+          if (result == SubmitWordResult.match) {
+            playConfetti();
+          }
+          print("result: ${result.friendlyString}");
+          break;
+        default:
+          gameStateNotifier.addLetter(character);
+      }
+
+      print(
+          "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final gameStateNotifier = ref.read(gameStateProvider.notifier);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -62,12 +94,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                       child: FurdleKeyboard(
                         onKeyPressed: (String character, KeyEventType event,
                             bool physicalKey) {
-                          if (event == KeyEventType.keyCancel) {
-                            return;
-                          }
-
-                          print(
-                              "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
+                          handleKeyPress(character, event, physicalKey);
                         },
                       ),
                     ),
