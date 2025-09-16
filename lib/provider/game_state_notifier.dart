@@ -22,7 +22,8 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final currentColumn = state.column;
     final currentRow = state.row;
     if (currentRow < state.size.height && currentColumn < state.size.width) {
-      if (state.cells[currentRow][currentColumn].character.isNotEmpty) {
+      final character = state.cells[currentRow][currentColumn].character;
+      if (character.isNotEmpty && currentColumn == state.size.width - 1) {
         return;
       }
       final newCell = CellState(cellType: Cell.unknown, character: letter);
@@ -54,16 +55,21 @@ class GameStateNotifier extends StateNotifier<GameState> {
     if (currentWord.length != state.size.width) {
       return SubmitWordResult.incomplete;
     } else if (currentWord == state.targetWord) {
+      updateCells(currentWord);
       return SubmitWordResult.match;
     }
     // TODO: To Use a binary search to check if the word is in the list
     else if (furdleList.contains(currentWord)) {
       updateCells(currentWord);
+      final submittedWords = state.submittedWords;
+      submittedWords.add(currentWord);
       if (currentWord == state.targetWord) {
-        state = state.copyWith(status: GameStatus.win);
+        state = state.copyWith(
+            status: GameStatus.win, submittedWords: submittedWords);
         return SubmitWordResult.match;
       } else {
-        state = state.copyWith(row: state.row + 1, column: 0);
+        state = state.copyWith(
+            row: state.row + 1, column: 0, submittedWords: submittedWords);
         return SubmitWordResult.notMatch;
       }
     } else {
@@ -77,13 +83,13 @@ class GameStateNotifier extends StateNotifier<GameState> {
     for (int i = 0; i < word.length; i++) {
       if (word[i] == targetWord[i]) {
         cells[state.row][i] =
-            CellState(cellType: Cell.match, character: word[i]);
+            CellState(cellType: Cell.match, character: word[i].toUpperCase());
       } else if (targetWord.contains(word[i])) {
-        cells[state.row][i] =
-            CellState(cellType: Cell.misplaced, character: word[i]);
+        cells[state.row][i] = CellState(
+            cellType: Cell.misplaced, character: word[i].toUpperCase());
       } else {
-        cells[state.row][i] =
-            CellState(cellType: Cell.notExists, character: word[i]);
+        cells[state.row][i] = CellState(
+            cellType: Cell.notExists, character: word[i].toUpperCase());
       }
     }
     state = state.copyWith(cells: cells);
