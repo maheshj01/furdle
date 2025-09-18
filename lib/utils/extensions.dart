@@ -91,3 +91,14 @@ extension ResponsiveSize on BuildContext {
     return 600;
   }
 }
+
+extension StringExtension on String {
+  /// check ascii value of the string is between 65 and 90 or 97 and 122
+  bool get isLetter {
+    return this.length == 1 &&
+            this.isNotEmpty &&
+            this.codeUnitAt(0) >= 65 &&
+            this.codeUnitAt(0) <= 90 ||
+        this.codeUnitAt(0) >= 97 && this.codeUnitAt(0) <= 122;
+  }
+}

@@ -7,6 +7,7 @@ import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/title_bar.dart';
+import 'package:furdle/utils/extensions.dart';
 import 'package:go_router/go_router.dart';
 
 class Home extends ConsumerStatefulWidget {
@@ -69,7 +70,9 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           print("result: ${result.friendlyString}");
           break;
         default:
-          gameStateNotifier.addLetter(character);
+          if (character.isLetter) {
+            gameStateNotifier.addLetter(character);
+          }
       }
 
       print(
