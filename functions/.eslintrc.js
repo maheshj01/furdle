@@ -27,5 +27,9 @@ module.exports = {
     "import/no-unresolved": 0,
     // off max line length
     "max-len": "off",
+    // ignore unused variables
+    "@typescript-eslint/no-unused-vars": "off",
+    // missing JSDoc comments
+    "require-jsdoc": "off",
   },
 };
