@@ -8,6 +8,7 @@ import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:furdle/utils/extensions.dart';
+import 'package:furdle/utils/utility.dart' show Utility;
 import 'package:go_router/go_router.dart';
 
 class Home extends ConsumerStatefulWidget {
@@ -66,6 +67,14 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           final result = gameStateNotifier.submitWord();
           if (result == SubmitWordResult.match) {
             playConfetti();
+          } else {
+            final screenSize = MediaQuery.of(context).size;
+            Utility.showMessage(
+              context,
+              result.friendlyString,
+              margin: EdgeInsets.only(
+                  bottom: screenSize.height * 0.6 - kToolbarHeight),
+            );
           }
           print("result: ${result.friendlyString}");
           break;

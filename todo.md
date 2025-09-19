@@ -15,11 +15,19 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 
 #### Basic Features
 
-- [ ] Logical and Phsyical key should be sync
-- [ ] Keyabord layout should be responsive
+- [ ] Logical and Phsyical key should be in sync
+- [x] Keyabord layout should be responsive
 - [ ] Keyboard state can be preserved locally
 
 - [ ] Game state should be persisted locally for offline mode
+
+### Animations
+
+- [x] Confetti on win
+- [ ] Initial render of Grid should be animated with Sound Effect
+      All the cells will enter from different directions and laid out in a grid pattern within 3 seconds.
+- [ ] Shake on wrong guess
+- [ ] Flip Cells on word Submit
 
 ## 1. ARCHITECTURE & DEPENDENCIES
 
