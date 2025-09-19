@@ -16,6 +16,7 @@ class FurdleKeyboard extends ConsumerStatefulWidget {
   final Function(String key, KeyEventType event, bool physicalKey)?
       onKeyPressed;
   final bool? autoFocus;
+  final FocusNode? focusNode;
 
   /// whether to enable haptic feedback for the key press
   final bool? enableFeedback;
@@ -23,6 +24,7 @@ class FurdleKeyboard extends ConsumerStatefulWidget {
   const FurdleKeyboard(
       {this.onKeyPressed,
       this.autoFocus = true,
+      this.focusNode,
       this.maxWidth,
       this.enableFeedback = true,
       super.key});
@@ -32,8 +34,25 @@ class FurdleKeyboard extends ConsumerStatefulWidget {
 }
 
 class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
     final keyboardNotifier = ref.read(keyboardProvider.notifier);
 
     // Listen to the last key event and call the onKeyPressed callback
@@ -52,7 +71,7 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
 
     return KeyboardListener(
       autofocus: widget.autoFocus!,
-      focusNode: FocusNode(),
+      focusNode: _focusNode,
       onKeyEvent: (event) {
         if (event is KeyDownEvent) {
           final key = _getKeyLabel(event.logicalKey);
