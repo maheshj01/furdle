@@ -61,15 +61,14 @@ class GameStateNotifier extends StateNotifier<GameState> {
     // TODO: To Use a binary search to check if the word is in the list
     else if (furdleList.contains(currentWord)) {
       updateCells(currentWord);
-      final submittedWords = state.submittedWords;
-      submittedWords.add(currentWord);
+      final submittedWordsList = [...state.submittedWords, currentWord];
       if (currentWord == state.targetWord) {
         state = state.copyWith(
-            status: GameStatus.win, submittedWords: submittedWords);
+            status: GameStatus.win, submittedWords: submittedWordsList);
         return SubmitWordResult.match;
       } else {
         state = state.copyWith(
-            row: state.row + 1, column: 0, submittedWords: submittedWords);
+            row: state.row + 1, column: 0, submittedWords: submittedWordsList);
         return SubmitWordResult.notMatch;
       }
     } else {
