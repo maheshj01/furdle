@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/colors.dart';
 import 'package:furdle/constants/const.dart';
+import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/utils/extensions.dart';
 
@@ -215,14 +216,14 @@ class _Key extends ConsumerWidget {
       return Colors.blue.withValues(alpha: 0.3);
     }
 
-    switch (keyState.letterStatus) {
-      case LetterStatus.present:
+    switch (keyState.cellType) {
+      case CellType.match:
         return AppColors.green;
-      case LetterStatus.notPresent:
+      case CellType.notExists:
         return AppColors.black;
-      case LetterStatus.wrongPosition:
+      case CellType.misplaced:
         return AppColors.yellow;
-      case LetterStatus.unknown:
+      case CellType.empty:
       default:
         return Colors.grey.withValues(alpha: 0.1);
     }
@@ -233,12 +234,12 @@ class _Key extends ConsumerWidget {
       return Colors.blue;
     }
 
-    switch (keyState.letterStatus) {
-      case LetterStatus.present:
+    switch (keyState.cellType) {
+      case CellType.match:
         return Colors.green.shade700;
-      case LetterStatus.notPresent:
+      case CellType.notExists:
         return Colors.red.shade700;
-      case LetterStatus.unknown:
+      case CellType.unknown:
       default:
         return Colors.black;
     }

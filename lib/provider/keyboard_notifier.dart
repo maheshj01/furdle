@@ -1,14 +1,8 @@
 // Enum for letter status in the word
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
+import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/ui/keyboard.dart';
-
-enum LetterStatus {
-  unknown,
-  present,
-  notPresent,
-  wrongPosition,
-}
 
 // Class to represent the state of a single key
 class KeyState {
@@ -24,7 +18,7 @@ class KeyState {
   final bool isSpecial;
 
   /// The status of the letter in the word
-  final LetterStatus letterStatus;
+  final CellType cellType;
   final DateTime? timeStamp;
   final String key; // Add the key identifier
 
@@ -32,7 +26,7 @@ class KeyState {
     required this.key,
     this.event = KeyEventType.keyUp,
     this.isPhysicalKey = false,
-    this.letterStatus = LetterStatus.unknown,
+    this.cellType = CellType.empty,
     this.timeStamp,
     this.isSpecial = false,
   });
@@ -41,7 +35,7 @@ class KeyState {
     String? key,
     KeyEventType? event,
     bool? isPhysicalKey,
-    LetterStatus? letterStatus,
+    CellType? cellType,
     DateTime? timeStamp,
     bool? isSpecial,
     int? widthCount,
@@ -50,7 +44,7 @@ class KeyState {
       key: key ?? this.key,
       event: event ?? this.event,
       isPhysicalKey: isPhysicalKey ?? this.isPhysicalKey,
-      letterStatus: letterStatus ?? this.letterStatus,
+      cellType: cellType ?? this.cellType,
       timeStamp: timeStamp ?? this.timeStamp,
       isSpecial: isSpecial ?? this.isSpecial,
     );
@@ -63,7 +57,7 @@ class KeyState {
         other.key == key &&
         other.event == event &&
         other.isPhysicalKey == isPhysicalKey &&
-        other.letterStatus == letterStatus &&
+        other.cellType == cellType &&
         other.timeStamp == timeStamp &&
         other.isSpecial == isSpecial;
   }
@@ -73,7 +67,7 @@ class KeyState {
       key.hashCode ^
       event.hashCode ^
       isPhysicalKey.hashCode ^
-      letterStatus.hashCode ^
+      cellType.hashCode ^
       timeStamp.hashCode ^
       isSpecial.hashCode;
 }
@@ -150,9 +144,9 @@ class KeyboardState {
   }
 
   // Helper method to set letter status
-  KeyboardState setLetterStatus(String key, LetterStatus status) {
+  KeyboardState setLetterStatus(String key, CellType cellType) {
     final currentState = getKeyState(key);
-    return updateKeyState(key, currentState.copyWith(letterStatus: status));
+    return updateKeyState(key, currentState.copyWith(cellType: cellType));
   }
 
   // Get the last key event
@@ -216,11 +210,11 @@ class KeyboardNotifier extends StateNotifier<KeyboardState> {
   }
 
   // Method to set letter status (for game logic)
-  void setLetterStatus(String letter, LetterStatus status) {
+  void setLetterStatus(String letter, CellType cellType) {
     if (letter.length == 1 &&
         letter.toUpperCase().codeUnitAt(0) >= 65 &&
         letter.toUpperCase().codeUnitAt(0) <= 90) {
-      state = state.setLetterStatus(letter.toUpperCase(), status);
+      state = state.setLetterStatus(letter.toUpperCase(), cellType);
     }
   }
 
@@ -238,7 +232,7 @@ class KeyboardNotifier extends StateNotifier<KeyboardState> {
     final newKeyStates = <String, KeyState>{};
     for (final entry in state.keyStates.entries) {
       newKeyStates[entry.key] =
-          entry.value.copyWith(letterStatus: LetterStatus.unknown);
+          entry.value.copyWith(cellType: CellType.unknown);
     }
     state = state.copyWith(keyStates: newKeyStates);
   }

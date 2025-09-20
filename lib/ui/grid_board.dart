@@ -61,16 +61,16 @@ class GridCell extends ConsumerStatefulWidget {
 
 class _GridCellState extends ConsumerState<GridCell>
     with SingleTickerProviderStateMixin {
-  Color stateToColor(Cell state) {
+  Color stateToColor(CellType state) {
     switch (state) {
-      case Cell.match:
+      case CellType.match:
         return AppColors.green;
-      case Cell.notExists:
+      case CellType.notExists:
         return AppColors.black;
-      case Cell.misplaced:
+      case CellType.misplaced:
         return AppColors.yellow;
-      case Cell.empty:
-      case Cell.unknown:
+      case CellType.empty:
+      case CellType.unknown:
         return AppColors.grey;
       default:
         return Colors.grey;

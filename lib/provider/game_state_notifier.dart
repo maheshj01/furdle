@@ -6,6 +6,9 @@ import 'package:furdle/utils/word.dart';
 
 class GameStateNotifier extends StateNotifier<GameState> {
   final KeyboardNotifier keyboardNotifier;
+  // Count occurrences of each letter in target word
+  final targetLetterCounts = <String, int>{};
+
   GameStateNotifier({
     required this.keyboardNotifier,
   }) : super(GameState.instance());
@@ -13,7 +16,11 @@ class GameStateNotifier extends StateNotifier<GameState> {
   void startGame() {
     final index = Random().nextInt(furdleList.length);
     final targetWord = furdleList[index];
-    print("targetWord: $targetWord");
+    print("target word: $targetWord");
+    for (int i = 0; i < targetWord.length; i++) {
+      final letter = targetWord[i].toLowerCase();
+      targetLetterCounts[letter] = (targetLetterCounts[letter] ?? 0) + 1;
+    }
     state = GameState.instance().copyWith(
         status: GameStatus.inprogress,
         targetWord: targetWord,
@@ -43,7 +50,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final cells = state.cells;
 
     final newCell =
-        CellState(cellType: Cell.unknown, character: letter.toUpperCase());
+        CellState(cellType: CellType.unknown, character: letter.toUpperCase());
     cells[currentRow][currentColumn] = newCell;
 
     final nextColumn = (currentColumn + 1).clamp(0, state.size.width);
@@ -70,7 +77,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
     final cells = state.cells;
 
-    final emptyCell = CellState(cellType: Cell.empty, character: '');
+    final emptyCell = CellState(cellType: CellType.empty, character: '');
     cells[currentRow][currentColumn - 1] = emptyCell;
 
     state = state.copyWith(
@@ -130,16 +137,33 @@ class GameStateNotifier extends StateNotifier<GameState> {
   void updateCells(String word) {
     final cells = state.cells;
     final targetWord = state.targetWord;
+
+    /// First pass: Mark exact matches (green) and track used letters
+    final matchedPositions = <int>{};
     for (int i = 0; i < word.length; i++) {
-      if (word[i] == targetWord[i]) {
-        cells[state.row][i] =
-            CellState(cellType: Cell.match, character: word[i].toUpperCase());
-      } else if (targetWord.contains(word[i])) {
+      if (word[i].toLowerCase() == targetWord[i].toLowerCase()) {
         cells[state.row][i] = CellState(
-            cellType: Cell.misplaced, character: word[i].toUpperCase());
+            cellType: CellType.match, character: word[i].toUpperCase());
+        matchedPositions.add(i);
+        // Decrease count for this letter, since it's been matched
+        final letter = word[i].toLowerCase();
+        targetLetterCounts[letter] = targetLetterCounts[letter]! - 1;
+      }
+    }
+    // second pass: mark yellows and blacks
+    for (int i = 0; i < word.length; i++) {
+      if (matchedPositions.contains(i)) {
+        continue;
+      }
+      final letter = word[i].toLowerCase();
+      if (targetLetterCounts.containsKey(letter) &&
+          targetLetterCounts[letter]! > 0) {
+        cells[state.row][i] = CellState(
+            cellType: CellType.misplaced, character: word[i].toUpperCase());
+        targetLetterCounts[letter] = targetLetterCounts[letter]! - 1;
       } else {
         cells[state.row][i] = CellState(
-            cellType: Cell.notExists, character: word[i].toUpperCase());
+            cellType: CellType.notExists, character: word[i].toUpperCase());
       }
     }
     state = state.copyWith(cells: cells);
@@ -282,7 +306,7 @@ class GameState {
         6,
         (row) => List.generate(
           5,
-          (column) => CellState(character: '', cellType: Cell.empty),
+          (column) => CellState(character: '', cellType: CellType.empty),
         ),
       );
 
@@ -350,12 +374,12 @@ enum SubmitWordResult {
 
 class CellState {
   final String character;
-  final Cell cellType;
+  final CellType cellType;
 
-  CellState({this.character = '', this.cellType = Cell.empty});
+  CellState({this.character = '', this.cellType = CellType.empty});
 }
 
-enum Cell {
+enum CellType {
   empty, // No letter entered (grey)
   match, // Letter in correct position (green)
   misplaced, // Letter in word but wrong position (yellow)
