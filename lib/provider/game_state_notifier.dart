@@ -82,9 +82,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final currentWord = getCurrentWord();
     if (currentWord.length != state.size.width) {
       return SubmitWordResult.incomplete;
-    } else if (currentWord == state.targetWord) {
-      updateCells(currentWord);
-      return SubmitWordResult.match;
     } else if (containsWord(currentWord, 0, furdleList.length - 1)) {
       updateCells(currentWord);
       final submittedWordsList = [...state.submittedWords, currentWord];
