@@ -31,10 +31,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final currentColumn = state.column;
     final currentRow = state.row;
 
-    if (state.status == GameStatus.win || state.status == GameStatus.lose) {
-      return;
-    }
-
     if (currentRow >= state.size.height || currentColumn >= state.size.width) {
       return;
     }
@@ -64,10 +60,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
   void deleteLetter() {
     final currentColumn = state.column;
     final currentRow = state.row;
-
-    if (state.status == GameStatus.win || state.status == GameStatus.lose) {
-      return;
-    }
 
     if (currentRow >= state.size.height ||
         currentColumn <= 0 ||
