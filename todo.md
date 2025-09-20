@@ -15,9 +15,9 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 
 #### Basic Features
 
-- [ ] Logical and Phsyical key should be in sync
+- [x] Logical and Phsyical key should be in sync
 - [x] Keyabord layout should be responsive
-- [ ] Keyboard state can be preserved locally
+- [ ] Keyboard state should update and preserved locally
 
 - [ ] Game state should be persisted locally for offline mode
 

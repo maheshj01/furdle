@@ -14,40 +14,69 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final index = Random().nextInt(furdleList.length);
     final targetWord = furdleList[index];
     print("targetWord: $targetWord");
-    state =
-        state.copyWith(status: GameStatus.inprogress, targetWord: targetWord);
+    state = GameState.instance().copyWith(
+        status: GameStatus.inprogress,
+        targetWord: targetWord,
+        startTime: DateTime.now());
   }
 
   void addLetter(String letter) {
     final currentColumn = state.column;
     final currentRow = state.row;
-    if (currentRow < state.size.height && currentColumn < state.size.width) {
-      final character = state.cells[currentRow][currentColumn].character;
-      if (character.isNotEmpty && currentColumn == state.size.width - 1) {
-        return;
-      }
-      final newCell = CellState(cellType: Cell.unknown, character: letter);
-      final cells = state.cells;
-      cells[currentRow][currentColumn] = newCell;
-      final isLastColumn = currentColumn == state.size.width - 1;
-      state = state.copyWith(
-        column: isLastColumn ? currentColumn : currentColumn + 1,
-        cells: cells,
-      );
+
+    if (state.status == GameStatus.win || state.status == GameStatus.lose) {
+      return;
     }
+
+    if (currentRow >= state.size.height || currentColumn >= state.size.width) {
+      return;
+    }
+
+    if (currentRow < 0 || currentColumn < 0) {
+      return;
+    }
+    final character = state.cells[currentRow][currentColumn].character;
+    if (currentColumn == state.size.width - 1 && character.isNotEmpty) {
+      return;
+    }
+
+    final cells = state.cells;
+
+    final newCell =
+        CellState(cellType: Cell.unknown, character: letter.toUpperCase());
+    cells[currentRow][currentColumn] = newCell;
+
+    final nextColumn = (currentColumn + 1).clamp(0, state.size.width);
+
+    state = state.copyWith(
+      column: nextColumn,
+      cells: cells,
+    );
   }
 
   void deleteLetter() {
     final currentColumn = state.column;
     final currentRow = state.row;
-    if (currentColumn >= 0) {
-      final cells = state.cells;
-      cells[currentRow][currentColumn] =
-          CellState(cellType: Cell.empty, character: '');
-      final isFirstColumn = currentColumn == 0;
-      state = state.copyWith(
-          cells: cells, column: isFirstColumn ? 0 : currentColumn - 1);
+
+    if (state.status == GameStatus.win || state.status == GameStatus.lose) {
+      return;
     }
+
+    if (currentRow >= state.size.height ||
+        currentColumn <= 0 ||
+        currentRow < 0) {
+      return;
+    }
+
+    final cells = state.cells;
+
+    final emptyCell = CellState(cellType: Cell.empty, character: '');
+    cells[currentRow][currentColumn - 1] = emptyCell;
+
+    state = state.copyWith(
+      cells: cells,
+      column: currentColumn - 1,
+    );
   }
 
   SubmitWordResult submitWord() {
@@ -57,9 +86,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     } else if (currentWord == state.targetWord) {
       updateCells(currentWord);
       return SubmitWordResult.match;
-    }
-    // TODO: To Use a binary search to check if the word is in the list
-    else if (furdleList.contains(currentWord)) {
+    } else if (containsWord(currentWord, 0, furdleList.length - 1)) {
       updateCells(currentWord);
       final submittedWordsList = [...state.submittedWords, currentWord];
       if (currentWord == state.targetWord) {
@@ -67,8 +94,15 @@ class GameStateNotifier extends StateNotifier<GameState> {
             status: GameStatus.win, submittedWords: submittedWordsList);
         return SubmitWordResult.match;
       } else {
+        GameStatus status = GameStatus.inprogress;
+        if (state.row == state.size.height - 1) {
+          status = GameStatus.lose;
+        }
         state = state.copyWith(
-            row: state.row + 1, column: 0, submittedWords: submittedWordsList);
+            row: state.row + 1,
+            column: 0,
+            submittedWords: submittedWordsList,
+            status: status);
         return SubmitWordResult.notMatch;
       }
     } else {
@@ -76,9 +110,26 @@ class GameStateNotifier extends StateNotifier<GameState> {
     }
   }
 
+  // binary search to check if the word is in the list
+  bool containsWord(String word, int start, int end) {
+    if (start > end) {
+      return false;
+    }
+    final mid = (start + end) ~/ 2;
+    final midWord = furdleList[mid];
+    if (midWord == word) {
+      return true;
+    } else if (midWord.compareTo(word) < 0) {
+      return containsWord(word, mid + 1, end);
+    } else {
+      return containsWord(word, start, mid - 1);
+    }
+  }
+
+  /// Update the color of the cells based on the submitted word and the target word
   void updateCells(String word) {
     final cells = state.cells;
-    final targetWord = state.targetWord.isEmpty ? 'hello' : state.targetWord;
+    final targetWord = state.targetWord;
     for (int i = 0; i < word.length; i++) {
       if (word[i] == targetWord[i]) {
         cells[state.row][i] =

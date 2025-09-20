@@ -51,11 +51,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   void handleKeyPress(String character, KeyEventType event, bool physicalKey) {
     final gameStateNotifier = ref.read(gameStateProvider.notifier);
-    final gameState = ref.read(gameStateProvider);
-    if (gameState.status == GameStatus.win ||
-        gameState.status == GameStatus.lose) {
-      return;
-    }
+
     if (event == KeyEventType.keyCancel) {
       return;
     } else if (event == KeyEventType.keyUp) {
@@ -65,8 +61,15 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           break;
         case Constants.keyboardEnterKey:
           final result = gameStateNotifier.submitWord();
+
+          // Read the updated game state after submission
+          final updatedGameState = ref.read(gameStateProvider);
+
           if (result == SubmitWordResult.match) {
             playConfetti();
+            _handleGameOver(updatedGameState);
+          } else if (updatedGameState.status == GameStatus.lose) {
+            _handleGameOver(updatedGameState);
           } else {
             final screenSize = MediaQuery.of(context).size;
             Utility.showMessage(
@@ -79,14 +82,62 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           print("result: ${result.friendlyString}");
           break;
         default:
+          // Check if game is over before allowing letter input
+          final currentGameState = ref.read(gameStateProvider);
+          if (currentGameState.status == GameStatus.win ||
+              currentGameState.status == GameStatus.lose) {
+            return;
+          }
           if (character.isLetter) {
             gameStateNotifier.addLetter(character);
           }
       }
 
-      print(
-          "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
+      // print(
+      //     "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
     }
+  }
+
+  void _handleGameOver(GameState gameState) {
+    if (gameState.status == GameStatus.win) {
+      // Handle win scenario
+      print("🎉 Game Won! Target word was: ${gameState.targetWord}");
+      // You can show a win dialog, update UI, etc.
+      _showGameOverDialog("Congratulations! You won!", gameState.targetWord);
+    } else if (gameState.status == GameStatus.lose) {
+      // Handle lose scenario
+      print(" Game Lost! Target word was: ${gameState.targetWord}");
+      // You can show a lose dialog, update UI, etc.
+      _showGameOverDialog("Game Over! The word was:", gameState.targetWord);
+    }
+  }
+
+  void _showGameOverDialog(String title, String targetWord) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text("The word was: $targetWord"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Optionally restart the game
+                ref.read(gameStateProvider.notifier).startGame();
+              },
+              child: Text("Play Again"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

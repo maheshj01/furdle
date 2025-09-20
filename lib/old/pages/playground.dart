@@ -266,8 +266,6 @@ class _PlayGroundState extends ConsumerState<PlayGround>
                           controller: textController,
                           isFurdleMode: true,
                           onKeyEvent: (String key, bool isPhysicalKeyEvent) {
-                            print(
-                                'key: $key, isPhysicalKeyEvent: $isPhysicalKeyEvent');
                             onKeyEvent(key, isPhysicalKeyEvent);
                           },
                         ),
