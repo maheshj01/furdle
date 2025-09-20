@@ -24,6 +24,8 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   final ConfettiController confettiController = ConfettiController();
   late AnimationController slideController;
   late Animation<double> slideAnimation;
+  late AnimationController gridScaleController;
+  late Animation<double> gridScaleAnimation;
 
   @override
   void initState() {
@@ -33,7 +35,23 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 600),
     );
     slideAnimation = Tween<double>(begin: 0, end: 1).animate(slideController);
+
+    // Grid scale animation with spring effect
+    gridScaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    gridScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: gridScaleController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
+    // Start animations
     slideController.forward();
+    gridScaleController.forward();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(gameStateProvider.notifier).startGame();
     });
@@ -42,6 +60,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   @override
   void dispose() {
     slideController.dispose();
+    gridScaleController.dispose();
     super.dispose();
   }
 
@@ -70,8 +89,8 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           final updatedGameState = ref.read(gameStateProvider);
 
           if (result == SubmitWordResult.match) {
-            playConfetti();
             _handleGameOver(updatedGameState);
+            playConfetti();
           } else if (updatedGameState.status == GameStatus.lose) {
             _handleGameOver(updatedGameState);
           } else {
@@ -156,7 +175,12 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
-                  Expanded(child: GridBoard()),
+                  Expanded(
+                    child: ScaleTransition(
+                      scale: gridScaleAnimation,
+                      child: GridBoard(),
+                    ),
+                  ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 50),
                     child: SlideTransition(
