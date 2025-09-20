@@ -166,7 +166,42 @@ class GameStateNotifier extends StateNotifier<GameState> {
             cellType: CellType.notExists, character: word[i].toUpperCase());
       }
     }
+
+    // Update keyboard state based on the results
+    _updateKeyboardState(word, cells[state.row]);
+
     state = state.copyWith(cells: cells);
+  }
+
+  /// Update keyboard state to reflect letter statuses
+  void _updateKeyboardState(String word, List<CellState> rowCells) {
+    for (int i = 0; i < word.length; i++) {
+      final letter = word[i].toUpperCase();
+      final cellType = rowCells[i].cellType;
+
+      // Get current keyboard state for this letter
+      final currentKeyState = keyboardNotifier.state.getKeyState(letter);
+
+      // Only update if the new status is "better" than the current one
+      // Priority: match > misplaced > notExists > unknown
+      if (_shouldUpdateKeyStatus(currentKeyState.cellType, cellType)) {
+        keyboardNotifier.setLetterStatus(letter, cellType);
+      }
+    }
+  }
+
+  /// Determine if we should update the key status based on priority
+  bool _shouldUpdateKeyStatus(CellType currentStatus, CellType newStatus) {
+    // Priority order: match > misplaced > notExists > unknown
+    const priority = {
+      CellType.match: 3,
+      CellType.misplaced: 2,
+      CellType.notExists: 1,
+      CellType.unknown: 0,
+      CellType.empty: 0,
+    };
+
+    return priority[newStatus]! > priority[currentStatus]!;
   }
 
   /// returns the word by concatenating the characters in the current row

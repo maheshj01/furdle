@@ -236,10 +236,10 @@ class _Key extends ConsumerWidget {
 
     switch (keyState.cellType) {
       case CellType.match:
-        return Colors.green.shade700;
       case CellType.notExists:
-        return Colors.red.shade700;
       case CellType.unknown:
+        return Colors.white;
+      case CellType.empty:
       default:
         return Colors.black;
     }
