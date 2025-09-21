@@ -47,6 +47,8 @@ class GameState {
   /// Number of hints used
   final int hintsUsed;
 
+  final DateTime? nextGameDate;
+
   GameState({
     required this.id,
     this.size = const GridSize(width: 5, height: 6),
@@ -63,6 +65,7 @@ class GameState {
     this.startTime,
     this.endTime,
     this.hintsUsed = 0,
+    this.nextGameDate,
   });
 
   GameState copyWith({
@@ -81,6 +84,7 @@ class GameState {
     GridSize? size,
     String? currentWord,
     List<String>? submittedWords,
+    DateTime? nextGameDate,
   }) {
     return GameState(
       id: id ?? this.id,
@@ -98,6 +102,7 @@ class GameState {
       currentWord: currentWord ?? this.currentWord,
       submittedWords: submittedWords ?? this.submittedWords,
       size: size ?? this.size,
+      nextGameDate: nextGameDate ?? this.nextGameDate,
     );
   }
 
@@ -116,6 +121,7 @@ class GameState {
       startTime: null,
       endTime: null,
       hintsUsed: 0,
+      nextGameDate: null,
     );
   }
 
@@ -153,6 +159,7 @@ class GameState {
       'startTime': startTime?.millisecondsSinceEpoch,
       'endTime': endTime?.millisecondsSinceEpoch,
       'hintsUsed': hintsUsed,
+      'nextGameDate': nextGameDate?.millisecondsSinceEpoch,
     };
   }
 
@@ -185,6 +192,9 @@ class GameState {
           ? DateTime.fromMillisecondsSinceEpoch(json['endTime'] as int)
           : null,
       hintsUsed: json['hintsUsed'] as int? ?? 0,
+      nextGameDate: json['nextGameDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['nextGameDate'] as int)
+          : null,
     );
   }
 }

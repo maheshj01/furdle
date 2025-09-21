@@ -17,10 +17,11 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 
 - [x] Logical and Phsyical key should be in sync
 - [x] Keyabord layout should be responsive
-- [ ] Keyboard state should update and preserved locally
-
-- [ ] Game state should be persisted locally for offline mode
-
+- [x] Keyboard state should update and preserved locally
+- [x] Game state should be persisted locally for offline mode
+- [ ] app does not run on web due to local storage
+- [ ] Add firebase push notifications
+- [ ] 
 ### Animations
 
 - [x] Confetti on win

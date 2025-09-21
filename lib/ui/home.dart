@@ -147,22 +147,30 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       // Handle win scenario
       print("🎉 Game Won! Target word was: ${gameState.targetWord}");
       // You can show a win dialog, update UI, etc.
-      _showGameOverDialog("Congratulations! You won!", gameState.targetWord);
+      _showGameOverDialog("Congratulations! You won!", gameState);
     } else if (gameState.status == GameStatus.lose) {
       // Handle lose scenario
       print(" Game Lost! Target word was: ${gameState.targetWord}");
       // You can show a lose dialog, update UI, etc.
-      _showGameOverDialog("Game Over! The word was:", gameState.targetWord);
+      _showGameOverDialog("Game Over! The word was:", gameState);
     }
   }
 
-  void _showGameOverDialog(String title, String targetWord) {
+  void _showGameOverDialog(String title, GameState gameState) {
+    final targetWord = gameState.targetWord;
+    final nextGameDate = gameState.nextGameDate;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
-          content: Text("The word was: $targetWord"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("The word was: $targetWord"),
+              Text("Next game available on: $nextGameDate"),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -200,7 +208,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             _completedGameToShow!.status == GameStatus.win
                 ? "Game Already Completed! You won!"
                 : "Game Already Completed! You lost!",
-            _completedGameToShow!.targetWord,
+            _completedGameToShow!,
           );
         }
       });

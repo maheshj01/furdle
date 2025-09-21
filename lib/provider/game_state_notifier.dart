@@ -105,7 +105,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
     // If we have a completed game and user didn't click play again, return it to show dialog
     if (savedState != null && savedState.isGameOver && !playAgain) {
-      return savedState;
+      return savedState.copyWith(nextGameDate: dailyChallenge.nextRun);
     }
 
     if (playAgain || savedState == null) {
@@ -124,6 +124,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
       status: GameStatus.inprogress,
       targetWord: challenge.word,
       startTime: DateTime.now(),
+      nextGameDate: challenge.nextRun,
     );
     keyboardNotifier.resetLetterStatuses();
 
