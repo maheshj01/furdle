@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/models/daily_challenge.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
+import 'package:furdle/service/firebase_challenge_service.dart';
 import 'package:furdle/service/hive_storage_service.dart';
 import 'package:furdle/state/game_state.dart';
 import 'package:furdle/utils/word.dart';
@@ -9,12 +11,14 @@ import 'package:furdle/utils/word.dart';
 class GameStateNotifier extends StateNotifier<GameState> {
   final KeyboardNotifier keyboardNotifier;
   final HiveStorageService storageService;
+  final FirebaseChallengeService challengeService;
   // Count occurrences of each letter in target word
   final targetLetterCounts = <String, int>{};
 
   GameStateNotifier({
     required this.keyboardNotifier,
     required this.storageService,
+    required this.challengeService,
   }) : super(GameState.instance());
 
   Future<void> _saveGameState() async {
@@ -52,22 +56,69 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 
   Future<void> startGame() async {
-    final savedState = await _loadGameState();
-    if (savedState != null) {
-      if (savedState.status == GameStatus.inprogress &&
-          savedState.targetWord.isNotEmpty) {
+    // First, try to get the daily challenge from Firebase
+    final dailyChallenge = await challengeService.getCurrentChallenge();
+    // Check if user has already completed this challenge
+    final hasCompleted =
+        await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
+    if (!hasCompleted && challengeService.isChallengeValid(dailyChallenge)) {
+      // Check if we have an ongoing game for this challenge
+      final savedState = await _loadGameState();
+      final savedChallenge = await storageService.getCurrentChallenge();
+
+      if (savedState != null &&
+          savedChallenge != null &&
+          savedChallenge == dailyChallenge &&
+          savedState.status == GameStatus.inprogress) {
+        // Resume the ongoing challenge game
         final keyboardState = await storageService.getKeyboardState();
         if (keyboardState != null) {
-          print("restoring onGoing game ${savedState.targetWord}");
           state = savedState;
           keyboardNotifier.restoreState(keyboardState);
           _buildTargetLetterCounts(savedState.targetWord);
           return;
         }
       }
+
+      // Start new daily challenge
+      print(
+          "Starting daily challenge #${dailyChallenge.number}: ${dailyChallenge.word}");
+      await _initializeChallengeGame(dailyChallenge);
+      return;
     }
-    // No local state found, initialize a new game
+
+    // Fallback: check for any ongoing local game
+    final savedState = await _loadGameState();
+    if (savedState != null && savedState.status == GameStatus.inprogress) {
+      final keyboardState = await storageService.getKeyboardState();
+      if (keyboardState != null) {
+        print("Resuming local game: ${savedState.targetWord}");
+        state = savedState;
+        keyboardNotifier.restoreState(keyboardState);
+        _buildTargetLetterCounts(savedState.targetWord);
+        return;
+      }
+    }
+
+    // No valid challenge or ongoing game, start random game
     initializeGame();
+  }
+
+  Future<void> _initializeChallengeGame(DailyChallenge challenge) async {
+    print("Initializing daily challenge #${challenge.number}");
+    _buildTargetLetterCounts(challenge.word);
+    state = GameState.instance().copyWith(
+      id: challenge.number,
+      status: GameStatus.inprogress,
+      targetWord: challenge.word,
+      startTime: DateTime.now(),
+    );
+    keyboardNotifier.resetLetterStatuses();
+
+    // Save the challenge and game state
+    await storageService.saveCurrentChallenge(challenge);
+    _saveGameState();
+    saveKeyboardState();
   }
 
   void initializeGame() {
@@ -138,7 +189,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     _saveGameState();
   }
 
-  SubmitWordResult submitWord() {
+  Future<SubmitWordResult> submitWord() async {
     final currentWord = getCurrentWord();
     if (currentWord.length != state.size.width) {
       return SubmitWordResult.incomplete;
@@ -147,7 +198,18 @@ class GameStateNotifier extends StateNotifier<GameState> {
       final submittedWordsList = [...state.submittedWords, currentWord];
       if (currentWord == state.targetWord) {
         state = state.copyWith(
-            status: GameStatus.win, submittedWords: submittedWordsList);
+            status: GameStatus.win,
+            submittedWords: submittedWordsList,
+            endTime: DateTime.now());
+
+        // Mark challenge as completed if this is a daily challenge
+        final savedChallenge = await storageService.getCurrentChallenge();
+        if (savedChallenge != null) {
+          await storageService
+              .markChallengeCompleted(savedChallenge.challengeId);
+          print("Daily challenge #${state.id} completed!");
+        }
+
         _saveGameState();
         return SubmitWordResult.match;
       } else {
@@ -374,10 +436,10 @@ enum CellType {
 
 final gameStateProvider =
     StateNotifierProvider<GameStateNotifier, GameState>((ref) {
-//   final storage = ref.watch(storageServiceProvider);
   final keyboardNotifier = ref.watch(keyboardProvider.notifier);
   return GameStateNotifier(
     keyboardNotifier: keyboardNotifier,
     storageService: HiveStorageService(),
+    challengeService: FirebaseChallengeService(),
   );
 });

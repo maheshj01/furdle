@@ -66,6 +66,7 @@ class GameState {
   });
 
   GameState copyWith({
+    int? id,
     GameStatus? status,
     String? targetWord,
     List<List<CellState>>? cells,
@@ -82,7 +83,7 @@ class GameState {
     List<String>? submittedWords,
   }) {
     return GameState(
-      id: id,
+      id: id ?? this.id,
       row: row ?? this.row,
       column: column ?? this.column,
       status: status ?? this.status,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:furdle/models/daily_challenge.dart';
 import 'package:furdle/old/service/storage_service.dart';
 import 'package:furdle/state/game_state.dart' show GameState;
 import 'package:furdle/state/keyboard_state.dart' show KeyboardState;
@@ -165,6 +166,59 @@ class HiveStorageService implements StorageService {
       await _keyboardStateBox?.put('current_keyboard_state', jsonString);
     } catch (e) {
       print('Error saving keyboard state: $e');
+    }
+  }
+
+  // Challenge tracking methods
+  Future<void> saveCurrentChallenge(DailyChallenge challenge) async {
+    await _ensureInitialized();
+    try {
+      final jsonString = jsonEncode(challenge.toJson());
+      await _settingsBox?.put('current_challenge', jsonString);
+    } catch (e) {
+      print('Error saving current challenge: $e');
+    }
+  }
+
+  Future<DailyChallenge?> getCurrentChallenge() async {
+    await _ensureInitialized();
+    final jsonString = _settingsBox?.get('current_challenge');
+    if (jsonString != null) {
+      try {
+        final json = jsonDecode(jsonString);
+        return DailyChallenge.fromJson(json);
+      } catch (e) {
+        print('Error deserializing current challenge: $e');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  Future<void> markChallengeCompleted(String challengeId) async {
+    await _ensureInitialized();
+    try {
+      await _settingsBox?.put('completed_challenge_$challengeId', 'true');
+    } catch (e) {
+      print('Error marking challenge completed: $e');
+    }
+  }
+
+  Future<bool> isChallengeCompleted(String challengeId) async {
+    await _ensureInitialized();
+    final completed = _settingsBox?.get('completed_challenge_$challengeId');
+    return completed == 'true';
+  }
+
+  Future<void> clearCompletedChallenges() async {
+    await _ensureInitialized();
+    try {
+      final keys = _settingsBox?.keys.where((key) => key.toString().startsWith('completed_challenge_')).toList() ?? [];
+      for (final key in keys) {
+        await _settingsBox?.delete(key);
+      }
+    } catch (e) {
+      print('Error clearing completed challenges: $e');
     }
   }
 

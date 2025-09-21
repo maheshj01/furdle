@@ -72,6 +72,32 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     confettiController.play();
   }
 
+  void _handleWordSubmission(GameStateNotifier gameStateNotifier) async {
+    try {
+      final result = await gameStateNotifier.submitWord();
+
+      // Read the updated game state after submission
+      final updatedGameState = ref.read(gameStateProvider);
+      if (result == SubmitWordResult.match) {
+        _handleGameOver(updatedGameState);
+        playConfetti();
+      } else if (updatedGameState.status == GameStatus.lose) {
+        _handleGameOver(updatedGameState);
+      } else {
+        final screenSize = MediaQuery.of(context).size;
+        Utility.showMessage(
+          context,
+          result.friendlyString,
+          margin:
+              EdgeInsets.only(bottom: screenSize.height * 0.6 - kToolbarHeight),
+        );
+      }
+    } catch (e) {
+      print("Error submitting word: $e");
+      Utility.showMessage(context, "Error submitting word");
+    }
+  }
+
   void handleKeyPress(String character, KeyEventType event, bool physicalKey) {
     final gameStateNotifier = ref.read(gameStateProvider.notifier);
     final gameState = ref.read(gameStateProvider);
@@ -88,27 +114,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           break;
         case Constants.keyboardEnterKey:
           print("GameState before submit: ${gameState.status}");
-          final result = gameStateNotifier.submitWord();
-
-          // Read the updated game state after submission
-          final updatedGameState = ref.read(gameStateProvider);
-          if (result == SubmitWordResult.match) {
-            print("GameState after submit: ${updatedGameState.status}");
-            _handleGameOver(updatedGameState);
-            playConfetti();
-          } else if (updatedGameState.status == GameStatus.lose) {
-            print("GameState after submit: ${updatedGameState.status}");
-            _handleGameOver(updatedGameState);
-          } else {
-            final screenSize = MediaQuery.of(context).size;
-            Utility.showMessage(
-              context,
-              result.friendlyString,
-              margin: EdgeInsets.only(
-                  bottom: screenSize.height * 0.6 - kToolbarHeight),
-            );
-          }
-          print("result: ${result.friendlyString}");
+          _handleWordSubmission(gameStateNotifier);
           break;
         default:
           // Check if game is over before allowing letter input

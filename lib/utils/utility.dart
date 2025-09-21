@@ -30,7 +30,8 @@ class Utility {
       return 'You can\'t share a furdle that hasn\'t been solved yet!';
     }
     final int attempts = isPuzzleCracked ? state.row + 1 : 0;
-    String generatedFurdle = '#1 $attempts/${state.size.height.toInt()}\n\n';
+    String generatedFurdle =
+        '#${state.id} $attempts/${state.size.height.toInt()}\n\n';
     for (int i = 0; i < state.size.height; i++) {
       String currentRow = '';
       for (int j = 0; j < state.size.width; j++) {
