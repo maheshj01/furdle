@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// declare colors here
-///
-const Color primaryBlue = Color(0xff086ce7);
-const Color green = Colors.green;
-const Color black = Colors.black87;
-const Color grey = Colors.grey;
- Color yellow = Colors.yellow[800]!;
+class AppColors {
+  static const Color primary = Color(0xff086ce7);
+
+  // Letter status colors
+  static const Color green = Colors.green;
+  static const Color black = Colors.black87;
+  static const Color grey = Colors.grey;
+  static Color yellow = Colors.yellow[800]!;
+}

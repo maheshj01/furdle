@@ -19,13 +19,17 @@ module.exports = {
   },
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
+    "/generated/**/*", // Ignore generated files.
   ],
-  plugins: [
-    "@typescript-eslint",
-    "import",
-  ],
+  plugins: ["@typescript-eslint", "import"],
   rules: {
     "quotes": ["error", "double"],
-    "require-jsdoc": 0,
+    "import/no-unresolved": 0,
+    // off max line length
+    "max-len": "off",
+    // ignore unused variables
+    "@typescript-eslint/no-unused-vars": "off",
+    // missing JSDoc comments
+    "require-jsdoc": "off",
   },
 };

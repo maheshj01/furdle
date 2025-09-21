@@ -17,6 +17,22 @@
     "predeploy": [
       "npm --prefix \"$RESOURCE_DIR\" run lint",
       "npm --prefix \"$RESOURCE_DIR\" run build"
-    ]
+    ],
+    "source": "functions"
+  },
+  "emulators": {
+    "functions": {
+      "port": 5101
+    },
+    "hosting": {
+      "port": 5100
+    },
+    "pubsub": {
+      "port": 8095
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
   }
 }
