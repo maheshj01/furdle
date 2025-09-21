@@ -1,6 +1,3 @@
-# If you're building an application, you may want to check-in your pubspec.lock
-pubspec.lock
-
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
 doc/api/
@@ -84,7 +81,6 @@ doc/api/
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
-**/ios/Podfile.lock
 **/ios/build/
 
 # Exceptions to above rules.
@@ -96,7 +92,6 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
-macos/Podfile.lock
 macos/Flutter/GeneratedPluginRegistrant.swift
 macos/Runner.xcodeproj/project.pbxproj
 macos/Runner.xcworkspace/contents.xcworkspacedata
