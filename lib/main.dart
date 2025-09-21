@@ -59,6 +59,9 @@ class _MyAppState extends ConsumerState<MyApp> {
       debugShowCheckedModeBanner: kDebugMode,
       theme: ThemeData(
         primaryColor: AppColors.primary,
+        iconButtonTheme: IconButtonThemeData(
+          style: IconButton.styleFrom(iconSize: 32),
+        ),
         colorScheme:
             const ColorScheme.light().copyWith(primary: AppColors.primary),
       ),
