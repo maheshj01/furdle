@@ -31,6 +31,9 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   late AnimationController gridScaleController;
   late Animation<double> gridScaleAnimation;
 
+  GameState? _completedGameToShow;
+  bool _hasShownDialog = false;
+
   @override
   void initState() {
     super.initState();
@@ -56,8 +59,14 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     slideController.forward();
     gridScaleController.forward();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(gameStateProvider.notifier).startGame();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final completedGame =
+          await ref.read(gameStateProvider.notifier).startGame();
+      if (completedGame != null && mounted) {
+        setState(() {
+          _completedGameToShow = completedGame;
+        });
+      }
     });
   }
 
@@ -158,8 +167,12 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Optionally restart the game
-                ref.read(gameStateProvider.notifier).startGame();
+                // Reset dialog state and start a new local game
+                setState(() {
+                  _completedGameToShow = null;
+                  _hasShownDialog = false;
+                });
+                ref.read(gameStateProvider.notifier).startGame(playAgain: true);
                 confettiController.stop();
               },
               child: Text("Play Again"),
@@ -178,6 +191,21 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Show dialog for completed game if needed
+    if (_completedGameToShow != null && !_hasShownDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_hasShownDialog) {
+          _hasShownDialog = true;
+          _showGameOverDialog(
+            _completedGameToShow!.status == GameStatus.win
+                ? "Game Already Completed! You won!"
+                : "Game Already Completed! You lost!",
+            _completedGameToShow!.targetWord,
+          );
+        }
+      });
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Stack(

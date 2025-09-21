@@ -40,6 +40,21 @@ class GameStateNotifier extends StateNotifier<GameState> {
   Future<GameState?> _loadGameState() async {
     try {
       final savedState = await storageService.getGameState();
+      if (savedState != null) {
+        final keyboardState = await storageService.getKeyboardState();
+        if (keyboardState != null) {
+          state = savedState;
+          keyboardNotifier.restoreState(keyboardState);
+          if (savedState.status == GameStatus.inprogress) {
+            print("Resuming local game: ${savedState.targetWord}");
+            _buildTargetLetterCounts(savedState.targetWord);
+          } else {
+            print(
+                "Loaded completed game: ${savedState.status} - ${savedState.targetWord}");
+          }
+          return savedState;
+        }
+      }
       return savedState;
     } catch (e) {
       print('Error loading game state: $e');
@@ -55,7 +70,9 @@ class GameStateNotifier extends StateNotifier<GameState> {
     }
   }
 
-  Future<void> startGame() async {
+  Future<GameState?> startGame({bool playAgain = false}) async {
+    // Fallback: check for any ongoing local game
+    final savedState = await _loadGameState();
     // First, try to get the daily challenge from Firebase
     final dailyChallenge = await challengeService.getCurrentChallenge();
     // Check if user has already completed this challenge
@@ -63,7 +80,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
         await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
     if (!hasCompleted && challengeService.isChallengeValid(dailyChallenge)) {
       // Check if we have an ongoing game for this challenge
-      final savedState = await _loadGameState();
       final savedChallenge = await storageService.getCurrentChallenge();
 
       if (savedState != null &&
@@ -76,7 +92,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
           state = savedState;
           keyboardNotifier.restoreState(keyboardState);
           _buildTargetLetterCounts(savedState.targetWord);
-          return;
+          return null; // Ongoing challenge game resumed, no dialog needed
         }
       }
 
@@ -84,24 +100,20 @@ class GameStateNotifier extends StateNotifier<GameState> {
       print(
           "Starting daily challenge #${dailyChallenge.number}: ${dailyChallenge.word}");
       await _initializeChallengeGame(dailyChallenge);
-      return;
+      return null;
     }
 
-    // Fallback: check for any ongoing local game
-    final savedState = await _loadGameState();
-    if (savedState != null && savedState.status == GameStatus.inprogress) {
-      final keyboardState = await storageService.getKeyboardState();
-      if (keyboardState != null) {
-        print("Resuming local game: ${savedState.targetWord}");
-        state = savedState;
-        keyboardNotifier.restoreState(keyboardState);
-        _buildTargetLetterCounts(savedState.targetWord);
-        return;
-      }
+    // If we have a completed game and user didn't click play again, return it to show dialog
+    if (savedState != null && savedState.isGameOver && !playAgain) {
+      return savedState;
     }
 
-    // No valid challenge or ongoing game, start random game
-    initializeGame();
+    if (playAgain || savedState == null) {
+      // No valid challenge or ongoing game, start random game
+      initializeGame();
+    }
+
+    return null;
   }
 
   Future<void> _initializeChallengeGame(DailyChallenge challenge) async {
@@ -127,11 +139,16 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final targetWord = furdleList[index];
     print("target word: $targetWord");
     _buildTargetLetterCounts(targetWord);
+
+    // Create a fresh game state with a new ID
+    final newId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     state = GameState.instance().copyWith(
+        id: newId,
         status: GameStatus.inprogress,
         targetWord: targetWord,
         startTime: DateTime.now());
     keyboardNotifier.resetLetterStatuses();
+    keyboardNotifier.clearEventHistory();
     _saveGameState();
     saveKeyboardState();
   }

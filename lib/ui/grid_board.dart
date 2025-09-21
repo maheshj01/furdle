@@ -12,7 +12,8 @@ class GridBoard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gridSize = ref.read(gameStateProvider).size;
-
+    final gameState = ref.watch(gameStateProvider);
+    final cells = gameState.cells;
     final screenWidth = context.width;
 
     // Calculate cell size to fit the grid nicely on the screen
@@ -36,8 +37,7 @@ class GridBoard extends ConsumerWidget {
             children: [
               for (int j = 0; j < gridSize.width; j++)
                 GridCell(
-                  i: i,
-                  j: j,
+                  cellState: cells[i][j],
                   cellSize: responsiveCellSize,
                 ),
             ],
@@ -48,11 +48,10 @@ class GridBoard extends ConsumerWidget {
 }
 
 class GridCell extends ConsumerStatefulWidget {
-  final int i;
-  final int j;
+  final CellState cellState;
   final double cellSize;
 
-  GridCell({Key? key, required this.i, required this.j, this.cellSize = 80})
+  GridCell({Key? key, this.cellSize = 80, required this.cellState})
       : super(key: key);
 
   @override
@@ -95,6 +94,10 @@ class _GridCellState extends ConsumerState<GridCell>
 
   @override
   void didUpdateWidget(covariant GridCell oldWidget) {
+    if (widget.cellState != oldWidget.cellState) {
+      _controller.reset();
+      _controller.forward();
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -106,8 +109,7 @@ class _GridCellState extends ConsumerState<GridCell>
 
   @override
   Widget build(BuildContext context) {
-    final gameState = ref.watch(gameStateProvider);
-    final cellState = gameState.cells[widget.i][widget.j];
+    final cellState = widget.cellState;
     return AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
@@ -122,7 +124,7 @@ class _GridCellState extends ConsumerState<GridCell>
               child: Text(
                 cellState.character,
                 style: TextStyle(
-                    fontSize: widget.cellSize * 1.5 * _animation.value,
+                    fontSize: widget.cellSize * 0.5 * _animation.value,
                     color: Colors.white),
               ));
         });
