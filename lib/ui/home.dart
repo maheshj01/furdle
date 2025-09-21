@@ -1,15 +1,19 @@
 import 'package:confetti/confetti.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide KeyEvent;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/old/pages/help.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/state/game_state.dart';
 import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:furdle/utils/extensions.dart';
 import 'package:furdle/utils/utility.dart' show Utility;
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 class Home extends ConsumerStatefulWidget {
   static String route = '/';
@@ -83,15 +87,17 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           gameStateNotifier.deleteLetter();
           break;
         case Constants.keyboardEnterKey:
+          print("GameState before submit: ${gameState.status}");
           final result = gameStateNotifier.submitWord();
 
           // Read the updated game state after submission
           final updatedGameState = ref.read(gameStateProvider);
-
           if (result == SubmitWordResult.match) {
+            print("GameState after submit: ${updatedGameState.status}");
             _handleGameOver(updatedGameState);
             playConfetti();
           } else if (updatedGameState.status == GameStatus.lose) {
+            print("GameState after submit: ${updatedGameState.status}");
             _handleGameOver(updatedGameState);
           } else {
             final screenSize = MediaQuery.of(context).size;
@@ -148,6 +154,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                 Navigator.of(context).pop();
                 // Optionally restart the game
                 ref.read(gameStateProvider.notifier).startGame();
+                confettiController.stop();
               },
               child: Text("Play Again"),
             ),
@@ -165,7 +172,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final gameStateNotifier = ref.read(gameStateProvider.notifier);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -223,9 +229,29 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                     icon: const Icon(Icons.help)),
                 actions: [
                   IconButton(
-                      onPressed: () async {}, icon: const Icon(Icons.share)),
-                  IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.settings)),
+                      onPressed: () async {
+                        final gameState = ref.read(gameStateProvider);
+                        if (gameState.status == GameStatus.inprogress) {
+                          Utility.showMessage(context,
+                              "You can't share a furdle that hasn't been solved yet!");
+                          return;
+                        }
+                        final result = Utility.generateFurdleGrid(gameState);
+                        final furdleScoreShareMessage = 'FURDLE ${result}';
+
+                        if (!kIsWeb) {
+                          await SharePlus.instance.share(
+                              ShareParams(text: furdleScoreShareMessage));
+                        } else {
+                          await Clipboard.setData(
+                              ClipboardData(text: furdleScoreShareMessage));
+                          Utility.showMessage(
+                              context, "Score copied to clipboard");
+                        }
+                      },
+                      icon: const Icon(Icons.share)),
+                  // IconButton(
+                  //     onPressed: () {}, icon: const Icon(Icons.settings)),
                 ],
               ),
             ),

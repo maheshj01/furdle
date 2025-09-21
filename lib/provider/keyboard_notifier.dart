@@ -2,182 +2,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/state/key_state.dart';
+import 'package:furdle/state/keyboard_state.dart';
 import 'package:furdle/ui/keyboard.dart';
-
-// Class to represent the state of a single key
-class KeyState {
-  /// The event type of the key
-  /// whether the key is pressed or released or tap cancelled
-  final KeyEventType event;
-
-  /// Whether the key is a physical key
-  final bool isPhysicalKey;
-
-  /// Whether the key is a special key
-  /// like space, backspace, enter
-  final bool isSpecial;
-
-  /// The status of the letter in the word
-  final CellType cellType;
-  final DateTime? timeStamp;
-  final String key; // Add the key identifier
-
-  const KeyState({
-    required this.key,
-    this.event = KeyEventType.keyUp,
-    this.isPhysicalKey = false,
-    this.cellType = CellType.empty,
-    this.timeStamp,
-    this.isSpecial = false,
-  });
-
-  KeyState copyWith({
-    String? key,
-    KeyEventType? event,
-    bool? isPhysicalKey,
-    CellType? cellType,
-    DateTime? timeStamp,
-    bool? isSpecial,
-    int? widthCount,
-  }) {
-    return KeyState(
-      key: key ?? this.key,
-      event: event ?? this.event,
-      isPhysicalKey: isPhysicalKey ?? this.isPhysicalKey,
-      cellType: cellType ?? this.cellType,
-      timeStamp: timeStamp ?? this.timeStamp,
-      isSpecial: isSpecial ?? this.isSpecial,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is KeyState &&
-        other.key == key &&
-        other.event == event &&
-        other.isPhysicalKey == isPhysicalKey &&
-        other.cellType == cellType &&
-        other.timeStamp == timeStamp &&
-        other.isSpecial == isSpecial;
-  }
-
-  @override
-  int get hashCode =>
-      key.hashCode ^
-      event.hashCode ^
-      isPhysicalKey.hashCode ^
-      cellType.hashCode ^
-      timeStamp.hashCode ^
-      isSpecial.hashCode;
-}
-
-// Class to manage the entire keyboard state
-class KeyboardState {
-  final Map<String, KeyState> keyStates;
-  final List<KeyState> keyEventHistory; // Track order of key events
-
-  const KeyboardState({
-    required this.keyStates,
-    this.keyEventHistory = const [],
-  });
-
-  KeyboardState copyWith({
-    Map<String, KeyState>? keyStates,
-    List<KeyState>? keyEventHistory,
-  }) {
-    return KeyboardState(
-      keyStates: keyStates ?? this.keyStates,
-      keyEventHistory: keyEventHistory ?? this.keyEventHistory,
-    );
-  }
-
-  // Helper method to get key state
-  KeyState getKeyState(String key) {
-    return keyStates[key] ?? KeyState(key: key);
-  }
-
-  // Helper method to update a single key state
-  KeyboardState updateKeyState(String key, KeyState newState) {
-    final newKeyStates = Map<String, KeyState>.from(keyStates);
-    newKeyStates[key] = newState;
-    return copyWith(keyStates: newKeyStates);
-  }
-
-  // Helper method to set key pressed state
-  KeyboardState setKeyPressed(String key, KeyEventType event,
-      {bool isPhysicalKey = false, DateTime? timeStamp}) {
-    final currentState = getKeyState(key);
-    final isSpecial = isSpecialKey(key);
-    final newState = currentState.copyWith(
-      key: key,
-      event: event,
-      isPhysicalKey: isPhysicalKey,
-      isSpecial: isSpecial,
-      widthCount: isSpecial ? 2 : 1,
-      timeStamp: timeStamp ?? DateTime.now(),
-    );
-
-    // Add to event history
-    final newEventHistory = List<KeyState>.from(keyEventHistory);
-    newEventHistory.add(newState);
-
-    return updateKeyState(key, newState).copyWith(
-      keyEventHistory: newEventHistory,
-    );
-  }
-
-  bool isSpecialKey(String key) {
-    switch (key) {
-      case Constants.keyboardBackspaceKey:
-      case Constants.keyboardEnterKey:
-      case Constants.keyboardSpaceKey:
-      case Constants.keyboardShiftKey:
-      case Constants.keyboardCapsLockKey:
-      case Constants.keyboardTabKey:
-      case Constants.keyboardDeleteKey:
-      case Constants.keyboardEscapeKey:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  // Helper method to set letter status
-  KeyboardState setLetterStatus(String key, CellType cellType) {
-    final currentState = getKeyState(key);
-    return updateKeyState(key, currentState.copyWith(cellType: cellType));
-  }
-
-  // Get the last key event
-  KeyState? get lastKeyEvent {
-    return keyEventHistory.isNotEmpty ? keyEventHistory.last : null;
-  }
-
-  // Get recent key events (last N events)
-  List<KeyState> getRecentKeyEvents(int count) {
-    if (keyEventHistory.isEmpty) return [];
-    final start =
-        keyEventHistory.length > count ? keyEventHistory.length - count : 0;
-    return keyEventHistory.sublist(start);
-  }
-
-  // Clear event history
-  KeyboardState clearEventHistory() {
-    return copyWith(keyEventHistory: []);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is KeyboardState &&
-        other.keyStates == keyStates &&
-        other.keyEventHistory == keyEventHistory;
-  }
-
-  @override
-  int get hashCode => keyStates.hashCode ^ keyEventHistory.hashCode;
-}
 
 // Notifier class for keyboard state management
 class KeyboardNotifier extends StateNotifier<KeyboardState> {
@@ -245,6 +72,15 @@ class KeyboardNotifier extends StateNotifier<KeyboardState> {
   // Method to reset everything
   void reset() {
     state = _initialState;
+  }
+
+  // Method to restore state without triggering events
+  void restoreState(KeyboardState restoredState) {
+    // Only restore the key states, not the event history to avoid triggering listeners
+    state = state.copyWith(
+      keyStates: restoredState.keyStates,
+      // Don't restore keyEventHistory to prevent triggering lastKeyEventProvider
+    );
   }
 }
 

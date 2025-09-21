@@ -4,6 +4,8 @@ import 'package:furdle/old/models/models.dart';
 class Constants {
   Constants._();
 
+  static const String gameUrl = 'https://furdle.web.app';
+
   /// length of words in list
   static const int maxWords = 2334;
 
@@ -60,5 +62,4 @@ class Constants {
   static const String letterXKey = 'X';
   static const String letterYKey = 'Y';
   static const String letterZKey = 'Z';
-
 }

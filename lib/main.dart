@@ -7,6 +7,9 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:furdle/firebase_options.dart';
 import 'package:furdle/old/shared/theme/theme.dart';
 import 'package:furdle/router.dart';
+import 'package:furdle/service/hive_storage_service.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'constants/constants.dart';
 
@@ -15,6 +18,10 @@ import 'constants/constants.dart';
 Future<void> main() async {
   usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await _initializeHive();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -22,6 +29,18 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(ProviderScope(child: MyApp()));
+}
+
+Future<void> _initializeHive() async {
+  // Get the application documents directory
+  final directory = await getApplicationDocumentsDirectory();
+
+  // Set Hive's default directory
+  Hive.init(directory.path);
+
+  // Initialize the Hive storage service
+  final hiveService = HiveStorageService();
+  await hiveService.initializeHive();
 }
 
 class MyApp extends ConsumerStatefulWidget {

@@ -2,29 +2,87 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
+import 'package:furdle/service/hive_storage_service.dart';
+import 'package:furdle/state/game_state.dart';
 import 'package:furdle/utils/word.dart';
 
 class GameStateNotifier extends StateNotifier<GameState> {
   final KeyboardNotifier keyboardNotifier;
+  final HiveStorageService storageService;
   // Count occurrences of each letter in target word
   final targetLetterCounts = <String, int>{};
 
   GameStateNotifier({
     required this.keyboardNotifier,
+    required this.storageService,
   }) : super(GameState.instance());
 
-  void startGame() {
-    final index = Random().nextInt(furdleList.length);
-    final targetWord = furdleList[index];
-    print("target word: $targetWord");
+  Future<void> _saveGameState() async {
+    try {
+      await storageService.saveGameState(state);
+    } catch (e) {
+      print('Error saving game state: $e');
+    }
+  }
+
+  Future<void> saveKeyboardState() async {
+    try {
+      await storageService.saveKeyboardState(keyboardNotifier.state);
+    } catch (e) {
+      print('Error saving keyboard state: $e');
+    }
+  }
+
+  Future<GameState?> _loadGameState() async {
+    try {
+      final savedState = await storageService.getGameState();
+      return savedState;
+    } catch (e) {
+      print('Error loading game state: $e');
+      return null;
+    }
+  }
+
+  void _buildTargetLetterCounts(String targetWord) {
+    targetLetterCounts.clear();
     for (int i = 0; i < targetWord.length; i++) {
       final letter = targetWord[i].toLowerCase();
       targetLetterCounts[letter] = (targetLetterCounts[letter] ?? 0) + 1;
     }
+  }
+
+  Future<void> startGame() async {
+    final savedState = await _loadGameState();
+    if (savedState != null) {
+      if (savedState.status == GameStatus.inprogress &&
+          savedState.targetWord.isNotEmpty) {
+        final keyboardState = await storageService.getKeyboardState();
+        if (keyboardState != null) {
+          print("restoring onGoing game ${savedState.targetWord}");
+          state = savedState;
+          keyboardNotifier.restoreState(keyboardState);
+          _buildTargetLetterCounts(savedState.targetWord);
+          return;
+        }
+      }
+    }
+    // No local state found, initialize a new game
+    initializeGame();
+  }
+
+  void initializeGame() {
+    print("initializing new game");
+    final index = Random().nextInt(furdleList.length);
+    final targetWord = furdleList[index];
+    print("target word: $targetWord");
+    _buildTargetLetterCounts(targetWord);
     state = GameState.instance().copyWith(
         status: GameStatus.inprogress,
         targetWord: targetWord,
         startTime: DateTime.now());
+    keyboardNotifier.resetLetterStatuses();
+    _saveGameState();
+    saveKeyboardState();
   }
 
   void addLetter(String letter) {
@@ -55,6 +113,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
       column: nextColumn,
       cells: cells,
     );
+    _saveGameState();
   }
 
   void deleteLetter() {
@@ -76,6 +135,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
       cells: cells,
       column: currentColumn - 1,
     );
+    _saveGameState();
   }
 
   SubmitWordResult submitWord() {
@@ -88,6 +148,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
       if (currentWord == state.targetWord) {
         state = state.copyWith(
             status: GameStatus.win, submittedWords: submittedWordsList);
+        _saveGameState();
         return SubmitWordResult.match;
       } else {
         GameStatus status = GameStatus.inprogress;
@@ -99,6 +160,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
             column: 0,
             submittedWords: submittedWordsList,
             status: status);
+        _saveGameState();
         return SubmitWordResult.notMatch;
       }
     } else {
@@ -160,6 +222,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     _updateKeyboardState(word, cells[state.row]);
 
     state = state.copyWith(cells: cells);
+    _saveGameState();
   }
 
   /// Update keyboard state to reflect letter statuses
@@ -177,6 +240,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
         keyboardNotifier.setLetterStatus(letter, cellType);
       }
     }
+    saveKeyboardState();
   }
 
   /// Determine if we should update the key status based on priority
@@ -208,139 +272,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 }
 
-class GameState {
-  /// the id of the game an incremental value starting from 1
-  final int id;
-
-  /// the size of the grid
-  /// default size is 5x5
-  final GridSize size;
-
-  /// the row of the grid where the user is currently typing
-  final int row;
-
-  /// the column of the grid where the user is currently typing
-  final int column;
-
-  /// Current game status (none, inprogress, win, lose)
-  final GameStatus status;
-
-  /// The target word/puzzle to solve
-  final String targetWord;
-
-  /// Current word being typed (for validation)
-  final String currentWord;
-
-  /// List of all words submitted so far
-  final List<String> submittedWords;
-
-  /// Grid cells state (character + cell state for each position)
-  final List<List<CellState>> cells;
-
-  /// Game difficulty level
-  final Difficulty? difficulty;
-
-  /// Whether the current word is valid
-  final bool isCurrentWordValid;
-
-  /// Last submitted word result
-  final SubmitWordResult? lastSubmitResult;
-
-  /// Game start time
-  final DateTime? startTime;
-
-  /// Game end time (if completed)
-  final DateTime? endTime;
-
-  /// Number of hints used
-  final int hintsUsed;
-
-  GameState({
-    required this.id,
-    this.size = const GridSize(width: 5, height: 6),
-    required this.row,
-    required this.column,
-    required this.status,
-    required this.targetWord,
-    this.currentWord = '',
-    this.submittedWords = const [],
-    required this.cells,
-    this.difficulty = Difficulty.medium,
-    this.isCurrentWordValid = false,
-    this.lastSubmitResult,
-    this.startTime,
-    this.endTime,
-    this.hintsUsed = 0,
-  });
-
-  GameState copyWith({
-    GameStatus? status,
-    String? targetWord,
-    List<List<CellState>>? cells,
-    Difficulty? difficulty,
-    bool? isCurrentWordValid,
-    SubmitWordResult? lastSubmitResult,
-    DateTime? startTime,
-    DateTime? endTime,
-    int? hintsUsed,
-    int? row,
-    int? column,
-    GridSize? size,
-    String? currentWord,
-    List<String>? submittedWords,
-  }) {
-    return GameState(
-      id: id,
-      row: row ?? this.row,
-      column: column ?? this.column,
-      status: status ?? this.status,
-      targetWord: targetWord ?? this.targetWord,
-      cells: cells ?? this.cells,
-      difficulty: difficulty ?? this.difficulty,
-      isCurrentWordValid: isCurrentWordValid ?? this.isCurrentWordValid,
-      lastSubmitResult: lastSubmitResult,
-      startTime: startTime,
-      endTime: endTime,
-      hintsUsed: hintsUsed ?? this.hintsUsed,
-      currentWord: currentWord ?? this.currentWord,
-      submittedWords: submittedWords ?? this.submittedWords,
-      size: size ?? this.size,
-    );
-  }
-
-  static GameState instance() {
-    return GameState(
-      id: 0,
-      row: 0,
-      column: 0,
-      size: const GridSize(width: 5, height: 6),
-      status: GameStatus.none,
-      targetWord: '',
-      cells: defaultGrid(),
-      difficulty: Difficulty.medium,
-      isCurrentWordValid: false,
-      lastSubmitResult: null,
-      startTime: null,
-      endTime: null,
-      hintsUsed: 0,
-    );
-  }
-
-  static List<List<CellState>> defaultGrid() => List.generate(
-        6,
-        (row) => List.generate(
-          5,
-          (column) => CellState(character: '', cellType: CellType.empty),
-        ),
-      );
-
-  // Helper getters
-  bool get isGameOver => status == GameStatus.win || status == GameStatus.lose;
-  bool get isGameWon => status == GameStatus.win;
-  bool get isGameLost => status == GameStatus.lose;
-  bool get canSubmit => currentWord.length == size.width && isCurrentWordValid;
-}
-
 class GridSize {
   final int width;
   final int height;
@@ -349,6 +280,21 @@ class GridSize {
     required this.width,
     required this.height,
   });
+
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'width': width,
+      'height': height,
+    };
+  }
+
+  static GridSize fromJson(Map<String, dynamic> json) {
+    return GridSize(
+      width: json['width'] as int,
+      height: json['height'] as int,
+    );
+  }
 }
 
 enum GameStatus {
@@ -401,6 +347,21 @@ class CellState {
   final CellType cellType;
 
   CellState({this.character = '', this.cellType = CellType.empty});
+
+  // JSON serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'character': character,
+      'cellType': cellType.index,
+    };
+  }
+
+  static CellState fromJson(Map<String, dynamic> json) {
+    return CellState(
+      character: json['character'] as String? ?? '',
+      cellType: CellType.values[json['cellType'] as int? ?? 0],
+    );
+  }
 }
 
 enum CellType {
@@ -415,5 +376,8 @@ final gameStateProvider =
     StateNotifierProvider<GameStateNotifier, GameState>((ref) {
 //   final storage = ref.watch(storageServiceProvider);
   final keyboardNotifier = ref.watch(keyboardProvider.notifier);
-  return GameStateNotifier(keyboardNotifier: keyboardNotifier);
+  return GameStateNotifier(
+    keyboardNotifier: keyboardNotifier,
+    storageService: HiveStorageService(),
+  );
 });

@@ -5,6 +5,7 @@ import 'package:furdle/constants/colors.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
+import 'package:furdle/state/key_state.dart';
 import 'package:furdle/utils/extensions.dart';
 
 enum KeyEventType {
@@ -59,7 +60,13 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
     // Listen to the last key event and call the onKeyPressed callback
     ref.listen<KeyState?>(lastKeyEventProvider, (previous, next) {
       if (next != null && widget.onKeyPressed != null) {
-        if (widget.enableFeedback! && next.event == KeyEventType.keyUp) {
+        // Only trigger callback for actual user interactions (keyUp events from real key presses)
+        // Skip if it's not a keyUp event or if there's no previous state (initial load)
+        if (next.event != KeyEventType.keyUp || previous == null) {
+          return;
+        }
+
+        if (widget.enableFeedback!) {
           HapticFeedback.lightImpact();
         }
         widget.onKeyPressed!.call(
@@ -237,8 +244,8 @@ class _Key extends ConsumerWidget {
     switch (keyState.cellType) {
       case CellType.match:
       case CellType.notExists:
-      case CellType.unknown:
         return Colors.white;
+      case CellType.unknown:
       case CellType.empty:
       default:
         return Colors.black;
