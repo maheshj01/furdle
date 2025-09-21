@@ -110,7 +110,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
     if (playAgain || savedState == null) {
       // No valid challenge or ongoing game, start random game
-      initializeGame();
+      initializeGame(nextGameDate: dailyChallenge.nextRun);
     }
 
     return null;
@@ -134,7 +134,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     saveKeyboardState();
   }
 
-  void initializeGame() {
+  void initializeGame({DateTime? nextGameDate}) {
     print("initializing new game");
     final index = Random().nextInt(furdleList.length);
     final targetWord = furdleList[index];
@@ -147,7 +147,8 @@ class GameStateNotifier extends StateNotifier<GameState> {
         id: newId,
         status: GameStatus.inprogress,
         targetWord: targetWord,
-        startTime: DateTime.now());
+        startTime: DateTime.now(),
+        nextGameDate: nextGameDate);
     keyboardNotifier.resetLetterStatuses();
     keyboardNotifier.clearEventHistory();
     _saveGameState();

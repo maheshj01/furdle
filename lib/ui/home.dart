@@ -7,6 +7,7 @@ import 'package:furdle/constants/const.dart';
 import 'package:furdle/old/pages/help.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/state/game_state.dart';
+import 'package:furdle/ui/dialog.dart';
 import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/title_bar.dart';
@@ -112,6 +113,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     final gameState = ref.read(gameStateProvider);
     if (gameState.status == GameStatus.win ||
         gameState.status == GameStatus.lose) {
+      _handleGameOver(gameState);
       return;
     }
     if (event == KeyEventType.keyCancel) {
@@ -146,11 +148,13 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     if (gameState.status == GameStatus.win) {
       // Handle win scenario
       print("🎉 Game Won! Target word was: ${gameState.targetWord}");
+      print("🎉 Next game date: ${gameState.nextGameDate}");
       // You can show a win dialog, update UI, etc.
       _showGameOverDialog("Congratulations! You won!", gameState);
     } else if (gameState.status == GameStatus.lose) {
       // Handle lose scenario
       print(" Game Lost! Target word was: ${gameState.targetWord}");
+      print("🎉 Next game date: ${gameState.nextGameDate}");
       // You can show a lose dialog, update UI, etc.
       _showGameOverDialog("Game Over! The word was:", gameState);
     }
@@ -161,37 +165,35 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     final nextGameDate = gameState.nextGameDate;
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("The word was: $targetWord"),
-              Text("Next game available on: $nextGameDate"),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Reset dialog state and start a new local game
-                setState(() {
-                  _completedGameToShow = null;
-                  _hasShownDialog = false;
-                });
-                ref.read(gameStateProvider.notifier).startGame(playAgain: true);
-                confettiController.stop();
-              },
-              child: Text("Play Again"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Close"),
-            ),
-          ],
+        return ResponsiveGameOverDialog(
+          title: title,
+          targetWord: targetWord,
+          nextGameDate: nextGameDate,
+          onPlayAgain: () {
+            Navigator.of(context).pop();
+            // Reset dialog state and start a new local game
+            setState(() {
+              _completedGameToShow = null;
+              _hasShownDialog = false;
+            });
+            ref.read(gameStateProvider.notifier).startGame(playAgain: true);
+            confettiController.stop();
+          },
+          onClose: () {
+            Navigator.of(context).pop();
+          },
+          onTimerComplete: () {
+            Navigator.of(context).pop();
+            // Reset dialog state and start the next game
+            setState(() {
+              _completedGameToShow = null;
+              _hasShownDialog = false;
+            });
+            ref.read(gameStateProvider.notifier).startGame(playAgain: false);
+            confettiController.stop();
+          },
         );
       },
     );
