@@ -5,13 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:furdle/firebase_options.dart';
-import 'package:furdle/old/shared/theme/theme.dart';
 import 'package:furdle/router.dart';
 import 'package:furdle/service/hive_storage_service.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'constants/constants.dart';
+import 'provider/theme_notifier.dart';
 
 /// Settings are exposed globally to access from anywhere
 
