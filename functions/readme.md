@@ -60,3 +60,31 @@ The functions send push notifications using Firebase Cloud Messaging (FCM) topic
 - **Topic**: `daily_challenge`
 - **Subscribers**: All app users who have enabled notifications
 - **Payload**: Challenge number, timestamp, and action data
+
+### Quick Test
+
+1. select project
+
+```bash
+gcloud auth login
+gcloud config set project furdle
+```
+
+2. send test notification to a topic
+
+```bash
+mahesh@MacBook-Pro-81 functions % ACCESS_TOKEN=$(gcloud auth print-access-token)
+curl -X POST \
+  "https://fcm.googleapis.com/v1/projects/furdle/messages:send" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": {
+      "topic": "daily_challenge",
+      "notification": {
+        "title": "<0001f9e9> Test Notification",
+        "body": "Testing from curl!"
+      }
+    }
+  }'
+```
