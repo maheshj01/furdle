@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/constants/strings.dart';
-import 'package:furdle/old/pages/error_page.dart';
-import 'package:furdle/old/pages/help.dart';
-import 'package:furdle/old/pages/settings.dart';
-import 'package:furdle/old/pages/webview.dart';
+import 'package:furdle/ui/help.dart';
 import 'package:furdle/ui/home.dart';
+import 'package:furdle/ui/settings.dart';
+import 'package:furdle/ui/webview.dart';
 import 'package:go_router/go_router.dart';
+
+import 'ui/error_page.dart';
 
 final router = GoRouter(
   initialLocation: '/',

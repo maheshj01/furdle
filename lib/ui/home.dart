@@ -10,6 +10,7 @@ import 'package:furdle/state/game_state.dart';
 import 'package:furdle/ui/dialog.dart';
 import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/keyboard.dart';
+import 'package:furdle/ui/settings.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:furdle/utils/extensions.dart';
 import 'package:furdle/utils/utility.dart' show Utility;
@@ -294,8 +295,11 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                         }
                       },
                       icon: const Icon(Icons.share)),
-                  // IconButton(
-                  //     onPressed: () {}, icon: const Icon(Icons.settings)),
+                  IconButton(
+                      onPressed: () {
+                        context.push(SettingsPage.path);
+                      },
+                      icon: const Icon(Icons.settings)),
                 ],
               ),
             ),
