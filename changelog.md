@@ -1,4 +1,12 @@
 ### v0.3.7 [Jun 10, 2023]
+- Rebuilt the app with modern architecture and state management.
+- Local state is persisted using Hive.
+- Adds Support for push notifications.
+- Sets up firebase functions for daily puzzle.
+- Send notifications to all users about the new puzzle.
+- Supports for all platforms.
+
+### v0.3.7 [Jun 10, 2023]
 
 - Improve keyboard keys for typing on mobile device.
 - [Fixes Issue 12](https://github.com/maheshmnj/furdle/issues/12) Add deep link support for sharing puzzle.
