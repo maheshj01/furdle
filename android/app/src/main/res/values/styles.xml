@@ -18,5 +18,5 @@
     </style>
 
     <!-- FCM notification color -->
-    <color name="colorAccent">#FF6200EE</color>
+    <!-- <color name="colorAccent">#FF6200EE</color> -->
 </resources>
