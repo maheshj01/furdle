@@ -46,7 +46,7 @@ final router = GoRouter(
                     key: state.pageKey,
                     child: WebViewPage(
                       title: 'Privacy Policy',
-                      url: PRIVACY_POLICY,
+                      url: privacyPolicyUrl,
                     ),
                   )),
         ]),
