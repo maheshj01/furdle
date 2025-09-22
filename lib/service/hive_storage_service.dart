@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:furdle/models/daily_challenge.dart';
-import 'package:furdle/old/service/storage_service.dart';
+import 'package:furdle/service/storage_service.dart';
 import 'package:furdle/state/game_state.dart' show GameState;
 import 'package:furdle/state/keyboard_state.dart' show KeyboardState;
 import 'package:hive/hive.dart';

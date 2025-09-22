@@ -65,11 +65,16 @@ class ThemeSettingsWidget extends ConsumerWidget {
                   value: isDarkMode,
                   onChanged: (value) {
                     settingsNotifier.toggleDarkMode();
-                    
+
                     // Show feedback to user
                     SettingsSnackBar.showThemeChanged(context, value);
                   },
-                  activeThumbColor: Theme.of(context).primaryColor,
+                  thumbColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Theme.of(context).primaryColor;
+                    }
+                    return Colors.grey;
+                  }),
                 ),
               ],
             ),
