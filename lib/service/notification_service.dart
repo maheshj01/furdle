@@ -25,7 +25,8 @@ class NotificationService {
   Future<void> initialize() async {
     try {
       // Request permission for notifications
-      await _requestPermissions();
+      final permissionGranted = await _requestPermissions();
+      print('🔔 Notification permissions granted: $permissionGranted');
 
       // Initialize local notifications
       await _initializeLocalNotifications();
@@ -42,6 +43,11 @@ class NotificationService {
       setUpBackgroundHandler();
 
       print('✅ Notification service initialized successfully');
+      
+      // Get FCM token for debugging
+      final token = await _firebaseMessaging.getToken();
+      print('🔑 FCM Token: $token');
+      
     } catch (e) {
       print('❌ Error initializing notification service: $e');
     }
@@ -52,9 +58,11 @@ class NotificationService {
   }
 
   /// Request notification permissions
-  Future<void> _requestPermissions() async {
+  Future<bool> _requestPermissions() async {
+    bool permissionGranted = false;
+    
     if (Platform.isIOS) {
-      await _firebaseMessaging.requestPermission(
+      final settings = await _firebaseMessaging.requestPermission(
         alert: true,
         announcement: false,
         badge: true,
@@ -63,21 +71,28 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
+      permissionGranted = settings.authorizationStatus == AuthorizationStatus.authorized ||
+                         settings.authorizationStatus == AuthorizationStatus.provisional;
+      print('iOS notification permission status: ${settings.authorizationStatus}');
     }
 
     // For Android 13+, request notification permission
     if (Platform.isAndroid) {
-      await _localNotifications
+      final androidPermission = await _localNotifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
+      permissionGranted = androidPermission ?? true; // Assume granted for older Android versions
+      print('Android notification permission granted: $androidPermission');
     }
+    
+    return permissionGranted;
   }
 
   /// Initialize local notifications
   Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@drawable/ic_notification');
+        AndroidInitializationSettings('@mipmap/ic_notification');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
@@ -154,7 +169,13 @@ class NotificationService {
     print('Data: ${message.data}');
 
     // Show local notification when app is in foreground
-    await _showLocalNotification(message);
+    // This is crucial because Firebase doesn't automatically show notifications in foreground
+    try {
+      await _showLocalNotification(message);
+      print('✅ Local notification displayed successfully');
+    } catch (e) {
+      print('❌ Error showing local notification: $e');
+    }
   }
 
   /// Handle messages when app is opened from background
@@ -184,7 +205,7 @@ class NotificationService {
       channelDescription: 'Notifications for new Furdle challenges',
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@drawable/ic_notification',
+      icon: '@mipmap/ic_notification',
       color: Color(0xFF6200EE),
       playSound: true,
       enableVibration: true,
@@ -246,17 +267,40 @@ class NotificationService {
   /// Send a test notification (for debugging)
   Future<void> sendTestNotification() async {
     if (kDebugMode) {
-      await _showLocalNotification(
-        RemoteMessage(
-          messageId: 'test_${DateTime.now().millisecondsSinceEpoch}',
-          notification: const RemoteNotification(
-            title: '🧩 New Furdle Challenge!',
-            body: 'A new daily challenge is now available. Can you solve it?',
+      print('🧪 Sending test notification...');
+      try {
+        await _showLocalNotification(
+          RemoteMessage(
+            messageId: 'test_${DateTime.now().millisecondsSinceEpoch}',
+            notification: const RemoteNotification(
+              title: '🧩 New Furdle Challenge!',
+              body: 'A new daily challenge is now available. Can you solve it?',
+            ),
+            data: {'action': 'new_challenge'},
           ),
-          data: {'action': 'new_challenge'},
-        ),
-      );
+        );
+        print('✅ Test notification sent successfully');
+      } catch (e) {
+        print('❌ Error sending test notification: $e');
+      }
     }
+  }
+
+  /// Check if notifications are properly configured
+  Future<bool> areNotificationsEnabled() async {
+    if (Platform.isAndroid) {
+      final androidImplementation = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      return await androidImplementation?.areNotificationsEnabled() ?? false;
+    }
+    
+    if (Platform.isIOS) {
+      final settings = await _firebaseMessaging.getNotificationSettings();
+      return settings.authorizationStatus == AuthorizationStatus.authorized ||
+             settings.authorizationStatus == AuthorizationStatus.provisional;
+    }
+    
+    return false;
   }
 
   /// Enable notifications by subscribing to the global topic
