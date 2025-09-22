@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -17,6 +19,9 @@ class NotificationService {
 
   // Global topic for all Furdle users
   static const String globalTopic = 'daily_challenge';
+  
+  // Key to store subscription status in SharedPreferences
+  static const String _subscriptionStatusKey = 'fcm_topic_subscribed';
 
   StreamSubscription<RemoteMessage>? _onMessageSubscription;
   StreamSubscription<RemoteMessage>? _onMessageOpenedAppSubscription;
@@ -43,11 +48,10 @@ class NotificationService {
       setUpBackgroundHandler();
 
       print('✅ Notification service initialized successfully');
-      
+
       // Get FCM token for debugging
       final token = await _firebaseMessaging.getToken();
       print('🔑 FCM Token: $token');
-      
     } catch (e) {
       print('❌ Error initializing notification service: $e');
     }
@@ -60,7 +64,7 @@ class NotificationService {
   /// Request notification permissions
   Future<bool> _requestPermissions() async {
     bool permissionGranted = false;
-    
+
     if (Platform.isIOS) {
       final settings = await _firebaseMessaging.requestPermission(
         alert: true,
@@ -71,9 +75,11 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
-      permissionGranted = settings.authorizationStatus == AuthorizationStatus.authorized ||
-                         settings.authorizationStatus == AuthorizationStatus.provisional;
-      print('iOS notification permission status: ${settings.authorizationStatus}');
+      permissionGranted =
+          settings.authorizationStatus == AuthorizationStatus.authorized ||
+              settings.authorizationStatus == AuthorizationStatus.provisional;
+      print(
+          'iOS notification permission status: ${settings.authorizationStatus}');
     }
 
     // For Android 13+, request notification permission
@@ -82,10 +88,11 @@ class NotificationService {
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
-      permissionGranted = androidPermission ?? true; // Assume granted for older Android versions
+      permissionGranted = androidPermission ??
+          true; // Assume granted for older Android versions
       print('Android notification permission granted: $androidPermission');
     }
-    
+
     return permissionGranted;
   }
 
@@ -130,13 +137,66 @@ class NotificationService {
     }
   }
 
-  /// Subscribe to global topic for daily challenges
+  /// Check if already subscribed to the global topic
+  Future<bool> _isSubscribedToTopic() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_subscriptionStatusKey) ?? false;
+    } catch (e) {
+      print('Error checking subscription status: $e');
+      return false;
+    }
+  }
+
+  /// Set subscription status in local storage
+  Future<void> _setSubscriptionStatus(bool isSubscribed) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_subscriptionStatusKey, isSubscribed);
+    } catch (e) {
+      print('Error setting subscription status: $e');
+    }
+  }
+
+  /// Check if notifications are enabled in settings
+  Future<bool> _areNotificationsEnabledInSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final settingsJson = prefs.getString('settings');
+      if (settingsJson != null) {
+        final settings = json.decode(settingsJson) as Map<String, dynamic>;
+        return settings['isNotificationsEnabled'] ?? true;
+      }
+      return true; // Default to enabled if no settings found
+    } catch (e) {
+      print('Error checking notification settings: $e');
+      return true; // Default to enabled on error
+    }
+  }
+
+  /// Subscribe to global topic for daily challenges (only if not already subscribed)
   Future<void> _subscribeToGlobalTopic() async {
     try {
+      // Check if notifications are enabled in settings
+      final notificationsEnabled = await _areNotificationsEnabledInSettings();
+      if (!notificationsEnabled) {
+        print('Notifications disabled in settings, skipping subscription');
+        return;
+      }
+
+      // Check if already subscribed
+      final alreadySubscribed = await _isSubscribedToTopic();
+      if (alreadySubscribed) {
+        print('Already subscribed to topic: $globalTopic');
+        return;
+      }
+
+      // Subscribe to the topic
       await _firebaseMessaging.subscribeToTopic(globalTopic);
-      print('Subscribed to topic: $globalTopic');
+      await _setSubscriptionStatus(true);
+      print('🔔 Subscribed to topic: $globalTopic');
     } catch (e) {
-      print('Error subscribing to topic: $e');
+      print('❌ Error subscribing to topic: $e');
     }
   }
 
@@ -144,9 +204,10 @@ class NotificationService {
   Future<void> _unsubscribeFromGlobalTopic() async {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(globalTopic);
-      print('Unsubscribed from topic: $globalTopic');
+      await _setSubscriptionStatus(false);
+      print('🔕 Unsubscribed from topic: $globalTopic');
     } catch (e) {
-      print('Error unsubscribing from topic: $e');
+      print('❌ Error unsubscribing from topic: $e');
     }
   }
 
@@ -289,32 +350,57 @@ class NotificationService {
   /// Check if notifications are properly configured
   Future<bool> areNotificationsEnabled() async {
     if (Platform.isAndroid) {
-      final androidImplementation = _localNotifications
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+      final androidImplementation =
+          _localNotifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
       return await androidImplementation?.areNotificationsEnabled() ?? false;
     }
-    
+
     if (Platform.isIOS) {
       final settings = await _firebaseMessaging.getNotificationSettings();
       return settings.authorizationStatus == AuthorizationStatus.authorized ||
-             settings.authorizationStatus == AuthorizationStatus.provisional;
+          settings.authorizationStatus == AuthorizationStatus.provisional;
     }
-    
+
     return false;
   }
 
   /// Enable notifications by subscribing to the global topic
   Future<void> enableNotifications() async {
+    print('🔔 Enabling notifications...');
     await _subscribeToGlobalTopic();
   }
 
   /// Disable notifications by unsubscribing from the global topic
   Future<void> disableNotifications() async {
+    print('🔕 Disabling notifications...');
     await _unsubscribeFromGlobalTopic();
+  }
+
+  /// Force resubscribe to topic (useful for debugging or manual refresh)
+  Future<void> forceResubscribe() async {
+    print('🔄 Force resubscribing to topic...');
+    try {
+      // First unsubscribe
+      await _firebaseMessaging.unsubscribeFromTopic(globalTopic);
+      await _setSubscriptionStatus(false);
+      
+      // Then subscribe again
+      await _firebaseMessaging.subscribeToTopic(globalTopic);
+      await _setSubscriptionStatus(true);
+      print('✅ Force resubscription completed');
+    } catch (e) {
+      print('❌ Error during force resubscription: $e');
+    }
   }
 
   /// Get the global topic name
   String get topicName => globalTopic;
+
+  /// Get current subscription status (for debugging)
+  Future<bool> getSubscriptionStatus() async {
+    return await _isSubscribedToTopic();
+  }
 
   /// Dispose resources
   void dispose() {
