@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/models/daily_challenge.dart';
+import 'package:furdle/provider/hive_storage_provider.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/service/firebase_challenge_service.dart';
 import 'package:furdle/service/hive_storage_service.dart';
@@ -456,9 +457,10 @@ enum CellType {
 final gameStateProvider =
     StateNotifierProvider<GameStateNotifier, GameState>((ref) {
   final keyboardNotifier = ref.watch(keyboardProvider.notifier);
+  final storageService = ref.watch(hiveStorageServiceProvider);
   return GameStateNotifier(
     keyboardNotifier: keyboardNotifier,
-    storageService: HiveStorageService(),
+    storageService: storageService,
     challengeService: FirebaseChallengeService(),
   );
 });

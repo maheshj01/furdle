@@ -4,7 +4,7 @@ import 'package:furdle/models/daily_challenge.dart';
 import 'package:furdle/service/storage_service.dart';
 import 'package:furdle/state/game_state.dart' show GameState;
 import 'package:furdle/state/keyboard_state.dart' show KeyboardState;
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HiveStorageService implements StorageService {
   static const String _gameStateBoxName = 'gameState';

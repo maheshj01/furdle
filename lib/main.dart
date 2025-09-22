@@ -6,10 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:furdle/firebase_options.dart';
 import 'package:furdle/router.dart';
-import 'package:furdle/service/hive_storage_service.dart';
 import 'package:furdle/service/notification_service.dart';
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'constants/constants.dart';
 import 'provider/app_theme_provider.dart';
@@ -37,15 +35,8 @@ Future<void> main() async {
 }
 
 Future<void> _initializeHive() async {
-  // Get the application documents directory
-  final directory = await getApplicationDocumentsDirectory();
-
-  // Set Hive's default directory
-  Hive.init(directory.path);
-
-  // Initialize the Hive storage service
-  final hiveService = HiveStorageService();
-  await hiveService.initializeHive();
+  // Initialize Hive using hive_flutter which handles all platforms including web
+  await Hive.initFlutter();
 }
 
 class MyApp extends ConsumerStatefulWidget {
