@@ -1,4 +1,5 @@
-### v0.3.7 [Jun 10, 2023]
+### v0.3.8 Sep 21, 2025
+
 - Rebuilt the app with modern architecture and state management.
 - Local state is persisted using Hive.
 - Adds Support for push notifications.
