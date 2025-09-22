@@ -72,6 +72,7 @@ async function sendNotificationToTopic(
 // Runs every 24 hours UTC
 export const publishChallenge = onSchedule(
   {
+    // runs every day at midnight UTC
     schedule: "0 0 * * *",
     timeZone: "UTC",
   },
