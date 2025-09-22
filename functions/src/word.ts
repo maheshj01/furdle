@@ -1,6 +1,6 @@
 // / The list of furdle words, ~2334 words in total
 
-export const wordList:string[] = [
+export const wordList: string[] = [
   "aback",
   "abase",
   "abate",

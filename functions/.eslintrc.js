@@ -11,6 +11,8 @@ module.exports = {
     "plugin:import/typescript",
     "google",
     "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended",
+    "prettier",
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -20,8 +22,9 @@ module.exports = {
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
+    "**/*.js", // Ignore JavaScript files (only lint TypeScript)
   ],
-  plugins: ["@typescript-eslint", "import"],
+  plugins: ["@typescript-eslint", "import", "prettier"],
   rules: {
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
@@ -31,5 +34,7 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": "off",
     // missing JSDoc comments
     "require-jsdoc": "off",
+    // Let Prettier handle formatting
+    "prettier/prettier": "error",
   },
 };
