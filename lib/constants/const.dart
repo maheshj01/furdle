@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:furdle/old/models/models.dart';
-
 class Constants {
   Constants._();
 
@@ -10,8 +7,6 @@ class Constants {
 
   /// length of words in list
   static const int maxWords = 2334;
-
-  static Size defaultSize = Difficulty.easy.toGridSize();
 
   static const int hoursUntilNextFurdle = 24;
 

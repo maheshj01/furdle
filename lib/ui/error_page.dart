@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:furdle/old/pages/playground.dart';
+import 'package:furdle/ui/home.dart';
 import 'package:go_router/go_router.dart';
 
 class ErrorPage extends StatefulWidget {
@@ -28,7 +28,7 @@ class _ErrorPageState extends State<ErrorPage> {
               ),
               TextButton(
                 child: const Text('Go Home 🏠'),
-                onPressed: () => context.replace(PlayGround.path),
+                onPressed: () => context.replace(Home.route),
               )
             ],
           ),

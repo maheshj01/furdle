@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/old/shared/theme/colors.dart';
+import 'package:furdle/constants/colors.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/utils/extensions.dart';
 

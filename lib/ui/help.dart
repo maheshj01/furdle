@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:furdle/constants/colors.dart';
 import 'package:furdle/exports.dart' hide AppColors;
-import 'package:furdle/old/pages/webview.dart';
-import 'package:furdle/old/shared/theme/colors.dart';
-import 'package:furdle/old/utils/utility.dart';
+import 'package:furdle/ui/webview.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
