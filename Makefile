@@ -51,9 +51,8 @@ release_apk:
 		$(if $(split),--split-per-abi,)
 
 # Create a release for shorebird
-shorebird_release_android: update_submodules generate
-	shorebird release android \
-		--flutter-version=$(FLUTTER_VERSION)
+shorebird_release_android:
+	shorebird release android --flutter-version=$(FLUTTER_VERSION)
 
 shorebird_release_ios: update_submodules generate
 	shorebird release ios \
