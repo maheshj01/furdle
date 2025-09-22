@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
-import {wordList} from "./word";
-import {onSchedule} from "firebase-functions/scheduler";
-import {logger} from "firebase-functions";
+import { wordList } from "./word";
+import { onSchedule } from "firebase-functions/scheduler";
+import { logger } from "firebase-functions";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -81,7 +81,7 @@ export const publishChallenge = onSchedule(
       const db = admin.firestore();
       const docRef = db.collection("furdle").doc("stats");
       const data = await docRef.get();
-      logger.info("Running scheduled function", {data: data.data()});
+      logger.info("Running scheduled function", { data: data.data() });
 
       // now in UTC
       const now = new Date();
@@ -91,7 +91,7 @@ export const publishChallenge = onSchedule(
 
       // remove the word from the list
       wordList.splice(wordList.indexOf(word), 1);
-      logger.info("Word list length", {length: wordList.length});
+      logger.info("Word list length", { length: wordList.length });
 
       // Alternative approach using Timestamp.fromDate for both timestamps
       const challengeNumber = (data.data()?.number || 0) + 1;
@@ -104,7 +104,7 @@ export const publishChallenge = onSchedule(
         word: word,
       });
 
-      logger.info("Successfully updated challenge with word:", {word});
+      logger.info("Successfully updated challenge with word:", { word });
 
       // Send notification to all topic subscribers about the new challenge
       await sendNotificationToTopic(
