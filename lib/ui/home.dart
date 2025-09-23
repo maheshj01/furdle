@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/state/game_state.dart';
+import 'package:furdle/ui/components/index.dart';
 import 'package:furdle/ui/dialog.dart';
 import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/help.dart';
@@ -95,17 +96,17 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       } else if (updatedGameState.status == GameStatus.lose) {
         _handleGameOver(updatedGameState);
       } else {
-        final screenSize = MediaQuery.of(context).size;
-        Utility.showMessage(
-          context,
-          result.friendlyString,
-          margin:
-              EdgeInsets.only(bottom: screenSize.height * 0.6 - kToolbarHeight),
-        );
+        if (result == SubmitWordResult.incomplete ||
+            result == SubmitWordResult.invalid) {
+          SettingsSnackBar.showError(
+            context,
+            message: result.friendlyString,
+          );
+        }
       }
     } catch (e) {
       print("Error submitting word: $e");
-      Utility.showMessage(context, "Error submitting word");
+      SettingsSnackBar.showError(context, message: "Error submitting word");
     }
   }
 
@@ -125,7 +126,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           gameStateNotifier.deleteLetter();
           break;
         case Constants.keyboardEnterKey:
-          print("GameState before submit: ${gameState.status}");
           _handleWordSubmission(gameStateNotifier);
           break;
         default:

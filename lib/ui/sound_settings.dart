@@ -65,11 +65,11 @@ class SoundSettingsWidget extends ConsumerWidget {
                   value: isSoundEnabled,
                   onChanged: (value) {
                     settingsNotifier.setSoundEnabled(value);
-                    
+
                     // Show feedback to user
                     SettingsSnackBar.showSoundChanged(context, value);
                   },
-                  activeColor: Theme.of(context).primaryColor,
+                  activeThumbColor: Theme.of(context).primaryColor,
                 ),
               ],
             ),
@@ -78,11 +78,11 @@ class SoundSettingsWidget extends ConsumerWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: (isSoundEnabled ? Colors.green : Colors.grey)
-                    .withOpacity(0.1),
+                    .withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: (isSoundEnabled ? Colors.green : Colors.grey)
-                      .withOpacity(0.3),
+                      .withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
