@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/ui/notification_settings.dart';
+import 'package:furdle/ui/theme_settings.dart';
 
 /// Simple settings page that includes notification settings
 class SettingsPage extends StatelessWidget {
@@ -20,7 +21,7 @@ class SettingsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
             SizedBox(height: 16),
-            // ThemeSettingsWidget(),
+            ThemeSettingsWidget(),
             // SoundSettingsWidget(),
             NotificationSettingsWidget(),
             // Add more settings widgets here as needed

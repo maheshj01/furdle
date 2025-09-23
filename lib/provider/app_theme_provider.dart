@@ -13,19 +13,19 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.primaryDark,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
         surface: AppColors.black,
       ),
-      scaffoldBackgroundColor: AppColors.black,
+      scaffoldBackgroundColor: AppColors.surfaceDark,
       appBarTheme: const AppBarTheme(
         elevation: 0,
-        backgroundColor: AppColors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surfaceDark,
+        foregroundColor: AppColors.foregroundDark,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: AppColors.black.withValues(alpha: 0.4),
+        backgroundColor: AppColors.dialogSurfaceDark,
       ),
       cardTheme: CardThemeData(
         color: AppColors.grey.withValues(alpha: 0.1),

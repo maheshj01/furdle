@@ -5,6 +5,7 @@ import 'package:furdle/constants/colors.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
+import 'package:furdle/provider/settings_notifier.dart';
 import 'package:furdle/state/key_state.dart';
 import 'package:furdle/utils/extensions.dart';
 
@@ -176,6 +177,8 @@ class _Key extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final keyState = ref.watch(keyStateProvider(character));
+    final settingsState = ref.watch(settingsNotifierProvider);
+    final isDarkMode = settingsState.isDarkMode;
     final keyboardNotifier = ref.read(keyboardProvider.notifier);
     final isPressed = keyState.event == KeyEventType.keyDown;
     final isSpecial = character == Constants.keyboardBackspaceKey ||
@@ -209,7 +212,7 @@ class _Key extends ConsumerWidget {
             character,
             style: TextStyle(
               fontSize: fontSize ?? context.sp(isSpecial ? 10 : 16),
-              color: _getTextColor(keyState),
+              color: _getTextColor(keyState, isDarkMode),
               fontWeight: isPressed ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -236,7 +239,7 @@ class _Key extends ConsumerWidget {
     }
   }
 
-  Color _getTextColor(KeyState keyState) {
+  Color _getTextColor(KeyState keyState, bool isDarkMode) {
     if (keyState.event == KeyEventType.keyDown) {
       return Colors.blue;
     }
@@ -248,6 +251,9 @@ class _Key extends ConsumerWidget {
       case CellType.unknown:
       case CellType.empty:
       default:
+        if (isDarkMode) {
+          return Colors.white;
+        }
         return Colors.black;
     }
   }
