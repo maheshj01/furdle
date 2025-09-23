@@ -28,9 +28,20 @@ final router = GoRouter(
           GoRoute(
               path: '${HelpPage.path}',
               name: 'help',
-              pageBuilder: (context, state) => MaterialPage<void>(
+              pageBuilder: (context, state) => CustomTransitionPage<void>(
                     key: state.pageKey,
                     child: HelpPage(),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      return SlideTransition(
+                        position: animation.drive(
+                          Tween<Offset>(
+                            begin: const Offset(-1.0, 0.0),
+                            end: Offset.zero,
+                          ).chain(CurveTween(curve: Curves.easeInOut)),
+                        ),
+                        child: child,
+                      );
+                    },
                   )),
           GoRoute(
               path: '${SettingsPage.path}',
