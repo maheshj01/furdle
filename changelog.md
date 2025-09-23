@@ -1,4 +1,4 @@
-### v0.3.9+13 Sep 21, 2025
+### v0.3.9+13 Sep 23, 2025
 
 - Fix Privacy Policy page was restricting JavaScript.
 - Remove Snackbar for valid word.
