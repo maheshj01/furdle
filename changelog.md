@@ -1,4 +1,11 @@
-### v0.3.8 Sep 21, 2025
+### v0.3.9+13 Sep 21, 2025
+
+- Fix Privacy Policy page was restricting JavaScript.
+- Remove Snackbar for valid word.
+- Add left to right transition for Help Page.
+- Show help page on first launch.
+
+### v0.3.8+12 Sep 21, 2025 (Rejected)
 
 - Rebuilt the app with modern architecture and state management.
 - Local state is persisted using Hive.

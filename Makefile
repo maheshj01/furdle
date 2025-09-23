@@ -23,7 +23,7 @@ format-lint: format lint
 run:
 	$(FLUTTER) run $(if $(RELEASE),--release,)
 
-# make update_version VERSION=4.0.0+360636
+# make update_version VERSION=0.4.0+14
 update_version:
 	@if [ -z "$(VERSION)" ]; then \
 		echo "Usage: make update_version VERSION=x.y.z+build"; \

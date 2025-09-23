@@ -3,7 +3,7 @@ class Constants {
 
   static const String gameUrl = 'https://furdle.web.app';
 
-  static const String appVersion = '0.3.8+12';
+  static const String appVersion = '0.3.9+13';
 
   /// length of words in list
   static const int maxWords = 2334;
