@@ -5,7 +5,8 @@ class WebViewPage extends StatefulWidget {
   static final String routeName = '/privacy';
   final String title;
   final String url;
-  const WebViewPage({Key? key, required this.title, required this.url}) : super(key: key);
+  const WebViewPage({Key? key, required this.title, required this.url})
+      : super(key: key);
 
   @override
   State<WebViewPage> createState() => _NewPageState();
@@ -16,6 +17,7 @@ class _NewPageState extends State<WebViewPage> {
   void initState() {
     super.initState();
     controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
       // ..setJavaScriptMode(JavaScriptMode.unrestricted)
       // ..setBackgroundColor(const Color(0x00000000))
       // ..setNavigationDelegate(
