@@ -38,7 +38,7 @@ class _NewPageState extends State<WebViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          automaticallyImplyLeading: true,
           title: Text(widget.title),
         ),
         body: WebViewWidget(
