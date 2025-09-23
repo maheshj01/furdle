@@ -213,12 +213,32 @@ class HiveStorageService implements StorageService {
   Future<void> clearCompletedChallenges() async {
     await _ensureInitialized();
     try {
-      final keys = _settingsBox?.keys.where((key) => key.toString().startsWith('completed_challenge_')).toList() ?? [];
+      final keys = _settingsBox?.keys
+              .where((key) => key.toString().startsWith('completed_challenge_'))
+              .toList() ??
+          [];
       for (final key in keys) {
         await _settingsBox?.delete(key);
       }
     } catch (e) {
       print('Error clearing completed challenges: $e');
+    }
+  }
+
+  // First launch tracking methods
+  Future<bool> isFirstLaunch() async {
+    await _ensureInitialized();
+    final hasLaunched =
+        _settingsBox?.get('has_launched_before', defaultValue: 'false');
+    return hasLaunched != 'true';
+  }
+
+  Future<void> markAsLaunched() async {
+    await _ensureInitialized();
+    try {
+      await _settingsBox?.put('has_launched_before', 'true');
+    } catch (e) {
+      print('Error marking app as launched: $e');
     }
   }
 

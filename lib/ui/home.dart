@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/provider/hive_storage_provider.dart';
 import 'package:furdle/state/game_state.dart';
 import 'package:furdle/ui/components/index.dart';
 import 'package:furdle/ui/dialog.dart';
@@ -63,6 +64,19 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     gridScaleController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Check if this is the first launch and navigate to help page
+      final storageService = ref.read(hiveStorageServiceProvider);
+      final isFirstLaunch = await storageService.isFirstLaunch();
+      if (isFirstLaunch && mounted) {
+        // Mark as launched to prevent showing help page again
+        await storageService.markAsLaunched();
+        // Navigate to help page
+        Future.delayed(const Duration(seconds: 1), () {
+          context.go(HelpPage.path);
+        });
+        return;
+      }
+
       final completedGame =
           await ref.read(gameStateProvider.notifier).startGame();
       if (completedGame != null && mounted) {

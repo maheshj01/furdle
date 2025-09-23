@@ -13,4 +13,8 @@ abstract class StorageService {
   Future<void> clear();
 
   Future<bool> has(String key);
+
+  // First launch tracking methods
+  Future<bool> isFirstLaunch();
+  Future<void> markAsLaunched();
 }
