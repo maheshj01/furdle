@@ -270,6 +270,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
   void updateCells(String word) {
     final cells = state.cells;
     final targetWord = state.targetWord;
+    _buildTargetLetterCounts(state.targetWord);
 
     /// First pass: Mark exact matches (green) and track used letters
     final matchedPositions = <int>{};
