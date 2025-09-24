@@ -46,13 +46,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
         if (keyboardState != null) {
           state = savedState;
           keyboardNotifier.restoreState(keyboardState);
-          if (savedState.status == GameStatus.inprogress) {
-            print("Resuming local game: ${savedState.targetWord}");
-            _buildTargetLetterCounts(savedState.targetWord);
-          } else {
-            print(
-                "Loaded completed game: ${savedState.status} - ${savedState.targetWord}");
-          }
           return savedState;
         }
       }
@@ -92,7 +85,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
         if (keyboardState != null) {
           state = savedState;
           keyboardNotifier.restoreState(keyboardState);
-          _buildTargetLetterCounts(savedState.targetWord);
           return null; // Ongoing challenge game resumed, no dialog needed
         }
       }
@@ -119,7 +111,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
   Future<void> _initializeChallengeGame(DailyChallenge challenge) async {
     print("Initializing daily challenge #${challenge.number}");
-    _buildTargetLetterCounts(challenge.word);
     state = GameState.instance().copyWith(
       id: challenge.number,
       status: GameStatus.inprogress,
@@ -139,9 +130,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
     print("initializing new game");
     final index = Random().nextInt(furdleList.length);
     final targetWord = furdleList[index];
-    print("target word: $targetWord");
-    _buildTargetLetterCounts(targetWord);
-
     // Create a fresh game state with a new ID
     final newId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     state = GameState.instance().copyWith(
@@ -227,7 +215,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
         if (savedChallenge != null) {
           await storageService
               .markChallengeCompleted(savedChallenge.challengeId);
-          print("Daily challenge #${state.id} completed!");
         }
 
         _saveGameState();
