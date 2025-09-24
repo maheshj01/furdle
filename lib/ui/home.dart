@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:confetti/confetti.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide KeyEvent;
@@ -6,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/provider/hive_storage_provider.dart';
+import 'package:furdle/provider/settings_notifier.dart';
+import 'package:furdle/service/audio_service.dart';
 import 'package:furdle/state/game_state.dart';
 import 'package:furdle/ui/components/index.dart';
 import 'package:furdle/ui/dialog.dart';
@@ -91,6 +95,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   void dispose() {
     slideController.dispose();
     gridScaleController.dispose();
+    AudioService.dispose();
     super.dispose();
   }
 
@@ -98,10 +103,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     confettiController.play();
   }
 
-  void _handleWordSubmission(GameStateNotifier gameStateNotifier) async {
+  void _handleWordSubmission(
+      GameStateNotifier gameStateNotifier, bool soundEffect) async {
     try {
       final result = await gameStateNotifier.submitWord();
-
       // Read the updated game state after submission
       final updatedGameState = ref.read(gameStateProvider);
       if (result == SubmitWordResult.match) {
@@ -117,6 +122,9 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             message: result.friendlyString,
           );
         }
+        if (soundEffect) {
+          AudioService.matchSound(index: Random().nextInt(3) + 1);
+        }
       }
     } catch (e) {
       print("Error submitting word: $e");
@@ -126,6 +134,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   void handleKeyPress(String character, KeyEventType event, bool physicalKey) {
     final gameStateNotifier = ref.read(gameStateProvider.notifier);
+    final settingsState = ref.read(settingsNotifierProvider);
     final gameState = ref.read(gameStateProvider);
     if (gameState.status == GameStatus.win ||
         gameState.status == GameStatus.lose) {
@@ -140,7 +149,8 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           gameStateNotifier.deleteLetter();
           break;
         case Constants.keyboardEnterKey:
-          _handleWordSubmission(gameStateNotifier);
+          _handleWordSubmission(
+              gameStateNotifier, settingsState.isSoundEnabled);
           break;
         default:
           // Check if game is over before allowing letter input
@@ -209,6 +219,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final settingsState = ref.watch(settingsNotifierProvider);
     // Show dialog for completed game if needed
     if (_completedGameToShow != null && !_hasShownDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -246,6 +257,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                               begin: const Offset(0, 1), end: Offset.zero)
                           .animate(slideController),
                       child: FurdleKeyboard(
+                        soundEffect: settingsState.isSoundEnabled,
                         onKeyPressed: (String character, KeyEventType event,
                             bool physicalKey) {
                           handleKeyPress(character, event, physicalKey);

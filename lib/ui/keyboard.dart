@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/provider/settings_notifier.dart';
+import 'package:furdle/service/audio_service.dart';
 import 'package:furdle/state/key_state.dart';
 import 'package:furdle/utils/extensions.dart';
 
@@ -20,6 +22,7 @@ class FurdleKeyboard extends ConsumerStatefulWidget {
       onKeyPressed;
   final bool? autoFocus;
   final FocusNode? focusNode;
+  final bool? soundEffect;
 
   /// whether to enable haptic feedback for the key press
   final bool? enableFeedback;
@@ -30,6 +33,7 @@ class FurdleKeyboard extends ConsumerStatefulWidget {
       this.focusNode,
       this.maxWidth,
       this.enableFeedback = true,
+      this.soundEffect = true,
       super.key});
 
   @override
@@ -51,6 +55,8 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
     super.dispose();
   }
 
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -69,6 +75,9 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
 
         if (widget.enableFeedback!) {
           HapticFeedback.lightImpact();
+        }
+        if (widget.soundEffect!) {
+          AudioService.clickSound(index: 3);
         }
         widget.onKeyPressed!.call(
           next.key,
