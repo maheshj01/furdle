@@ -177,28 +177,18 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
 
   void restartGame() {
     Navigator.of(context).pop();
-    confettiController.stop();
-    // Reset dialog state and start the next game
+    // Reset dialog state and start a new local game
     setState(() {
       _completedGameToShow = null;
       _hasShownDialog = false;
     });
-    ref.read(gameStateProvider.notifier).startGame(playAgain: false);
+    ref.read(gameStateProvider.notifier).startGame(playAgain: true);
     confettiController.stop();
   }
 
   void _showGameOverDialog(String title, GameState gameState) {
-    // Prevent showing multiple dialogs
-    if (_hasShownDialog) {
-      return;
-    }
-
     final targetWord = gameState.targetWord;
     final nextGameDate = gameState.nextGameDate;
-
-    // Mark dialog as shown before displaying it
-    _hasShownDialog = true;
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -210,8 +200,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           onPlayAgain: restartGame,
           onClose: () {
             Navigator.of(context).pop();
-            // Reset dialog state when dialog is closed
-            _hasShownDialog = false;
           },
           onTimerComplete: restartGame,
         );
