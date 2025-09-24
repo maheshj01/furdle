@@ -29,7 +29,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
       cardTheme: CardThemeData(
-        color: AppColors.grey.withValues(alpha: 0.1),
+        color: AppColors.cardColorDark,
         elevation: 2,
       ),
       switchTheme: SwitchThemeData(
