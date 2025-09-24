@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/constants/colors.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/provider/settings_notifier.dart';
 import 'package:furdle/utils/extensions.dart';
 
 class GridBoard extends ConsumerWidget {
@@ -60,7 +61,7 @@ class GridCell extends ConsumerStatefulWidget {
 
 class _GridCellState extends ConsumerState<GridCell>
     with SingleTickerProviderStateMixin {
-  Color stateToColor(CellType state) {
+  Color stateToColor(CellType state, bool isDarkMode) {
     switch (state) {
       case CellType.match:
         return AppColors.green;
@@ -70,9 +71,9 @@ class _GridCellState extends ConsumerState<GridCell>
         return AppColors.yellow;
       case CellType.empty:
       case CellType.unknown:
-        return AppColors.grey;
+        return isDarkMode ? Colors.grey.shade800 : Colors.grey.shade400;
       default:
-        return Colors.grey;
+        return isDarkMode ? Colors.grey.shade800 : Colors.grey.shade400;
     }
   }
 
@@ -110,6 +111,8 @@ class _GridCellState extends ConsumerState<GridCell>
   @override
   Widget build(BuildContext context) {
     final cellState = widget.cellState;
+    final isDarkMode = ref.watch(settingsNotifierProvider).isDarkMode;
+    final colorScheme = Theme.of(context).colorScheme;
     return AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
@@ -119,7 +122,11 @@ class _GridCellState extends ConsumerState<GridCell>
               margin: const EdgeInsets.all(2),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: stateToColor(cellState.cellType),
+                  border: Border.all(
+                    color: colorScheme.onSurface,
+                    width: 2,
+                  ),
+                  color: stateToColor(cellState.cellType, isDarkMode),
                   borderRadius: BorderRadius.circular(6)),
               child: Text(
                 cellState.character,
