@@ -14,7 +14,7 @@ class AppColors {
   /// Dark Mode
 
   static const Color primaryDark = Color(0xff086ce7);
-  static const Color surfaceDark = Color.fromARGB(221, 45, 40, 40);
+  static const Color surfaceDark = Color.fromARGB(255, 45, 40, 40);
   static const Color foregroundDark = Colors.white;
-  static const Color dialogSurfaceDark = Color.fromARGB(221, 22, 22, 22);
+  static const Color dialogSurfaceDark = Color.fromARGB(255, 22, 22, 22);
 }

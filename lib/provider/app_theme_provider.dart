@@ -26,6 +26,7 @@ class AppTheme {
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.dialogSurfaceDark,
+        surfaceTintColor: Colors.transparent,
       ),
       cardTheme: CardThemeData(
         color: AppColors.grey.withValues(alpha: 0.1),
@@ -63,6 +64,10 @@ class AppTheme {
         elevation: 0,
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
       ),
       cardTheme: const CardThemeData(
         color: Colors.white,
