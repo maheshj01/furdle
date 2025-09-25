@@ -77,8 +77,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         return;
       }
 
-      final completedGame =
-          await ref.read(gameStateProvider.notifier).startGame();
+      final completedGame = await ref.read(gameStateProvider.notifier).startGame();
       if (completedGame != null && mounted) {
         setState(() {
           _completedGameToShow = completedGame;
@@ -110,8 +109,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       } else if (updatedGameState.status == GameStatus.lose) {
         _handleGameOver(updatedGameState);
       } else {
-        if (result == SubmitWordResult.incomplete ||
-            result == SubmitWordResult.invalid) {
+        if (result == SubmitWordResult.incomplete || result == SubmitWordResult.invalid) {
           SettingsSnackBar.showError(
             context,
             message: result.friendlyString,
@@ -127,8 +125,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   void handleKeyPress(String character, KeyEventType event, bool physicalKey) {
     final gameStateNotifier = ref.read(gameStateProvider.notifier);
     final gameState = ref.read(gameStateProvider);
-    if (gameState.status == GameStatus.win ||
-        gameState.status == GameStatus.lose) {
+    if (gameState.status == GameStatus.win || gameState.status == GameStatus.lose) {
       _handleGameOver(gameState);
       return;
     }
@@ -242,12 +239,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                   Padding(
                     padding: EdgeInsets.only(bottom: 50),
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                              begin: const Offset(0, 1), end: Offset.zero)
+                      position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
                           .animate(slideController),
                       child: FurdleKeyboard(
-                        onKeyPressed: (String character, KeyEventType event,
-                            bool physicalKey) {
+                        onKeyPressed: (String character, KeyEventType event, bool physicalKey) {
                           handleKeyPress(character, event, physicalKey);
                         },
                       ),
@@ -284,21 +279,19 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                       onPressed: () async {
                         final gameState = ref.read(gameStateProvider);
                         if (gameState.status == GameStatus.inprogress) {
-                          Utility.showMessage(context,
-                              "You can't share a furdle that hasn't been solved yet!");
+                          Utility.showMessage(
+                              context, "You can't share a furdle that hasn't been solved yet!");
                           return;
                         }
                         final result = Utility.generateFurdleGrid(gameState);
                         final furdleScoreShareMessage = 'FURDLE ${result}';
 
                         if (!kIsWeb) {
-                          await SharePlus.instance.share(
-                              ShareParams(text: furdleScoreShareMessage));
+                          await SharePlus.instance
+                              .share(ShareParams(text: furdleScoreShareMessage));
                         } else {
-                          await Clipboard.setData(
-                              ClipboardData(text: furdleScoreShareMessage));
-                          Utility.showMessage(
-                              context, "Score copied to clipboard");
+                          await Clipboard.setData(ClipboardData(text: furdleScoreShareMessage));
+                          Utility.showMessage(context, "Score copied to clipboard");
                         }
                       },
                       icon: const Icon(Icons.share)),

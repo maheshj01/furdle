@@ -58,11 +58,9 @@ extension ResponsiveSize on BuildContext {
     // Determine device size category based on both dimensions
     if (width <= _compactPhone.maxWidth && height <= _compactPhone.maxHeight) {
       return (scale * dprAdjustment).clamp(0.8, 1);
-    } else if (width <= _mediumPhone.maxWidth &&
-        height <= _mediumPhone.maxHeight) {
+    } else if (width <= _mediumPhone.maxWidth && height <= _mediumPhone.maxHeight) {
       return (scale * dprAdjustment).clamp(0.85, 1);
-    } else if (width <= _largePhone.maxWidth &&
-        height <= _largePhone.maxHeight) {
+    } else if (width <= _largePhone.maxWidth && height <= _largePhone.maxHeight) {
       return (scale * dprAdjustment).clamp(0.9, 1.1);
     } else if (width <= _tablet.maxWidth && height <= _tablet.maxHeight) {
       return (scale * dprAdjustment).clamp(1.1, 1.2);

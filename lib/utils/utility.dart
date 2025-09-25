@@ -8,8 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// State Color for either furdle or Keyboard
 class Utility {
   static Future<void> launch(String url,
-      {bool isNewTab = true,
-      LaunchMode mode = LaunchMode.externalApplication}) async {
+      {bool isNewTab = true, LaunchMode mode = LaunchMode.externalApplication}) async {
     await launchUrl(
       Uri.parse(url),
       mode: mode,
@@ -18,10 +17,9 @@ class Utility {
   }
 
   static void showMessage(context, message,
-      {Duration? duration = const Duration(milliseconds: 1500),
-      EdgeInsetsGeometry? margin}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        snackBar(message: '$message', duration: duration!, margin: margin));
+      {Duration? duration = const Duration(milliseconds: 1500), EdgeInsetsGeometry? margin}) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(snackBar(message: '$message', duration: duration!, margin: margin));
   }
 
   static String generateFurdleGrid(GameState state) {
@@ -30,8 +28,7 @@ class Utility {
       return 'You can\'t share a furdle that hasn\'t been solved yet!';
     }
     final int attempts = isPuzzleCracked ? state.row + 1 : 0;
-    String generatedFurdle =
-        '#${state.id} $attempts/${state.size.height.toInt()}\n\n';
+    String generatedFurdle = '#${state.id} $attempts/${state.size.height.toInt()}\n\n';
     for (int i = 0; i < state.size.height; i++) {
       String currentRow = '';
       for (int j = 0; j < state.size.width; j++) {

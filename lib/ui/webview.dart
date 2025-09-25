@@ -5,8 +5,7 @@ class WebViewPage extends StatefulWidget {
   static final String routeName = '/privacy';
   final String title;
   final String url;
-  const WebViewPage({Key? key, required this.title, required this.url})
-      : super(key: key);
+  const WebViewPage({Key? key, required this.title, required this.url}) : super(key: key);
 
   @override
   State<WebViewPage> createState() => _NewPageState();

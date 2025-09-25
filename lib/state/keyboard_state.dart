@@ -88,8 +88,7 @@ class KeyboardState {
   // Get recent key events (last N events)
   List<KeyState> getRecentKeyEvents(int count) {
     if (keyEventHistory.isEmpty) return [];
-    final start =
-        keyEventHistory.length > count ? keyEventHistory.length - count : 0;
+    final start = keyEventHistory.length > count ? keyEventHistory.length - count : 0;
     return keyEventHistory.sublist(start);
   }
 
@@ -113,16 +112,14 @@ class KeyboardState {
   Map<String, dynamic> toJson() {
     return {
       'keyStates': keyStates.map((key, value) => MapEntry(key, value.toJson())),
-      'keyEventHistory':
-          keyEventHistory.map((event) => event.toJson()).toList(),
+      'keyEventHistory': keyEventHistory.map((event) => event.toJson()).toList(),
     };
   }
 
   static KeyboardState fromJson(Map<String, dynamic> json) {
     final keyStatesJson = json['keyStates'] as Map<String, dynamic>? ?? {};
     final keyStates = keyStatesJson.map(
-      (key, value) =>
-          MapEntry(key, KeyState.fromJson(value as Map<String, dynamic>)),
+      (key, value) => MapEntry(key, KeyState.fromJson(value as Map<String, dynamic>)),
     );
 
     final keyEventHistoryJson = json['keyEventHistory'] as List? ?? [];

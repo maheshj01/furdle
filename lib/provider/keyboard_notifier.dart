@@ -58,8 +58,7 @@ class KeyboardNotifier extends StateNotifier<KeyboardState> {
   void resetLetterStatuses() {
     final newKeyStates = <String, KeyState>{};
     for (final entry in state.keyStates.entries) {
-      newKeyStates[entry.key] =
-          entry.value.copyWith(cellType: CellType.unknown);
+      newKeyStates[entry.key] = entry.value.copyWith(cellType: CellType.unknown);
     }
     state = state.copyWith(keyStates: newKeyStates);
   }
@@ -85,8 +84,7 @@ class KeyboardNotifier extends StateNotifier<KeyboardState> {
 }
 
 // Provider for the keyboard notifier
-final keyboardProvider =
-    StateNotifierProvider<KeyboardNotifier, KeyboardState>((ref) {
+final keyboardProvider = StateNotifierProvider<KeyboardNotifier, KeyboardState>((ref) {
   return KeyboardNotifier();
 });
 

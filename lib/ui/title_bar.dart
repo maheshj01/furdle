@@ -72,11 +72,7 @@ class LetterBox extends StatelessWidget {
   final Color? color;
   final bool isOdd;
   const LetterBox(
-      {super.key,
-      required this.letter,
-      required this.boxSize,
-      this.color,
-      this.isOdd = false});
+      {super.key, required this.letter, required this.boxSize, this.color, this.isOdd = false});
 
   @override
   Widget build(BuildContext context) {

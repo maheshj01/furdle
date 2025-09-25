@@ -16,8 +16,7 @@ enum KeyEventType {
 }
 
 class FurdleKeyboard extends ConsumerStatefulWidget {
-  final Function(String key, KeyEventType event, bool physicalKey)?
-      onKeyPressed;
+  final Function(String key, KeyEventType event, bool physicalKey)? onKeyPressed;
   final bool? autoFocus;
   final FocusNode? focusNode;
 
@@ -109,17 +108,7 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
               characters: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
             ),
             _KeyRow(
-              characters: [
-                'Enter',
-                'Z',
-                'X',
-                'C',
-                'V',
-                'B',
-                'N',
-                'M',
-                'Backspace'
-              ],
+              characters: ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace'],
             ),
           ],
         ),
@@ -154,8 +143,8 @@ class _KeyRow extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: characters.map((character) {
-        final isSpecial = character == Constants.keyboardBackspaceKey ||
-            character == Constants.keyboardEnterKey;
+        final isSpecial =
+            character == Constants.keyboardBackspaceKey || character == Constants.keyboardEnterKey;
 
         // Use Flexible with different flex values for special keys
         return Flexible(
@@ -181,8 +170,8 @@ class _Key extends ConsumerWidget {
     final isDarkMode = settingsState.isDarkMode;
     final keyboardNotifier = ref.read(keyboardProvider.notifier);
     final isPressed = keyState.event == KeyEventType.keyDown;
-    final isSpecial = character == Constants.keyboardBackspaceKey ||
-        character == Constants.keyboardEnterKey;
+    final isSpecial =
+        character == Constants.keyboardBackspaceKey || character == Constants.keyboardEnterKey;
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: InkWell(
@@ -193,8 +182,7 @@ class _Key extends ConsumerWidget {
           keyboardNotifier.onKeyPressed(character, KeyEventType.keyUp, false);
         },
         onTapCancel: () {
-          keyboardNotifier.onKeyPressed(
-              character, KeyEventType.keyCancel, false);
+          keyboardNotifier.onKeyPressed(character, KeyEventType.keyCancel, false);
         },
         child: Container(
           width: double.infinity, // Take full width of Flexible parent

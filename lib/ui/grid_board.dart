@@ -22,8 +22,7 @@ class GridBoard extends ConsumerWidget {
     final horizontalPadding = 32.0; // 16px on each side
     final cellMargin = 4.0; // 2px margin on each side of cell
     final availableWidth = screenWidth - horizontalPadding;
-    final cellSize =
-        (availableWidth - (gridSize.width - 1) * cellMargin) / gridSize.width;
+    final cellSize = (availableWidth - (gridSize.width - 1) * cellMargin) / gridSize.width;
 
     final minCellSize = 40.0;
     final maxCellSize = 65.0;
@@ -52,15 +51,13 @@ class GridCell extends ConsumerStatefulWidget {
   final CellState cellState;
   final double cellSize;
 
-  GridCell({Key? key, this.cellSize = 80, required this.cellState})
-      : super(key: key);
+  GridCell({Key? key, this.cellSize = 80, required this.cellState}) : super(key: key);
 
   @override
   ConsumerState<GridCell> createState() => _GridCellState();
 }
 
-class _GridCellState extends ConsumerState<GridCell>
-    with SingleTickerProviderStateMixin {
+class _GridCellState extends ConsumerState<GridCell> with SingleTickerProviderStateMixin {
   Color stateToColor(CellType state, bool isDarkMode) {
     switch (state) {
       case CellType.match:
@@ -131,8 +128,7 @@ class _GridCellState extends ConsumerState<GridCell>
               child: Text(
                 cellState.character,
                 style: TextStyle(
-                    fontSize: widget.cellSize * 0.5 * _animation.value,
-                    color: Colors.white),
+                    fontSize: widget.cellSize * 0.5 * _animation.value, color: Colors.white),
               ));
         });
   }

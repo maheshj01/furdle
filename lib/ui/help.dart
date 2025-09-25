@@ -25,15 +25,13 @@ class HelpPage extends StatelessWidget {
     const String case2 = 'The letter L is in the word but in the wrong spot.';
     const String case3 = 'The letter Y is not in the word at any spot';
 
-    Widget subTitle(String subTitle,
-        {double fontSize = 24, double vPadding = 8}) {
+    Widget subTitle(String subTitle, {double fontSize = 24, double vPadding = 8}) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: vPadding),
         child: Text(
           subTitle,
           style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: fontSize >= 20 ? FontWeight.w500 : FontWeight.normal),
+              fontSize: fontSize, fontWeight: fontSize >= 20 ? FontWeight.w500 : FontWeight.normal),
         ),
       );
     }
@@ -41,23 +39,19 @@ class HelpPage extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(title),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  context.pop(true);
-                },
-                icon: const Icon(Icons.close))
-          ]),
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(title), actions: [
+        IconButton(
+            onPressed: () {
+              context.pop(true);
+            },
+            icon: const Icon(Icons.close))
+      ]),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: screenSize.width < 600
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.center,
+            crossAxisAlignment:
+                screenSize.width < 600 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
             children: [
               const SizedBox(
                 height: 20,
@@ -142,8 +136,7 @@ extension WebLink on String {
 }
 
 extension ExampleWord on String {
-  Widget toWord(int index,
-      {double boxSize = 40, Color color = AppColors.green}) {
+  Widget toWord(int index, {double boxSize = 40, Color color = AppColors.green}) {
     return Material(
       color: Colors.transparent,
       child: Row(mainAxisSize: MainAxisSize.min, children: [

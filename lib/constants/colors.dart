@@ -20,12 +20,9 @@ class AppColors {
 
   // Surface colors - Avoid pure black, use dark grays
   static const Color surfaceDark = Color(0xFF121212); // Material 3 surface
-  static const Color surfaceVariantDark =
-      Color(0xFF1E1E1E); // Elevated surfaces
-  static const Color surfaceContainerDark =
-      Color(0xFF2D2D2D); // Container surfaces
-  static const Color surfaceContainerHighDark =
-      Color(0xFF3A3A3A); // High elevation
+  static const Color surfaceVariantDark = Color(0xFF1E1E1E); // Elevated surfaces
+  static const Color surfaceContainerDark = Color(0xFF2D2D2D); // Container surfaces
+  static const Color surfaceContainerHighDark = Color(0xFF3A3A3A); // High elevation
 
   // Background and foreground
   static const Color backgroundDark = Color(0xFF0F0F0F); // True background
@@ -33,8 +30,7 @@ class AppColors {
 
   // Dialog and overlay surfaces
   static const Color dialogSurfaceDark = Color(0xFF1C1C1C); // Dialog background
-  static const Color overlayDark =
-      Color(0x66000000); // Semi-transparent overlay
+  static const Color overlayDark = Color(0x66000000); // Semi-transparent overlay
 
   // Card and container colors
   static const Color cardColorDark = Color(0xFF1E1E1E);
@@ -42,8 +38,7 @@ class AppColors {
 
   // State colors - Adjusted for dark mode
   static const Color errorDark = Color(0xFFCF6679); // Soft red for errors
-  static const Color warningDark =
-      Color(0xFFFFB74D); // Soft orange for warnings
+  static const Color warningDark = Color(0xFFFFB74D); // Soft orange for warnings
   static const Color successDark = Color(0xFF81C784); // Soft green for success
   static const Color infoDark = Color(0xFF64B5F6); // Soft blue for info
 

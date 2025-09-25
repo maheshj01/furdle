@@ -70,8 +70,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     // First, try to get the daily challenge from Firebase
     final dailyChallenge = await challengeService.getCurrentChallenge();
     // Check if user has already completed this challenge
-    final hasCompleted =
-        await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
+    final hasCompleted = await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
     if (!hasCompleted && challengeService.isChallengeValid(dailyChallenge)) {
       // Check if we have an ongoing game for this challenge
       final savedChallenge = await storageService.getCurrentChallenge();
@@ -90,8 +89,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
       }
 
       // Start new daily challenge
-      print(
-          "Starting daily challenge #${dailyChallenge.number}: ${dailyChallenge.word}");
+      print("Starting daily challenge #${dailyChallenge.number}: ${dailyChallenge.word}");
       await _initializeChallengeGame(dailyChallenge);
       return null;
     }
@@ -162,8 +160,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
     final cells = state.cells;
 
-    final newCell =
-        CellState(cellType: CellType.unknown, character: letter.toUpperCase());
+    final newCell = CellState(cellType: CellType.unknown, character: letter.toUpperCase());
     cells[currentRow][currentColumn] = newCell;
 
     final nextColumn = (currentColumn + 1).clamp(0, state.size.width);
@@ -179,9 +176,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final currentColumn = state.column;
     final currentRow = state.row;
 
-    if (currentRow >= state.size.height ||
-        currentColumn <= 0 ||
-        currentRow < 0) {
+    if (currentRow >= state.size.height || currentColumn <= 0 || currentRow < 0) {
       return;
     }
 
@@ -206,15 +201,12 @@ class GameStateNotifier extends StateNotifier<GameState> {
       final submittedWordsList = [...state.submittedWords, currentWord];
       if (currentWord == state.targetWord) {
         state = state.copyWith(
-            status: GameStatus.win,
-            submittedWords: submittedWordsList,
-            endTime: DateTime.now());
+            status: GameStatus.win, submittedWords: submittedWordsList, endTime: DateTime.now());
 
         // Mark challenge as completed if this is a daily challenge
         final savedChallenge = await storageService.getCurrentChallenge();
         if (savedChallenge != null) {
-          await storageService
-              .markChallengeCompleted(savedChallenge.challengeId);
+          await storageService.markChallengeCompleted(savedChallenge.challengeId);
         }
 
         _saveGameState();
@@ -225,10 +217,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
           status = GameStatus.lose;
         }
         state = state.copyWith(
-            row: state.row + 1,
-            column: 0,
-            submittedWords: submittedWordsList,
-            status: status);
+            row: state.row + 1, column: 0, submittedWords: submittedWordsList, status: status);
         _saveGameState();
         return SubmitWordResult.notMatch;
       }
@@ -263,8 +252,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final matchedPositions = <int>{};
     for (int i = 0; i < word.length; i++) {
       if (word[i].toLowerCase() == targetWord[i].toLowerCase()) {
-        cells[state.row][i] = CellState(
-            cellType: CellType.match, character: word[i].toUpperCase());
+        cells[state.row][i] = CellState(cellType: CellType.match, character: word[i].toUpperCase());
         matchedPositions.add(i);
         // Decrease count for this letter, since it's been matched
         final letter = word[i].toLowerCase();
@@ -277,14 +265,13 @@ class GameStateNotifier extends StateNotifier<GameState> {
         continue;
       }
       final letter = word[i].toLowerCase();
-      if (targetLetterCounts.containsKey(letter) &&
-          targetLetterCounts[letter]! > 0) {
-        cells[state.row][i] = CellState(
-            cellType: CellType.misplaced, character: word[i].toUpperCase());
+      if (targetLetterCounts.containsKey(letter) && targetLetterCounts[letter]! > 0) {
+        cells[state.row][i] =
+            CellState(cellType: CellType.misplaced, character: word[i].toUpperCase());
         targetLetterCounts[letter] = targetLetterCounts[letter]! - 1;
       } else {
-        cells[state.row][i] = CellState(
-            cellType: CellType.notExists, character: word[i].toUpperCase());
+        cells[state.row][i] =
+            CellState(cellType: CellType.notExists, character: word[i].toUpperCase());
       }
     }
 
@@ -330,8 +317,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
   /// returns the word by concatenating the characters in the current row
   String getCurrentWord() {
     final currentRow = state.row;
-    final currentWord =
-        state.cells[currentRow].map((cell) => cell.character).join('');
+    final currentWord = state.cells[currentRow].map((cell) => cell.character).join('');
     return currentWord.toLowerCase();
   }
 
@@ -442,8 +428,7 @@ enum CellType {
   unknown, // Unknown cell type because it's not yet submitted
 }
 
-final gameStateProvider =
-    StateNotifierProvider<GameStateNotifier, GameState>((ref) {
+final gameStateProvider = StateNotifierProvider<GameStateNotifier, GameState>((ref) {
   final keyboardNotifier = ref.watch(keyboardProvider.notifier);
   final storageService = ref.watch(hiveStorageServiceProvider);
   return GameStateNotifier(

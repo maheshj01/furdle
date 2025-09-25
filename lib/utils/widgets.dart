@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 SnackBar snackBar(
-    {required String message,
-    required Duration duration,
-    EdgeInsetsGeometry? margin}) {
+    {required String message, required Duration duration, EdgeInsetsGeometry? margin}) {
   return SnackBar(
     content: Text(
       message,

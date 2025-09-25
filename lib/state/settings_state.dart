@@ -14,8 +14,7 @@ class SettingsState {
     bool? isDarkMode,
   }) {
     return SettingsState(
-      isNotificationsEnabled:
-          isNotificationsEnabled ?? this.isNotificationsEnabled,
+      isNotificationsEnabled: isNotificationsEnabled ?? this.isNotificationsEnabled,
       isSoundEnabled: isSoundEnabled ?? this.isSoundEnabled,
       isDarkMode: isDarkMode ?? this.isDarkMode,
     );

@@ -50,8 +50,7 @@ class DailyChallenge {
   }
 
   // Helper method to get a unique identifier for this challenge
-  String get challengeId =>
-      'challenge_${number}_${date.year}_${date.month}_${date.day}';
+  String get challengeId => 'challenge_${number}_${date.year}_${date.month}_${date.day}';
 
   @override
   String toString() {

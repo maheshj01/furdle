@@ -228,8 +228,7 @@ class HiveStorageService implements StorageService {
   // First launch tracking methods
   Future<bool> isFirstLaunch() async {
     await _ensureInitialized();
-    final hasLaunched =
-        _settingsBox?.get('has_launched_before', defaultValue: 'false');
+    final hasLaunched = _settingsBox?.get('has_launched_before', defaultValue: 'false');
     return hasLaunched != 'true';
   }
 

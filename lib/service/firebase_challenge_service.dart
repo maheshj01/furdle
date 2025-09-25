@@ -10,8 +10,7 @@ class FirebaseChallengeService {
   /// Fetches the current daily challenge from Firebase
   Future<DailyChallenge?> getCurrentChallenge() async {
     try {
-      final doc =
-          await _firestore.collection(_collectionName).doc(_documentName).get();
+      final doc = await _firestore.collection(_collectionName).doc(_documentName).get();
 
       if (!doc.exists) {
         print('Challenge document does not exist');

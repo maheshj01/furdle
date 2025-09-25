@@ -14,12 +14,11 @@ class NotificationService {
   NotificationService._internal();
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   // Global topic for all Furdle users
   static const String globalTopic = 'daily_challenge';
-  
+
   // Key to store subscription status in SharedPreferences
   static const String _subscriptionStatusKey = 'fcm_topic_subscribed';
 
@@ -75,21 +74,17 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
-      permissionGranted =
-          settings.authorizationStatus == AuthorizationStatus.authorized ||
-              settings.authorizationStatus == AuthorizationStatus.provisional;
-      print(
-          'iOS notification permission status: ${settings.authorizationStatus}');
+      permissionGranted = settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+      print('iOS notification permission status: ${settings.authorizationStatus}');
     }
 
     // For Android 13+, request notification permission
     if (Platform.isAndroid) {
       final androidPermission = await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
-      permissionGranted = androidPermission ??
-          true; // Assume granted for older Android versions
+      permissionGranted = androidPermission ?? true; // Assume granted for older Android versions
       print('Android notification permission granted: $androidPermission');
     }
 
@@ -101,15 +96,13 @@ class NotificationService {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_notification');
 
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
+    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
 
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
+    const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
     );
@@ -131,8 +124,7 @@ class NotificationService {
       );
 
       await _localNotifications
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(channel);
     }
   }
@@ -214,8 +206,7 @@ class NotificationService {
   /// Set up message handlers for different app states
   void _setupMessageHandlers() {
     // Handle messages when app is in foreground
-    _onMessageSubscription =
-        FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    _onMessageSubscription = FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
     // Handle messages when app is in background but not terminated
     _onMessageOpenedAppSubscription =
@@ -247,9 +238,7 @@ class NotificationService {
 
   /// Handle notification when app is launched from terminated state
   void _handleInitialMessage() {
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
         print('🚀 App launched from notification: ${message.messageId}');
         _handleNotificationAction(message);
@@ -259,8 +248,7 @@ class NotificationService {
 
   /// Show local notification
   Future<void> _showLocalNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'furdle_notifications',
       'Furdle Notifications',
       channelDescription: 'Notifications for new Furdle challenges',
@@ -272,8 +260,7 @@ class NotificationService {
       enableVibration: true,
     );
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails(
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
@@ -350,9 +337,8 @@ class NotificationService {
   /// Check if notifications are properly configured
   Future<bool> areNotificationsEnabled() async {
     if (Platform.isAndroid) {
-      final androidImplementation =
-          _localNotifications.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+      final androidImplementation = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       return await androidImplementation?.areNotificationsEnabled() ?? false;
     }
 
@@ -384,7 +370,7 @@ class NotificationService {
       // First unsubscribe
       await _firebaseMessaging.unsubscribeFromTopic(globalTopic);
       await _setSubscriptionStatus(false);
-      
+
       // Then subscribe again
       await _firebaseMessaging.subscribeToTopic(globalTopic);
       await _setSubscriptionStatus(true);

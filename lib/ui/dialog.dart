@@ -21,8 +21,7 @@ class ResponsiveGameOverDialog extends StatefulWidget {
   });
 
   @override
-  State<ResponsiveGameOverDialog> createState() =>
-      _ResponsiveGameOverDialogState();
+  State<ResponsiveGameOverDialog> createState() => _ResponsiveGameOverDialogState();
 }
 
 class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
@@ -128,8 +127,7 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
 
               // Target word
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -152,8 +150,7 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -233,15 +230,13 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
           horizontal: 24,
           vertical: 24,
         ),
-        backgroundColor: isPrimary
-            ? Theme.of(context).primaryColor
-            : Theme.of(context).colorScheme.secondary,
+        backgroundColor:
+            isPrimary ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        minimumSize:
-            isDesktop ? const Size(100, 48) : Size(double.infinity, 48),
+        minimumSize: isDesktop ? const Size(100, 48) : Size(double.infinity, 48),
       ),
     );
 

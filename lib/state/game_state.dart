@@ -150,9 +150,7 @@ class GameState {
       'targetWord': targetWord,
       'currentWord': currentWord,
       'submittedWords': submittedWords,
-      'cells': cells
-          .map((row) => row.map((cell) => cell.toJson()).toList())
-          .toList(),
+      'cells': cells.map((row) => row.map((cell) => cell.toJson()).toList()).toList(),
       'difficulty': difficulty?.index,
       'isCurrentWordValid': isCurrentWordValid,
       'lastSubmitResult': lastSubmitResult?.index,
@@ -178,9 +176,7 @@ class GameState {
               .map((cell) => CellState.fromJson(cell as Map<String, dynamic>))
               .toList())
           .toList(),
-      difficulty: json['difficulty'] != null
-          ? Difficulty.values[json['difficulty'] as int]
-          : null,
+      difficulty: json['difficulty'] != null ? Difficulty.values[json['difficulty'] as int] : null,
       isCurrentWordValid: json['isCurrentWordValid'] as bool? ?? false,
       lastSubmitResult: json['lastSubmitResult'] != null
           ? SubmitWordResult.values[json['lastSubmitResult'] as int]

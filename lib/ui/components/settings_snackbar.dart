@@ -133,9 +133,8 @@ class SettingsSnackBar {
   static void showNotificationsChanged(BuildContext context, bool isEnabled) {
     show(
       context,
-      message: isEnabled 
-          ? '✅ Notifications enabled for daily challenges'
-          : '🔕 Notifications disabled',
+      message:
+          isEnabled ? '✅ Notifications enabled for daily challenges' : '🔕 Notifications disabled',
       icon: isEnabled ? Icons.notifications_active : Icons.notifications_off,
       backgroundColor: isEnabled ? Colors.blue : Colors.grey,
     );

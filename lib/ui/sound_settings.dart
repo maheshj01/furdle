@@ -77,20 +77,17 @@ class SoundSettingsWidget extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (isSoundEnabled ? Colors.green : Colors.grey)
-                    .withValues(alpha: 0.1),
+                color: (isSoundEnabled ? Colors.green : Colors.grey).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: (isSoundEnabled ? Colors.green : Colors.grey)
-                      .withValues(alpha: 0.3),
+                  color: (isSoundEnabled ? Colors.green : Colors.grey).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color:
-                        isSoundEnabled ? Colors.green[700] : Colors.grey[600],
+                    color: isSoundEnabled ? Colors.green[700] : Colors.grey[600],
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -101,9 +98,7 @@ class SoundSettingsWidget extends ConsumerWidget {
                           : 'Game will run silently without sound effects',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isSoundEnabled
-                            ? Colors.green[700]
-                            : Colors.grey[600],
+                        color: isSoundEnabled ? Colors.green[700] : Colors.grey[600],
                       ),
                     ),
                   ),

@@ -82,12 +82,10 @@ class ThemeSettingsWidget extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (isDarkMode ? Colors.indigo : Colors.orange)
-                    .withValues(alpha: 0.1),
+                color: (isDarkMode ? Colors.indigo : Colors.orange).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: (isDarkMode ? Colors.indigo : Colors.orange)
-                      .withValues(alpha: 0.3),
+                  color: (isDarkMode ? Colors.indigo : Colors.orange).withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -105,9 +103,7 @@ class ThemeSettingsWidget extends ConsumerWidget {
                           : 'Light mode provides better visibility in bright environments',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDarkMode
-                            ? Colors.indigo[300]
-                            : Colors.orange[700],
+                        color: isDarkMode ? Colors.indigo[300] : Colors.orange[700],
                       ),
                     ),
                   ),
