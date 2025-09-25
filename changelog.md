@@ -1,4 +1,8 @@
-### v0.3.9+13 (Unpublished)
+### v0.4.1+15 (Unpublished)
+
+-
+
+### v0.4.0+14 Sep 24, 2025
 
 - Add dark mode.
 - Dialog was showing multiple times.[Issue #16](https://github.com/maheshmnj/furdle/issues/16)
