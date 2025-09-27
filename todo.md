@@ -18,7 +18,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 - [ ] Dark mode theme issue with black color grid cell
 - [ ] Keyboard layout is difficult to use on mobile devices
 - [ ] Show Details about the word on Game Over (Nested Dialog)
-
+- [ ] On Game Over Show the Streak
 
 #### Basic Features
 
@@ -49,3 +49,4 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 
 - [ ] Maintain a List of Streaks for each user
 - [ ] Update the Streak on Game Over
+- [ ] Leaderboard for current week
