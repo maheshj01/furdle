@@ -5,7 +5,7 @@ current_dir := $(shell 'pwd')
 FLUTTER := $(shell which flutter)
 DART := $(shell which dart)
 
-FLUTTER_VERSION := 3.35.1
+FLUTTER_VERSION := 3.35.4
 
 start-devtools:
 	$(FLUTTER) pub global run devtools
