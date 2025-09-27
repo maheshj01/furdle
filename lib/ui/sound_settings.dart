@@ -69,7 +69,6 @@ class SoundSettingsWidget extends ConsumerWidget {
                     // Show feedback to user
                     SettingsSnackBar.showSoundChanged(context, value);
                   },
-                  activeThumbColor: Theme.of(context).primaryColor,
                 ),
               ],
             ),

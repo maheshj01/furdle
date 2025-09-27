@@ -83,12 +83,14 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         });
       }
     });
+    _initShakeAnimation();
   }
 
   @override
   void dispose() {
     slideController.dispose();
     gridScaleController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
@@ -113,6 +115,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             context,
             message: result.friendlyString,
           );
+          shakeFurdle();
         }
       }
     } catch (e) {
@@ -166,6 +169,25 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     }
   }
 
+  void _initShakeAnimation() {
+    _shakeController =
+        AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    _shakeAnimation = Tween(begin: 0.0, end: 24.0)
+        .chain(CurveTween(curve: Curves.elasticIn))
+        .animate(_shakeController)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _shakeController.reverse();
+        }
+      });
+  }
+
+  void shakeFurdle() {
+    _shakeController.reset();
+    _shakeController.forward();
+    HapticFeedback.mediumImpact();
+  }
+
   void restartGame() {
     Navigator.of(context).pop();
     // Reset dialog state and start a new local game
@@ -198,6 +220,8 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     );
   }
 
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeAnimation;
   @override
   Widget build(BuildContext context) {
     // Show dialog for completed game if needed
@@ -225,11 +249,20 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
               child: Column(
                 children: [
                   Expanded(
-                    child: ScaleTransition(
-                      scale: gridScaleAnimation,
-                      child: GridBoard(),
-                    ),
-                  ),
+                      child: AnimatedBuilder(
+                          animation: _shakeAnimation,
+                          builder: (BuildContext context, Widget? child) {
+                            final bool isAnimating = _shakeController.isAnimating;
+                            final padding = isAnimating ? 24 : 0;
+                            return Container(
+                                padding: EdgeInsets.only(
+                                    left: _shakeAnimation.value + padding,
+                                    right: padding - _shakeAnimation.value),
+                                child: ScaleTransition(
+                                  scale: gridScaleAnimation,
+                                  child: GridBoard(),
+                                ));
+                          })),
                   Padding(
                     padding: EdgeInsets.only(bottom: 50),
                     child: SlideTransition(
