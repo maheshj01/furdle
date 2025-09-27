@@ -13,6 +13,26 @@ This directory contains Firebase Cloud Functions for the Furdle word puzzle game
   - Sends push notifications to all subscribed users via FCM topics
   - Removes used words from the word list
   - Tracks challenge numbers and timing
+  - Initializes completion tracking for the new challenge
+
+### reportCompletion
+
+- **Trigger**: HTTPS Callable
+- **Purpose**: Reports puzzle completion and handles first completion detection
+- **Features**:
+  - Tracks first completion of each daily challenge
+  - Posts celebratory tweet when someone is first to solve
+  - Optionally mentions user's Twitter handle
+  - Maintains completion statistics
+
+### getCompletionStats
+
+- **Trigger**: HTTPS Callable
+- **Purpose**: Retrieves completion statistics for a challenge
+- **Features**:
+  - Returns total completion count
+  - Indicates if first completion has occurred
+  - Provides first completion attempt count
 
 ## Development
 
@@ -32,6 +52,30 @@ npm run build         # Compile TypeScript
 npm run serve         # Start Firebase emulator
 npm run deploy        # Deploy to Firebase
 ```
+
+## Environment Configuration
+
+### Twitter API Setup
+
+To enable Twitter functionality, configure these environment variables for Firebase Functions:
+
+```bash
+# Set Twitter API credentials
+firebase functions:config:set twitter.api_key="your_api_key"
+firebase functions:config:set twitter.api_secret="your_api_secret"
+firebase functions:config:set twitter.access_token="your_access_token"
+firebase functions:config:set twitter.access_token_secret="your_access_token_secret"
+```
+
+**Required Twitter API permissions:**
+- Read and Write tweets
+- App-only authentication
+
+**Getting Twitter API credentials:**
+1. Apply for Twitter Developer account at https://developer.twitter.com/
+2. Create a new app in the Twitter Developer Portal
+3. Generate API keys and access tokens
+4. Set the credentials using the commands above
 
 ## Code Quality
 
