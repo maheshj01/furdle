@@ -116,7 +116,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         }
       }
     } catch (e) {
-      print("Error submitting word: $e");
       SettingsSnackBar.showError(context, message: "Error submitting word");
     }
   }
@@ -158,14 +157,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   void _handleGameOver(GameState gameState) {
     if (gameState.status == GameStatus.win) {
       // Handle win scenario
-      print("🎉 Game Won! Target word was: ${gameState.targetWord}");
-      print("🎉 Next game date: ${gameState.nextGameDate}");
       // You can show a win dialog, update UI, etc.
       _showGameOverDialog("Congratulations! You won!", gameState);
     } else if (gameState.status == GameStatus.lose) {
       // Handle lose scenario
-      print(" Game Lost! Target word was: ${gameState.targetWord}");
-      print("🎉 Next game date: ${gameState.nextGameDate}");
       // You can show a lose dialog, update UI, etc.
       _showGameOverDialog("Game Over! The word was:", gameState);
     }

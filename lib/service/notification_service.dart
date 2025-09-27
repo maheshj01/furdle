@@ -30,8 +30,6 @@ class NotificationService {
     try {
       // Request permission for notifications
       final permissionGranted = await _requestPermissions();
-      print('🔔 Notification permissions granted: $permissionGranted');
-
       // Initialize local notifications
       await _initializeLocalNotifications();
 
@@ -46,13 +44,13 @@ class NotificationService {
 
       setUpBackgroundHandler();
 
-      print('✅ Notification service initialized successfully');
+      print('Notification service initialized successfully');
 
       // Get FCM token for debugging
       final token = await _firebaseMessaging.getToken();
       print('🔑 FCM Token: $token');
     } catch (e) {
-      print('❌ Error initializing notification service: $e');
+      print(' Error initializing notification service: $e');
     }
   }
 
@@ -172,23 +170,20 @@ class NotificationService {
       // Check if notifications are enabled in settings
       final notificationsEnabled = await _areNotificationsEnabledInSettings();
       if (!notificationsEnabled) {
-        print('Notifications disabled in settings, skipping subscription');
         return;
       }
 
       // Check if already subscribed
       final alreadySubscribed = await _isSubscribedToTopic();
       if (alreadySubscribed) {
-        print('Already subscribed to topic: $globalTopic');
         return;
       }
 
       // Subscribe to the topic
       await _firebaseMessaging.subscribeToTopic(globalTopic);
       await _setSubscriptionStatus(true);
-      print('🔔 Subscribed to topic: $globalTopic');
     } catch (e) {
-      print('❌ Error subscribing to topic: $e');
+      print('Error subscribing to topic: $e');
     }
   }
 
@@ -197,9 +192,8 @@ class NotificationService {
     try {
       await _firebaseMessaging.unsubscribeFromTopic(globalTopic);
       await _setSubscriptionStatus(false);
-      print('🔕 Unsubscribed from topic: $globalTopic');
     } catch (e) {
-      print('❌ Error unsubscribing from topic: $e');
+      print(' Error unsubscribing from topic: $e');
     }
   }
 
@@ -215,16 +209,10 @@ class NotificationService {
 
   /// Handle messages when app is in foreground
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    print('📨 Received foreground message: ${message.messageId}');
-    print('Title: ${message.notification?.title}');
-    print('Body: ${message.notification?.body}');
-    print('Data: ${message.data}');
-
     // Show local notification when app is in foreground
     // This is crucial because Firebase doesn't automatically show notifications in foreground
     try {
       await _showLocalNotification(message);
-      print('✅ Local notification displayed successfully');
     } catch (e) {
       print('❌ Error showing local notification: $e');
     }
@@ -232,7 +220,6 @@ class NotificationService {
 
   /// Handle messages when app is opened from background
   void _handleMessageOpenedApp(RemoteMessage message) {
-    print('📱 App opened from notification: ${message.messageId}');
     _handleNotificationAction(message);
   }
 
@@ -240,7 +227,6 @@ class NotificationService {
   void _handleInitialMessage() {
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
-        print('🚀 App launched from notification: ${message.messageId}');
         _handleNotificationAction(message);
       }
     });
@@ -280,9 +266,15 @@ class NotificationService {
     );
   }
 
+  /// Navigate to the game screen
+  void _navigateToGame() {
+    // This would typically use your app's navigation system
+    // For now, we'll just print a message
+    // Example: Get.toNamed('/game') or Navigator.pushNamed(context, '/game')
+  }
+
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse notificationResponse) {
-    print('🔔 Notification tapped: ${notificationResponse.payload}');
     // Navigate to appropriate screen or handle action
     _navigateToGame();
   }
@@ -291,31 +283,11 @@ class NotificationService {
   void _handleNotificationAction(RemoteMessage message) {
     // Extract action from message data
     final String? action = message.data['action'];
-
-    switch (action) {
-      case 'new_challenge':
-        _navigateToGame();
-        break;
-      case 'reminder':
-        _navigateToGame();
-        break;
-      default:
-        _navigateToGame();
-    }
-  }
-
-  /// Navigate to the game screen
-  void _navigateToGame() {
-    // This would typically use your app's navigation system
-    // For now, we'll just print a message
-    print('🎮 Navigating to game...');
-    // Example: Get.toNamed('/game') or Navigator.pushNamed(context, '/game')
   }
 
   /// Send a test notification (for debugging)
   Future<void> sendTestNotification() async {
     if (kDebugMode) {
-      print('🧪 Sending test notification...');
       try {
         await _showLocalNotification(
           RemoteMessage(
@@ -327,7 +299,6 @@ class NotificationService {
             data: {'action': 'new_challenge'},
           ),
         );
-        print('✅ Test notification sent successfully');
       } catch (e) {
         print('❌ Error sending test notification: $e');
       }
@@ -353,13 +324,11 @@ class NotificationService {
 
   /// Enable notifications by subscribing to the global topic
   Future<void> enableNotifications() async {
-    print('🔔 Enabling notifications...');
     await _subscribeToGlobalTopic();
   }
 
   /// Disable notifications by unsubscribing from the global topic
   Future<void> disableNotifications() async {
-    print('🔕 Disabling notifications...');
     await _unsubscribeFromGlobalTopic();
   }
 

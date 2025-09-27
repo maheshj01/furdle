@@ -71,21 +71,13 @@ class GameStateNotifier extends StateNotifier<GameState> {
   Future<GameState?> startGame({bool playAgain = false}) async {
     // Fallback: check for any ongoing local game
     final savedState = await _loadGameState();
-    print("savedState: $savedState");
     // First, try to get the daily challenge from Firebase
     final dailyChallenge = await challengeService.getCurrentChallenge();
     // Check if user has already completed this challenge
     final hasCompleted = await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
-    print("check if hasCompleted: $hasCompleted");
     if (!hasCompleted && challengeService.isChallengeValid(dailyChallenge)) {
-      print("hasCompleted: $hasCompleted");
       // Check if we have an ongoing game for this challenge
       final savedChallenge = await storageService.getCurrentChallenge();
-
-      print("savedState: $savedState");
-      print("savedChallenge: $savedChallenge");
-      print("dailyChallenge: $dailyChallenge");
-      print("savedState.status: ${savedState?.status}");
 
       if (savedState != null &&
           savedChallenge != null &&
@@ -101,7 +93,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
       }
 
       // Start new daily challenge
-      print("Starting daily challenge #${dailyChallenge.number}: ${dailyChallenge.word}");
       await _initializeChallengeGame(dailyChallenge);
       return null;
     }
@@ -120,7 +111,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 
   Future<void> _initializeChallengeGame(DailyChallenge challenge) async {
-    print("Initializing daily challenge #${challenge.number}");
     state = GameState.instance().copyWith(
       id: challenge.number,
       status: GameStatus.inprogress,
@@ -137,7 +127,6 @@ class GameStateNotifier extends StateNotifier<GameState> {
   }
 
   void initializeGame({DateTime? nextGameDate}) {
-    print("initializing new game");
     final index = Random().nextInt(furdleList.length);
     final targetWord = furdleList[index];
     // Create a fresh game state with a new ID
