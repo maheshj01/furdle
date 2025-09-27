@@ -19,13 +19,7 @@ class HelpPage extends ConsumerWidget {
     final screenSize = MediaQuery.of(context).size;
     final isDarkMode = ref.watch(settingsNotifierProvider).isDarkMode;
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false, title: Text(title), actions: [
-        IconButton(
-            onPressed: () {
-              context.pop(true);
-            },
-            icon: const Icon(Icons.close))
-      ]),
+      appBar: AppBar(title: Text(title)),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: ScrollConfiguration(
