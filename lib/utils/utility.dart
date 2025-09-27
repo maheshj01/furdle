@@ -16,17 +16,8 @@ class Utility {
     );
   }
 
-  static void showMessage(context, message,
-      {Duration? duration = const Duration(milliseconds: 1500), EdgeInsetsGeometry? margin}) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(snackBar(message: '$message', duration: duration!, margin: margin));
-  }
-
   static String generateFurdleGrid(GameState state) {
     final isPuzzleCracked = state.status == GameStatus.win;
-    if (!isPuzzleCracked) {
-      return 'You can\'t share a furdle that hasn\'t been solved yet!';
-    }
     final int attempts = isPuzzleCracked ? state.row + 1 : 0;
     String generatedFurdle = '#${state.id} $attempts/${state.size.height.toInt()}\n\n';
     for (int i = 0; i < state.size.height; i++) {

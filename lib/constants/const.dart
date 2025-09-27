@@ -31,6 +31,9 @@ class Constants {
   static String case2 = 'The letter L is in the word but in the wrong spot.';
   static String case3 = 'The letter Y is not in the word at any spot';
 
+  static const String shareIncomplete = 'You can\'t share a furdle that hasn\'t been solved yet!';
+
+  static const String scoreCopiedToClipboard = 'Score copied to clipboard';
   // Challenge storage keys
   static const String challengeProgressKey = 'challenge_current_progress';
   static const String challengeCompletedIdsKey = 'challenge_completed_ids';
