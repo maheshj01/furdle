@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/ui/notification_settings.dart';
 import 'package:furdle/ui/theme_settings.dart';
+import 'package:furdle/ui/twitter_settings.dart';
 
 /// Simple settings page that includes notification settings
 class SettingsPage extends StatelessWidget {
@@ -24,6 +25,7 @@ class SettingsPage extends StatelessWidget {
             ThemeSettingsWidget(),
             // SoundSettingsWidget(),
             NotificationSettingsWidget(),
+            TwitterSettingsWidget(),
             // Add more settings widgets here as needed
           ],
         ),

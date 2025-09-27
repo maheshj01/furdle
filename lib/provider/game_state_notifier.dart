@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/models/daily_challenge.dart';
 import 'package:furdle/provider/hive_storage_provider.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
+import 'package:furdle/provider/settings_notifier.dart';
 import 'package:furdle/service/firebase_challenge_service.dart';
 import 'package:furdle/service/hive_storage_service.dart';
+import 'package:furdle/service/completion_service.dart';
 import 'package:furdle/state/game_state.dart';
 import 'package:furdle/utils/word.dart';
 
@@ -13,6 +15,8 @@ class GameStateNotifier extends StateNotifier<GameState> {
   final KeyboardNotifier keyboardNotifier;
   final HiveStorageService storageService;
   final FirebaseChallengeService challengeService;
+  final CompletionService completionService;
+  final Ref ref; // Add ref to access other providers
   // Count occurrences of each letter in target word
   final targetLetterCounts = <String, int>{};
 
@@ -20,6 +24,8 @@ class GameStateNotifier extends StateNotifier<GameState> {
     required this.keyboardNotifier,
     required this.storageService,
     required this.challengeService,
+    required this.completionService,
+    required this.ref,
   }) : super(GameState.instance());
 
   Future<void> _saveGameState() async {
@@ -208,6 +214,9 @@ class GameStateNotifier extends StateNotifier<GameState> {
         final savedChallenge = await storageService.getCurrentChallenge();
         if (savedChallenge != null) {
           await storageService.markChallengeCompleted(savedChallenge.challengeId);
+          
+          // Report completion to the server for first completion tracking
+          _reportCompletionToServer(savedChallenge, submittedWordsList.length);
         }
 
         _saveGameState();
@@ -320,6 +329,33 @@ class GameStateNotifier extends StateNotifier<GameState> {
     final currentRow = state.row;
     final currentWord = state.cells[currentRow].map((cell) => cell.character).join('');
     return currentWord.toLowerCase();
+  }
+
+  /// Reports completion to the server for Twitter functionality
+  Future<void> _reportCompletionToServer(DailyChallenge challenge, int attempts) async {
+    try {
+      // Get Twitter username from settings
+      final settings = ref.read(settingsNotifierProvider);
+      final twitterUsername = settings.twitterUsername.trim().isEmpty ? null : settings.twitterUsername.trim();
+      
+      // This should be async and not block the game completion
+      completionService.reportCompletion(
+        challengeId: challenge.challengeId,
+        challengeNumber: challenge.number,
+        attempts: attempts,
+        twitterUsername: twitterUsername,
+      ).then((result) {
+        if (result.isFirstCompletion) {
+          print('🎉 Congratulations! You were the first to complete this challenge!');
+        }
+      }).catchError((error) {
+        print('Failed to report completion to server: $error');
+        // Don't block game completion for server errors
+      });
+    } catch (e) {
+      print('Error reporting completion: $e');
+      // Don't block game completion for errors
+    }
   }
 
   @override
@@ -436,5 +472,7 @@ final gameStateProvider = StateNotifierProvider<GameStateNotifier, GameState>((r
     keyboardNotifier: keyboardNotifier,
     storageService: storageService,
     challengeService: FirebaseChallengeService(),
+    completionService: CompletionService(),
+    ref: ref,
   );
 });

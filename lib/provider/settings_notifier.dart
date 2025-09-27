@@ -58,6 +58,11 @@ class SettingsNotifier extends Notifier<SettingsState> {
     saveSettings();
   }
 
+  void setTwitterUsername(String username) {
+    state = state.copyWith(twitterUsername: username);
+    saveSettings();
+  }
+
   void saveSettings() {
     final settingsJson = json.encode(state.toJson());
     _sharedPreferences.setString('settings', settingsJson);
