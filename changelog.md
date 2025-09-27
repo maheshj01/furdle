@@ -1,6 +1,8 @@
 ### v0.4.1+15 (Unpublished)
 
--
+### v0.4.1+15 Sep 27, 2025
+
+- Fix: First launch game state was not updated
 
 ### v0.4.0+14 Sep 24, 2025
 
