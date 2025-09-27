@@ -16,17 +16,6 @@ class HelpPage extends ConsumerWidget {
   static String path = '/how-to-play';
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Widget subTitle(String subTitle, {double fontSize = 24, double vPadding = 8}) {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: vPadding),
-        child: Text(
-          subTitle,
-          style: TextStyle(
-              fontSize: fontSize, fontWeight: fontSize >= 20 ? FontWeight.w500 : FontWeight.normal),
-        ),
-      );
-    }
-
     final screenSize = MediaQuery.of(context).size;
     final isDarkMode = ref.watch(settingsNotifierProvider).isDarkMode;
     return Scaffold(
@@ -76,32 +65,7 @@ class HelpPage extends ConsumerWidget {
                       },
                       child: Image.asset('assets/googleplay.png'),
                     )),
-              subTitle('Report a bug', fontSize: 16),
-              Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
-                  child: Column(
-                    children: [
-                      'Email'.toLink(onTap: () {
-                        Utility.launch(emailSource,
-                            isNewTab: true, mode: LaunchMode.platformDefault);
-                      }),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      'Github'.toLink(onTap: () {
-                        Utility.launch(
-                          sourceUrl,
-                        );
-                      })
-                    ],
-                  )),
-              Padding(
-                  padding: EdgeInsets.only(bottom: 50.0),
-                  child: 'Privacy Policy'.toLink(
-                    onTap: () {
-                      context.push(WebViewPage.routeName);
-                    },
-                  )),
+              ReportBugWidget(),
             ],
           ),
         ),
@@ -110,17 +74,62 @@ class HelpPage extends ConsumerWidget {
   }
 }
 
+Widget subTitle(String subTitle, {double fontSize = 24, double vPadding = 8}) {
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: vPadding),
+    child: Text(
+      subTitle,
+      style: TextStyle(
+          fontSize: fontSize, fontWeight: fontSize >= 20 ? FontWeight.w500 : FontWeight.normal),
+    ),
+  );
+}
+
+class ReportBugWidget extends ConsumerWidget {
+  const ReportBugWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        subTitle('Report a bug', fontSize: 16),
+        Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: Wrap(
+              children: [
+                'Email'.toLink(onTap: () {
+                  Utility.launch(emailSource, isNewTab: true, mode: LaunchMode.platformDefault);
+                }),
+                const SizedBox(
+                  height: 10,
+                ),
+                'Github'.toLink(onTap: () {
+                  Utility.launch(
+                    sourceUrl,
+                  );
+                })
+              ],
+            )),
+        Padding(
+            padding: EdgeInsets.only(bottom: 50.0),
+            child: 'Privacy Policy'.toLink(
+              onTap: () {
+                context.push(WebViewPage.routeName);
+              },
+            ))
+      ],
+    );
+  }
+}
+
 extension WebLink on String {
   Widget toLink({Function()? onTap}) {
     return InkWell(
       onTap: onTap,
-      child: Text(
-        this,
-        style: const TextStyle(
-          color: Colors.blue,
-          decoration: TextDecoration.underline,
-          // decorationStyle: TextDecorationStyle.solid
-        ),
+      child: TextButton(
+        onPressed: onTap,
+        child: Text(this),
       ),
     );
   }
