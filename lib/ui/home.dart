@@ -248,6 +248,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
+                  SizedBox(height: 50),
                   Expanded(
                       child: AnimatedBuilder(
                           animation: _shakeAnimation,
