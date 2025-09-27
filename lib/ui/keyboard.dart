@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/constants/colors.dart';
 import 'package:furdle/constants/const.dart';
-import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/constants/styles.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/provider/settings_notifier.dart';
 import 'package:furdle/state/key_state.dart';
@@ -106,15 +105,15 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _KeyRow(
+              KeyBoardRow(
                 characters: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
               ),
               SizedBox(height: context.width < 400 ? 4.0 : 6.0),
-              _KeyRow(
+              KeyBoardRow(
                 characters: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
               ),
               SizedBox(height: context.width < 400 ? 4.0 : 6.0),
-              _KeyRow(
+              KeyBoardRow(
                 characters: ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace'],
               ),
             ],
@@ -142,9 +141,9 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
   }
 }
 
-class _KeyRow extends ConsumerWidget {
+class KeyBoardRow extends ConsumerWidget {
   final List<String> characters;
-  const _KeyRow({required this.characters});
+  const KeyBoardRow({required this.characters});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -159,28 +158,19 @@ class _KeyRow extends ConsumerWidget {
         // This ensures better distribution of space
         return Expanded(
           flex: isSpecial ? 15 : 10, // Special keys get 1.5x the space
-          child: _Key(character),
+          child: KeyBoardKey(character),
         );
       }).toList(),
     );
   }
 }
 
-class _Key extends ConsumerWidget {
+class KeyBoardKey extends ConsumerWidget {
   final String character;
-  const _Key(this.character);
+  const KeyBoardKey(this.character);
 
   Widget backspaceButtonChild(BuildContext context) {
     return Icon(Icons.backspace, size: context.sp(24));
-  }
-
-  BoxBorder buttonBorder(bool isPressed, bool isDarkMode) {
-    return Border.all(
-      color: isPressed
-          ? (isDarkMode ? Colors.white.withValues(alpha: 0.3) : Colors.blue.withValues(alpha: 0.7))
-          : Colors.grey.withValues(alpha: 0.3),
-      width: isPressed ? 2 : 1,
-    );
   }
 
   @override
@@ -225,19 +215,8 @@ class _Key extends ConsumerWidget {
           child: Container(
             width: double.infinity, // Take full width of Flexible parent
             height: responsiveHeight,
-            decoration: BoxDecoration(
-              color: _getKeyColor(keyState),
-              borderRadius: BorderRadius.circular(8),
-              border: buttonBorder(isPressed, isDarkMode),
-              boxShadow: [
-                if (isPressed)
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-              ],
-            ),
+            decoration:
+                buttonDecoration(isDarkMode, isPressed, colorFromKeyState(keyState, isDarkMode)),
             alignment: Alignment.center,
             child: isSpecial && character == Constants.keyboardBackspaceKey
                 ? backspaceButtonChild(context)
@@ -245,7 +224,7 @@ class _Key extends ConsumerWidget {
                     character,
                     style: TextStyle(
                       fontSize: context.sp(isSpecial ? 12 : 18),
-                      color: _getTextColor(keyState, isDarkMode),
+                      color: textColorFromKeyState(keyState, isDarkMode),
                       fontWeight: isPressed ? FontWeight.w600 : FontWeight.w500,
                       letterSpacing: 0.5,
                     ),
@@ -254,44 +233,5 @@ class _Key extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Color _getKeyColor(KeyState keyState) {
-    if (keyState.event == KeyEventType.keyDown) {
-      return Colors.blue.withValues(alpha: 0.2);
-    }
-
-    switch (keyState.cellType) {
-      case CellType.match:
-        return AppColors.green;
-      case CellType.notExists:
-        return AppColors.black;
-      case CellType.misplaced:
-        return AppColors.yellow;
-      case CellType.empty:
-      default:
-        return Colors.grey.withValues(alpha: 0.15);
-    }
-  }
-
-  Color _getTextColor(KeyState keyState, bool isDarkMode) {
-    if (keyState.event == KeyEventType.keyDown) {
-      return isDarkMode ? Colors.blue.shade300 : Colors.blue.shade700;
-    }
-
-    switch (keyState.cellType) {
-      case CellType.match:
-      case CellType.notExists:
-        return Colors.white;
-      case CellType.misplaced:
-        return Colors.black;
-      case CellType.unknown:
-      case CellType.empty:
-      default:
-        if (isDarkMode) {
-          return Colors.white;
-        }
-        return Colors.black87;
-    }
   }
 }

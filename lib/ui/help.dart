@@ -1,30 +1,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:furdle/constants/colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/exports.dart' hide AppColors;
+import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/provider/settings_notifier.dart';
+import 'package:furdle/state/key_state.dart';
 import 'package:furdle/ui/webview.dart';
 import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class HelpPage extends StatelessWidget {
+class HelpPage extends ConsumerWidget {
   const HelpPage({Key? key}) : super(key: key);
   static String title = helpTitle;
   static String path = '/how-to-play';
   @override
-  Widget build(BuildContext context) {
-    final String description = """
-  Your goal is to guess a 5 letter word in 6 tries.
-
-  Each guess must be a valid five-letter word. Hit the enter button to submit.
-
-  After submitting each word, the color of the tiles will change to indicate how close your guess was to the word.
-  """;
-
-    const String case1 = 'The letter E is in the word and in the correct spot';
-    const String case2 = 'The letter L is in the word but in the wrong spot.';
-    const String case3 = 'The letter Y is not in the word at any spot';
-
+  Widget build(BuildContext context, WidgetRef ref) {
     Widget subTitle(String subTitle, {double fontSize = 24, double vPadding = 8}) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: vPadding),
@@ -37,7 +28,7 @@ class HelpPage extends StatelessWidget {
     }
 
     final screenSize = MediaQuery.of(context).size;
-
+    final isDarkMode = ref.watch(settingsNotifierProvider).isDarkMode;
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false, title: Text(title), actions: [
         IconButton(
@@ -58,7 +49,7 @@ class HelpPage extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(description,
+                child: Text(Constants.description,
                     style: const TextStyle(
                       fontSize: 16,
                     )),
@@ -66,14 +57,14 @@ class HelpPage extends StatelessWidget {
               const Divider(),
               subTitle('Examples'),
               subTitle('Case 1 (Green)', fontSize: 20),
-              "GREAT".toWord(2),
-              subTitle(case1, fontSize: 16),
+              "GREAT".toWord(2, isDarkMode, KeyState(key: 'G', cellType: CellType.match)),
+              subTitle(Constants.case1, fontSize: 16),
               subTitle('Case 2 (Orange)', fontSize: 20),
-              "PLANE".toWord(1, color: AppColors.yellow),
-              subTitle(case2, fontSize: 16),
+              "PLANE".toWord(1, isDarkMode, KeyState(key: 'L', cellType: CellType.misplaced)),
+              subTitle(Constants.case2, fontSize: 16),
               subTitle('Case 3 (Black)', fontSize: 20),
-              "DAISY".toWord(4, color: AppColors.black),
-              subTitle(case3, fontSize: 16),
+              "DAISY".toWord(4, isDarkMode, KeyState(key: 'Y', cellType: CellType.notExists)),
+              subTitle(Constants.case3, fontSize: 16),
               if (kIsWeb)
                 Container(
                     alignment: Alignment.center,
@@ -136,30 +127,41 @@ extension WebLink on String {
 }
 
 extension ExampleWord on String {
-  Widget toWord(int index, {double boxSize = 40, Color color = AppColors.green}) {
+  Widget toWord(int index, bool isDarkMode, KeyState keyState, {double boxSize = 40}) {
     return Material(
       color: Colors.transparent,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         for (int i = 0; i < length; i++)
           Container(
-              height: boxSize,
-              width: boxSize,
-              alignment: Alignment.center,
-              margin: const EdgeInsets.symmetric(
-                horizontal: 4,
-              ),
-              child: Text(
-                this[i].toUpperCase(),
-                style: const TextStyle(
-                    height: 1.1,
-                    letterSpacing: 2,
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
-              ),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  color: i == index ? color : AppColors.grey))
+            height: boxSize,
+            width: boxSize,
+            alignment: Alignment.center,
+            decoration: buttonDecoration(
+              true,
+              false,
+              i == index
+                  ? colorFromKeyState(keyState, isDarkMode)
+                  : isDarkMode
+                      ? Color.fromARGB(255, 46, 46, 46)
+                      : Colors.grey.withValues(alpha: 0.15),
+            ),
+            margin: const EdgeInsets.symmetric(
+              horizontal: 4,
+            ),
+            child: Text(
+              this[i].toUpperCase(),
+              style: TextStyle(
+                  height: 1.1,
+                  letterSpacing: 2,
+                  fontSize: 24,
+                  color: i == index
+                      ? textColorFromKeyState(keyState, isDarkMode)
+                      : isDarkMode
+                          ? Colors.white
+                          : Colors.black,
+                  fontWeight: FontWeight.bold),
+            ),
+          )
       ]),
     );
   }
