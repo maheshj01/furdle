@@ -14,7 +14,7 @@ class ThemeSettingsWidget extends ConsumerWidget {
     final screenSize = MediaQuery.of(context).size;
     final isDesktop = screenSize.width > 600;
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         padding: const EdgeInsets.all(16),
         width: isDesktop ? 600 : screenSize.width,
