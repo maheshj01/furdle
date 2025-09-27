@@ -1,0 +1,27 @@
+{
+    "dart.flutterSdkPath": "~/Development/flutter",
+    "editor.wordWrap": "on",
+    "editor.rulers": [
+        100
+    ],
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "[dart]": {
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+            100
+        ],
+        "editor.wordWrap": "on",
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.defaultFormatter": "Dart-Code.dart-code"
+    },
+    "dart.lineLength": 100,
+    "dart.enableSdkFormatter": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true
+}
