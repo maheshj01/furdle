@@ -115,7 +115,7 @@ class SettingsSnackBar {
   static void showThemeChanged(BuildContext context, bool isDarkMode) {
     show(
       context,
-      message: isDarkMode ? '🌙 Dark mode enabled' : '☀️ Light mode enabled',
+      message: isDarkMode ? 'Dark mode enabled' : 'Light mode enabled',
       icon: isDarkMode ? Icons.dark_mode : Icons.light_mode,
       backgroundColor: isDarkMode ? Colors.indigo : Colors.orange,
     );
@@ -124,7 +124,7 @@ class SettingsSnackBar {
   static void showSoundChanged(BuildContext context, bool isEnabled) {
     show(
       context,
-      message: isEnabled ? '🔊 Sound effects enabled' : '🔇 Sound effects disabled',
+      message: isEnabled ? 'Sound effects enabled' : 'Sound effects disabled',
       icon: isEnabled ? Icons.volume_up : Icons.volume_off,
       backgroundColor: isEnabled ? Colors.green : Colors.grey,
     );
@@ -133,8 +133,7 @@ class SettingsSnackBar {
   static void showNotificationsChanged(BuildContext context, bool isEnabled) {
     show(
       context,
-      message:
-          isEnabled ? '✅ Notifications enabled for daily challenges' : '🔕 Notifications disabled',
+      message: isEnabled ? 'Notifications enabled for daily challenges' : 'Notifications disabled',
       icon: isEnabled ? Icons.notifications_active : Icons.notifications_off,
       backgroundColor: isEnabled ? Colors.blue : Colors.grey,
     );
