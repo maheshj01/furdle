@@ -16,7 +16,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 ### Bugs & Improvements
 
 - [ ] Dark mode theme issue with black color grid cell
-- [ ] Keyboard layout is difficult to use on mobile devices
+- [x] Keyboard layout is difficult to use on mobile devices
 - [ ] Show Details about the word on Game Over (Nested Dialog)
 - [ ] On Game Over Show the Streak
 

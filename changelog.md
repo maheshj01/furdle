@@ -1,4 +1,6 @@
-### v0.4.1+15 (Unpublished)
+### v0.4.2+16 (Unpublished)
+
+- Improve the Keyboard Layout for better usability.
 
 ### v0.4.1+15 Sep 27, 2025
 
