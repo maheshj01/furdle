@@ -67,20 +67,19 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       // Check if this is the first launch and navigate to help page
       final storageService = ref.read(hiveStorageServiceProvider);
       final isFirstLaunch = await storageService.isFirstLaunch();
+
+      final completedGame = await ref.read(gameStateProvider.notifier).startGame();
+      if (completedGame != null && mounted) {
+        setState(() {
+          _completedGameToShow = completedGame;
+        });
+      }
       if (isFirstLaunch && mounted) {
         // Mark as launched to prevent showing help page again
         await storageService.markAsLaunched();
         // Navigate to help page
         Future.delayed(const Duration(seconds: 1), () {
           context.go(HelpPage.path);
-        });
-        return;
-      }
-
-      final completedGame = await ref.read(gameStateProvider.notifier).startGame();
-      if (completedGame != null && mounted) {
-        setState(() {
-          _completedGameToShow = completedGame;
         });
       }
     });

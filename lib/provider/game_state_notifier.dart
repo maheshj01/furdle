@@ -60,20 +60,32 @@ class GameStateNotifier extends StateNotifier<GameState> {
     targetLetterCounts.clear();
     for (int i = 0; i < targetWord.length; i++) {
       final letter = targetWord[i].toLowerCase();
-      targetLetterCounts[letter] = (targetLetterCounts[letter] ?? 0) + 1;
+      int freq = 1;
+      if (targetLetterCounts.containsKey(letter)) {
+        freq = targetLetterCounts[letter]! + 1;
+      }
+      targetLetterCounts[letter] = freq;
     }
   }
 
   Future<GameState?> startGame({bool playAgain = false}) async {
     // Fallback: check for any ongoing local game
     final savedState = await _loadGameState();
+    print("savedState: $savedState");
     // First, try to get the daily challenge from Firebase
     final dailyChallenge = await challengeService.getCurrentChallenge();
     // Check if user has already completed this challenge
     final hasCompleted = await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
+    print("check if hasCompleted: $hasCompleted");
     if (!hasCompleted && challengeService.isChallengeValid(dailyChallenge)) {
+      print("hasCompleted: $hasCompleted");
       // Check if we have an ongoing game for this challenge
       final savedChallenge = await storageService.getCurrentChallenge();
+
+      print("savedState: $savedState");
+      print("savedChallenge: $savedChallenge");
+      print("dailyChallenge: $dailyChallenge");
+      print("savedState.status: ${savedState?.status}");
 
       if (savedState != null &&
           savedChallenge != null &&
