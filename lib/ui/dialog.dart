@@ -123,13 +123,22 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
                     ),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 8),
+              Text(
+                'The word was:',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                textAlign: TextAlign.center,
+              ),
+
               const SizedBox(height: 16),
 
               // Target word
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -152,9 +161,9 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                    border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     _formatDuration(_timeRemaining!),
@@ -231,7 +240,7 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
           vertical: 24,
         ),
         backgroundColor:
-            isPrimary ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.secondary,
+            isPrimary ? Theme.of(context).primaryColor : Colors.orange.withValues(alpha: 0.8),
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),

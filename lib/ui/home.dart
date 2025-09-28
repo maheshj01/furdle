@@ -165,7 +165,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     } else if (gameState.status == GameStatus.lose) {
       // Handle lose scenario
       // You can show a lose dialog, update UI, etc.
-      _showGameOverDialog("Game Over! The word was:", gameState);
+      _showGameOverDialog("Game Over!", gameState);
     }
   }
 
@@ -204,7 +204,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     final nextGameDate = gameState.nextGameDate;
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return ResponsiveGameOverDialog(
           title: title,

@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:furdle/constants/const.dart';
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/state/game_state.dart';
-import 'package:furdle/utils/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// State Color for either furdle or Keyboard
