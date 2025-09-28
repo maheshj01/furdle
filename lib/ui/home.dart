@@ -311,7 +311,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                             return;
                           }
                           final result = Utility.generateFurdleGrid(gameState);
-                          final furdleScoreShareMessage = 'FURDLE ${result}';
+                          final furdleScoreShareMessage = 'FURDLE $result';
 
                           if (!kIsWeb) {
                             await SharePlus.instance

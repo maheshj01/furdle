@@ -99,14 +99,14 @@ class LetterBox extends StatelessWidget {
         boxShadow: [
           // Stronger, more realistic shadow
           BoxShadow(
-            color: AppColors.black.withOpacity(0.35),
+            color: AppColors.black.withValues(alpha: 0.35),
             offset: const Offset(2, 4),
             blurRadius: 12,
             spreadRadius: 1,
           ),
           // Subtle highlight for a "lifted" look
           BoxShadow(
-            color: Colors.white.withOpacity(0.10),
+            color: Colors.white.withValues(alpha: 0.10),
             offset: const Offset(2, 2),
             blurRadius: 4,
             spreadRadius: 0,

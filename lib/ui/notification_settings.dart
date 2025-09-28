@@ -70,7 +70,7 @@ class NotificationSettingsWidget extends ConsumerWidget {
                     // Show feedback to user
                     SettingsSnackBar.showNotificationsChanged(context, value);
                   },
-                  activeColor: Theme.of(context).primaryColor,
+                  activeThumbColor: Theme.of(context).primaryColor,
                 ),
               ],
             ),
