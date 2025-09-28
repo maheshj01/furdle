@@ -116,7 +116,7 @@ class ReportBugWidget extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Report a bug',
+                'Support & Feedback',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -145,7 +145,7 @@ class ReportBugWidget extends ConsumerWidget {
           const SizedBox(height: 12),
           _ActionButton(
             icon: Icons.code_outlined,
-            label: 'GitHub Issues',
+            label: 'GitHub',
             onTap: () {
               Utility.launch(sourceUrl);
             },

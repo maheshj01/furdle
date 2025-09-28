@@ -25,6 +25,9 @@ class TitleBarState extends State<TitleBar> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+
+    final double responsiveBoxSize = _calculateResponsiveBoxSize(screenSize.width);
+
     return Container(
       width: screenSize.width,
       padding: const EdgeInsets.all(16.0),
@@ -32,11 +35,27 @@ class TitleBarState extends State<TitleBar> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           widget.leading!,
-          GameTitle(title: widget.title, boxSize: context.sp(24)),
+          GameTitle(title: widget.title, boxSize: responsiveBoxSize),
           Row(children: widget.actions!)
         ],
       ),
     );
+  }
+
+  /// Calculate responsive box size based on screen width
+  double _calculateResponsiveBoxSize(double screenWidth) {
+    if (screenWidth < 360) {
+      // Very small phones
+      return context.sp(28);
+    } else if (screenWidth < 400) {
+      // Small phones
+      return context.sp(30);
+    } else if (screenWidth < 600) {
+      // Medium phones
+      return context.sp(32);
+    } else {
+      return context.sp(35);
+    }
   }
 }
 
@@ -76,44 +95,66 @@ class LetterBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate responsive font size based on box size
+    final double fontSize = _calculateFontSize(boxSize);
+    final double borderRadius = boxSize * 0.15;
+    final double margin = _calculateMargin(boxSize);
+
     return Container(
       height: boxSize,
       width: boxSize,
-      padding: const EdgeInsets.all(2),
       alignment: Alignment.center,
-      margin: const EdgeInsets.symmetric(
-            horizontal: 2,
+      margin: EdgeInsets.symmetric(
+            horizontal: margin,
           ) +
-          EdgeInsets.only(bottom: isOdd ? 8 : 0),
+          EdgeInsets.only(bottom: isOdd ? boxSize * 0.25 : 0),
       child: Text(
         letter.toUpperCase(),
         style: TextStyle(
-            height: 1.1,
-            letterSpacing: 2,
-            fontSize: context.sp(16),
-            color: Colors.white,
-            fontWeight: FontWeight.bold),
+          height: 1.0, // Tighter line height for better centering
+          letterSpacing: boxSize * 0.05, // Responsive letter spacing
+          fontSize: fontSize,
+          color: Colors.white,
+          fontWeight: FontWeight.w700, // Slightly bolder for better visibility
+        ),
+        textAlign: TextAlign.center,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
-          // Stronger, more realistic shadow
+          // Enhanced shadow for better depth
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.35),
-            offset: const Offset(2, 4),
-            blurRadius: 12,
-            spreadRadius: 1,
+            color: AppColors.black.withValues(alpha: 0.4),
+            offset: Offset(0, boxSize * 0.08),
+            blurRadius: boxSize * 0.3,
+            spreadRadius: 0,
           ),
           // Subtle highlight for a "lifted" look
           BoxShadow(
-            color: Colors.white.withValues(alpha: 0.10),
-            offset: const Offset(2, 2),
-            blurRadius: 4,
+            color: Colors.white.withValues(alpha: 0.15),
+            offset: Offset(0, boxSize * 0.02),
+            blurRadius: boxSize * 0.1,
             spreadRadius: 0,
           ),
         ],
         color: color ?? AppColors.primary,
       ),
     );
+  }
+
+  /// Calculate responsive font size based on box size
+  double _calculateFontSize(double boxSize) {
+    if (boxSize < 35) {
+      return boxSize * 0.5; // 50% of box size for small boxes
+    } else if (boxSize < 45) {
+      return boxSize * 0.55; // 55% for medium boxes
+    } else {
+      return boxSize * 0.6; // 60% for large boxes
+    }
+  }
+
+  /// Calculate responsive margin based on box size
+  double _calculateMargin(double boxSize) {
+    return boxSize * 0.05; // 5% of box size for consistent spacing
   }
 }
