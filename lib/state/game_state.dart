@@ -49,8 +49,12 @@ class GameState {
 
   final DateTime? nextGameDate;
 
+  /// Game type
+  final GameType gameType;
+
   GameState({
     required this.id,
+    this.gameType = GameType.daily,
     this.size = const GridSize(width: 5, height: 6),
     required this.row,
     required this.column,
@@ -70,6 +74,7 @@ class GameState {
 
   GameState copyWith({
     int? id,
+    GameType? gameType,
     GameStatus? status,
     String? targetWord,
     List<List<CellState>>? cells,
@@ -88,6 +93,7 @@ class GameState {
   }) {
     return GameState(
       id: id ?? this.id,
+      gameType: gameType ?? this.gameType,
       row: row ?? this.row,
       column: column ?? this.column,
       status: status ?? this.status,
@@ -112,6 +118,7 @@ class GameState {
       row: 0,
       column: 0,
       size: const GridSize(width: 5, height: 6),
+      gameType: GameType.daily,
       status: GameStatus.none,
       targetWord: '',
       cells: defaultGrid(),
@@ -143,6 +150,7 @@ class GameState {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'gameType': gameType.index,
       'size': size.toJson(),
       'row': row,
       'column': column,
@@ -162,11 +170,17 @@ class GameState {
   }
 
   static GameState fromJson(Map<String, dynamic> json) {
+    // This is a temporary fix for backward compatibility with older versions of the app
+    // TODO: remove this after next 5 releases
+    if (!json.containsKey('gameType')) {
+      json['gameType'] = 0;
+    }
     return GameState(
       id: json['id'] as int,
       size: GridSize.fromJson(json['size'] as Map<String, dynamic>),
       row: json['row'] as int,
       column: json['column'] as int,
+      gameType: GameType.values[json['gameType'] as int],
       status: GameStatus.values[json['status'] as int],
       targetWord: json['targetWord'] as String,
       currentWord: json['currentWord'] as String? ?? '',

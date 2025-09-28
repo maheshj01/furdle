@@ -2,6 +2,8 @@
 
 - Improve the Keyboard Layout for better usability.
 - Update notification should launch playstore.
+- Update UI of title bar.
+- Show Share button only on completion of Daily challenge.
 
 ### v0.4.1+15 Sep 27, 2025
 

@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/provider/game_state_notifier.dart';
 
-class ResponsiveGameOverDialog extends StatefulWidget {
+class ResponsiveGameOverDialog extends ConsumerStatefulWidget {
   final String title;
   final String targetWord;
   final DateTime? nextGameDate;
@@ -23,10 +25,10 @@ class ResponsiveGameOverDialog extends StatefulWidget {
   });
 
   @override
-  State<ResponsiveGameOverDialog> createState() => _ResponsiveGameOverDialogState();
+  ConsumerState<ResponsiveGameOverDialog> createState() => _ResponsiveGameOverDialogState();
 }
 
-class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
+class _ResponsiveGameOverDialogState extends ConsumerState<ResponsiveGameOverDialog>
     with TickerProviderStateMixin {
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -102,6 +104,7 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
     final isDesktop = screenWidth > 600;
     final dialogWidth = isDesktop ? 600.0 : screenWidth * 0.9;
     final dialogMaxHeight = screenHeight * 0.8;
+    final gameState = ref.read(gameStateProvider);
 
     return ScaleTransition(
       scale: _scaleAnimation,
@@ -191,11 +194,11 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
               if (isDesktop)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: _buildRowButtons(context),
+                  children: _buildRowButtons(context, gameState.gameType == GameType.daily),
                 )
               else
                 Column(
-                  children: _buildColumnButtons(context),
+                  children: _buildColumnButtons(context, gameState.gameType == GameType.daily),
                 ),
             ],
           ),
@@ -204,7 +207,7 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
     );
   }
 
-  List<Widget> _buildColumnButtons(BuildContext context) {
+  List<Widget> _buildColumnButtons(BuildContext context, bool showShare) {
     final buttons = <Widget>[
       _buildButton(
         context,
@@ -214,14 +217,15 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
         isPrimary: true,
       ),
       const SizedBox(height: 12),
-      _buildButton(
-        context,
-        'Share',
-        Icons.share,
-        widget.onShare,
-        isSecondary: true,
-      ),
-      const SizedBox(height: 12),
+      if (showShare)
+        _buildButton(
+          context,
+          'Share',
+          Icons.share,
+          widget.onShare,
+          isSecondary: true,
+        ),
+      if (showShare) const SizedBox(height: 12),
       _buildButton(
         context,
         'Close',
@@ -233,15 +237,16 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
     return buttons;
   }
 
-  List<Widget> _buildRowButtons(BuildContext context) {
+  List<Widget> _buildRowButtons(BuildContext context, bool showShare) {
     final buttons = <Widget>[
-      _buildButton(
-        context,
-        'Share',
-        Icons.share,
-        widget.onShare,
-        isSecondary: true,
-      ),
+      if (showShare)
+        _buildButton(
+          context,
+          'Share',
+          Icons.share,
+          widget.onShare,
+          isSecondary: true,
+        ),
       _buildButton(
         context,
         'Play Again',
