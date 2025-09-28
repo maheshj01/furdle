@@ -15,7 +15,7 @@ import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/settings.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:furdle/utils/extensions.dart';
-import 'package:furdle/utils/utility.dart' show Utility;
+import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -214,6 +214,20 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           onClose: () {
             Navigator.of(context).pop();
           },
+          onShare: () async {
+            if (!gameState.isGameOver) {
+              SettingsSnackBar.showError(context, message: Constants.shareIncomplete);
+              return;
+            }
+            final result = Utility.generateFurdleGrid(gameState);
+            final furdleScoreShareMessage = 'FURDLE $result';
+            if (!kIsWeb) {
+              await SharePlus.instance.share(ShareParams(text: furdleScoreShareMessage));
+            } else {
+              await Clipboard.setData(ClipboardData(text: furdleScoreShareMessage));
+              SettingsSnackBar.showInfo(context, message: Constants.scoreCopiedToClipboard);
+            }
+          },
           onTimerComplete: restartGame,
         );
       },
@@ -303,26 +317,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                     },
                     icon: const Icon(Icons.help)),
                 actions: [
-                  if (gameState.isGameOver)
-                    IconButton(
-                        onPressed: () async {
-                          if (!gameState.isGameOver) {
-                            SettingsSnackBar.showError(context, message: Constants.shareIncomplete);
-                            return;
-                          }
-                          final result = Utility.generateFurdleGrid(gameState);
-                          final furdleScoreShareMessage = 'FURDLE $result';
-
-                          if (!kIsWeb) {
-                            await SharePlus.instance
-                                .share(ShareParams(text: furdleScoreShareMessage));
-                          } else {
-                            await Clipboard.setData(ClipboardData(text: furdleScoreShareMessage));
-                            SettingsSnackBar.showInfo(context,
-                                message: Constants.scoreCopiedToClipboard);
-                          }
-                        },
-                        icon: const Icon(Icons.share)),
                   IconButton(
                       onPressed: () {
                         context.push(SettingsPage.path);

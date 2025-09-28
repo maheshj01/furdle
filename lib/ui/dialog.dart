@@ -9,6 +9,7 @@ class ResponsiveGameOverDialog extends StatefulWidget {
   final VoidCallback onPlayAgain;
   final VoidCallback onClose;
   final VoidCallback onTimerComplete;
+  final VoidCallback onShare;
 
   const ResponsiveGameOverDialog({
     super.key,
@@ -18,6 +19,7 @@ class ResponsiveGameOverDialog extends StatefulWidget {
     required this.onPlayAgain,
     required this.onClose,
     required this.onTimerComplete,
+    required this.onShare,
   });
 
   @override
@@ -188,12 +190,12 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
               // Action buttons
               if (isDesktop)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: _buildActionButtons(context),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: _buildRowButtons(context),
                 )
               else
                 Column(
-                  children: _buildActionButtons(context),
+                  children: _buildColumnButtons(context),
                 ),
             ],
           ),
@@ -202,7 +204,7 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
     );
   }
 
-  List<Widget> _buildActionButtons(BuildContext context) {
+  List<Widget> _buildColumnButtons(BuildContext context) {
     final buttons = <Widget>[
       _buildButton(
         context,
@@ -212,6 +214,41 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
         isPrimary: true,
       ),
       const SizedBox(height: 12),
+      _buildButton(
+        context,
+        'Share',
+        Icons.share,
+        widget.onShare,
+        isSecondary: true,
+      ),
+      const SizedBox(height: 12),
+      _buildButton(
+        context,
+        'Close',
+        Icons.close,
+        widget.onClose,
+      ),
+    ];
+
+    return buttons;
+  }
+
+  List<Widget> _buildRowButtons(BuildContext context) {
+    final buttons = <Widget>[
+      _buildButton(
+        context,
+        'Share',
+        Icons.share,
+        widget.onShare,
+        isSecondary: true,
+      ),
+      _buildButton(
+        context,
+        'Play Again',
+        Icons.play_arrow,
+        widget.onPlayAgain,
+        isPrimary: true,
+      ),
       _buildButton(
         context,
         'Close',
@@ -229,23 +266,35 @@ class _ResponsiveGameOverDialogState extends State<ResponsiveGameOverDialog>
     IconData icon,
     VoidCallback onPressed, {
     bool isPrimary = false,
+    bool isSecondary = false,
   }) {
     final isDesktop = MediaQuery.of(context).size.width > 600;
-    final button = ElevatedButton(
+
+    // Determine button color based on type
+    Color backgroundColor;
+    if (isPrimary) {
+      backgroundColor = Theme.of(context).primaryColor;
+    } else if (isSecondary) {
+      backgroundColor = Colors.green.withValues(alpha: 0.8);
+    } else {
+      backgroundColor = Colors.orange.withValues(alpha: 0.8);
+    }
+
+    final button = ElevatedButton.icon(
       onPressed: onPressed,
-      child: Text(text),
+      icon: Icon(icon, size: 20),
+      label: Text(text),
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.symmetric(
           horizontal: 24,
           vertical: 24,
         ),
-        backgroundColor:
-            isPrimary ? Theme.of(context).primaryColor : Colors.orange.withValues(alpha: 0.8),
+        backgroundColor: backgroundColor,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        minimumSize: isDesktop ? const Size(100, 48) : Size(double.infinity, 48),
+        minimumSize: isDesktop ? const Size(120, 48) : Size(double.infinity, 48),
       ),
     );
 
