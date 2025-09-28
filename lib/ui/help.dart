@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:furdle/constants/assets.dart';
 import 'package:furdle/exports.dart' hide AppColors;
 import 'package:furdle/provider/game_state_notifier.dart';
 import 'package:furdle/provider/settings_notifier.dart';
@@ -60,9 +61,10 @@ class HelpPage extends ConsumerWidget {
                         onTap: () {
                           Utility.launch(playStoreUrl);
                         },
-                        child: Image.asset('assets/googleplay.png'),
+                        child: Image.asset(Assets.googlePlay),
                       )),
                 ReportBugWidget(),
+                SizedBox(height: 50),
               ],
             ),
           ),

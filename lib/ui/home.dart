@@ -183,9 +183,9 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   }
 
   void shakeFurdle() {
+    HapticFeedback.heavyImpact();
     _shakeController.reset();
     _shakeController.forward();
-    HapticFeedback.mediumImpact();
   }
 
   void restartGame() {

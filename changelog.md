@@ -1,6 +1,7 @@
 ### v0.4.2+16 (Unpublished)
 
 - Improve the Keyboard Layout for better usability.
+- Update notification should launch playstore.
 
 ### v0.4.1+15 Sep 27, 2025
 
