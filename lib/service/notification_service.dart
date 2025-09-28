@@ -6,7 +6,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:furdle/constants/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -22,6 +24,12 @@ class NotificationService {
   // Key to store subscription status in SharedPreferences
   static const String _subscriptionStatusKey = 'fcm_topic_subscribed';
 
+  // When a notification is sent with this action
+  // {action: app_update}: This will redirect to the Play Store
+  static const String kAppUpdateAction = 'app_update';
+  // {action: new_challenge}: This will redirect to the game screen
+  static const String kNewChallengeAction = 'new_challenge';
+
   StreamSubscription<RemoteMessage>? _onMessageSubscription;
   StreamSubscription<RemoteMessage>? _onMessageOpenedAppSubscription;
 
@@ -29,13 +37,12 @@ class NotificationService {
   Future<void> initialize() async {
     try {
       // Request permission for notifications
-      final permissionGranted = await _requestPermissions();
+      await _requestPermissions();
       // Initialize local notifications
       await _initializeLocalNotifications();
 
-      // Subscribe to global topic
+      // Subscribe to global topic and app updates topic
       await _subscribeToGlobalTopic();
-
       // Set up message handlers
       _setupMessageHandlers();
 
@@ -262,7 +269,7 @@ class NotificationService {
       message.notification?.title ?? 'Furdle',
       message.notification?.body ?? 'New challenge available!',
       platformChannelSpecifics,
-      payload: message.data.toString(),
+      payload: json.encode(message.data),
     );
   }
 
@@ -273,16 +280,70 @@ class NotificationService {
     // Example: Get.toNamed('/game') or Navigator.pushNamed(context, '/game')
   }
 
+  /// Handle app update action - redirect to Play Store
+  Future<void> _handleAppUpdateAction() async {
+    try {
+      final Uri playStoreUri = Uri.parse(playStoreUrl);
+
+      if (await canLaunchUrl(playStoreUri)) {
+        await launchUrl(
+          playStoreUri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        print('❌ Could not launch Play Store URL: $playStoreUrl');
+      }
+    } catch (e) {
+      print('❌ Error launching Play Store: $e');
+    }
+  }
+
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse notificationResponse) {
-    // Navigate to appropriate screen or handle action
-    _navigateToGame();
+    // Parse the payload to determine action
+    final String? payload = notificationResponse.payload;
+
+    if (payload != null) {
+      try {
+        final Map<String, dynamic> data = json.decode(payload);
+        final String? action = data['action'];
+
+        switch (action) {
+          case kAppUpdateAction:
+            _handleAppUpdateAction();
+            break;
+          case kNewChallengeAction:
+            _navigateToGame();
+            break;
+          default:
+            _navigateToGame();
+            break;
+        }
+      } catch (e) {
+        print('❌ Error parsing notification payload: $e');
+        _navigateToGame(); // Default action
+      }
+    } else {
+      _navigateToGame(); // Default action if no payload
+    }
   }
 
   /// Handle notification actions (navigation, etc.)
   void _handleNotificationAction(RemoteMessage message) {
     // Extract action from message data
     final String? action = message.data['action'];
+
+    switch (action) {
+      case kAppUpdateAction:
+        _handleAppUpdateAction();
+        break;
+      case kNewChallengeAction:
+        _navigateToGame();
+        break;
+      default:
+        _navigateToGame();
+        break;
+    }
   }
 
   /// Send a test notification (for debugging)
@@ -302,6 +363,28 @@ class NotificationService {
       } catch (e) {
         print('❌ Error sending test notification: $e');
       }
+    }
+  }
+
+  /// Send an app update notification (for testing)
+  Future<void> sendAppUpdateNotification({
+    String title = '🔄 Furdle Update Available!',
+    String body =
+        'A new version of Furdle is available with exciting new features and improvements.',
+  }) async {
+    try {
+      await _showLocalNotification(
+        RemoteMessage(
+          messageId: 'update_${DateTime.now().millisecondsSinceEpoch}',
+          notification: RemoteNotification(
+            title: title,
+            body: body,
+          ),
+          data: {'action': 'app_update'},
+        ),
+      );
+    } catch (e) {
+      print('❌ Error sending app update notification: $e');
     }
   }
 
@@ -332,29 +415,39 @@ class NotificationService {
     await _unsubscribeFromGlobalTopic();
   }
 
-  /// Force resubscribe to topic (useful for debugging or manual refresh)
-  Future<void> forceResubscribe() async {
-    print('🔄 Force resubscribing to topic...');
-    try {
-      // First unsubscribe
-      await _firebaseMessaging.unsubscribeFromTopic(globalTopic);
-      await _setSubscriptionStatus(false);
-
-      // Then subscribe again
-      await _firebaseMessaging.subscribeToTopic(globalTopic);
-      await _setSubscriptionStatus(true);
-      print('✅ Force resubscription completed');
-    } catch (e) {
-      print('❌ Error during force resubscription: $e');
-    }
-  }
-
   /// Get the global topic name
   String get topicName => globalTopic;
 
   /// Get current subscription status (for debugging)
   Future<bool> getSubscriptionStatus() async {
     return await _isSubscribedToTopic();
+  }
+
+  /// Send app update notification manually (for testing)
+  Future<void> sendManualAppUpdateNotification({
+    String title = '🔄 Furdle Update Available!',
+    String body =
+        'A new version of Furdle is available with exciting new features and improvements.',
+    String version = '1.0.0',
+  }) async {
+    try {
+      await _showLocalNotification(
+        RemoteMessage(
+          messageId: 'manual_update_${DateTime.now().millisecondsSinceEpoch}',
+          notification: RemoteNotification(
+            title: title,
+            body: body,
+          ),
+          data: {
+            'action': 'app_update',
+            'version': version,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        ),
+      );
+    } catch (e) {
+      print('❌ Error sending manual app update notification: $e');
+    }
   }
 
   /// Dispose resources
