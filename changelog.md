@@ -1,5 +1,9 @@
 ### v0.4.2+16 (Unpublished)
 
+- Make Keyboard taps more accurate
+
+### v0.4.2+16 Sep 27, 2025
+
 - Improve the Keyboard Layout for better usability.
 - Update notification should launch playstore.
 - Update UI of title bar.
