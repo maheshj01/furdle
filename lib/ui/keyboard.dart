@@ -108,11 +108,9 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
               KeyBoardRow(
                 characters: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
               ),
-              SizedBox(height: context.width < 400 ? 4.0 : 6.0),
               KeyBoardRow(
                 characters: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
               ),
-              SizedBox(height: context.width < 400 ? 4.0 : 6.0),
               KeyBoardRow(
                 characters: ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace'],
               ),
@@ -188,49 +186,44 @@ class KeyBoardKey extends ConsumerWidget {
     final minTouchTarget = 48.0; // Minimum accessibility requirement
     final responsiveHeight = context.sp(48).clamp(minTouchTarget, 60.0);
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth < 400 ? 1.5 : 2.5,
-        vertical: 2.0,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTapDown: (details) {
-            keyboardNotifier.onKeyPressed(character, KeyEventType.keyDown, false);
-          },
-          onTapUp: (details) {
-            keyboardNotifier.onKeyPressed(character, KeyEventType.keyUp, false);
-          },
-          onTapCancel: () {
-            keyboardNotifier.onKeyPressed(character, KeyEventType.keyCancel, false);
-          },
-          borderRadius: BorderRadius.circular(8),
-          splashColor: isDarkMode
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.black.withValues(alpha: 0.1),
-          highlightColor: isDarkMode
-              ? Colors.white.withValues(alpha: 0.05)
-              : Colors.black.withValues(alpha: 0.05),
-          child: Container(
-            width: double.infinity, // Take full width of Flexible parent
-            height: responsiveHeight,
-            decoration:
-                buttonDecoration(isDarkMode, isPressed, colorFromKeyState(keyState, isDarkMode)),
-            alignment: Alignment.center,
-            child: isSpecial && character == Constants.keyboardBackspaceKey
-                ? backspaceButtonChild(context)
-                : Text(
-                    character,
-                    style: TextStyle(
-                      fontSize: context.sp(isSpecial ? 12 : 18),
-                      color: textColorFromKeyState(keyState, isDarkMode),
-                      fontWeight: isPressed ? FontWeight.w600 : FontWeight.w500,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-          ),
+    return GestureDetector(
+      onTapDown: (details) {
+        keyboardNotifier.onKeyPressed(character, KeyEventType.keyDown, false);
+      },
+      onTapUp: (details) {
+        keyboardNotifier.onKeyPressed(character, KeyEventType.keyUp, false);
+      },
+      onTapCancel: () {
+        keyboardNotifier.onKeyPressed(character, KeyEventType.keyCancel, false);
+      },
+      // borderRadius: BorderRadius.circular(8),
+      // highlightColor: Colors.transparent,
+      // hoverColor: Colors.transparent,
+      // splashColor:
+      //     isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+      // highlightColor:
+      //     isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: screenWidth < 400 ? 1.5 : 2.5,
+          vertical: screenWidth < 400 ? 4.0 : 6.0,
         ),
+        width: double.infinity, // Take full width of Flexible parent
+        height: responsiveHeight,
+        decoration:
+            buttonDecoration(isDarkMode, isPressed, colorFromKeyState(keyState, isDarkMode)),
+        alignment: Alignment.center,
+        child: isSpecial && character == Constants.keyboardBackspaceKey
+            ? backspaceButtonChild(context)
+            : Text(
+                character,
+                style: TextStyle(
+                  fontSize: context.sp(isSpecial ? 12 : 18),
+                  color: textColorFromKeyState(keyState, isDarkMode),
+                  fontWeight: isPressed ? FontWeight.w600 : FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+              ),
       ),
     );
   }

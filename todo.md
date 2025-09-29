@@ -20,6 +20,7 @@ Rebuilding Furdle from scratch with modern Flutter architecture, Riverpod state 
 - [ ] Show Details about the word on Game Over (Nested Dialog)
 - [ ] Ask for Google play review
 - [ ] On Game Over Show the Streak
+- [ ] Add interactive Onboarding explaining the game with a example target word.
 
 #### Basic Features
 
