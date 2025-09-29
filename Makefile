@@ -5,7 +5,7 @@ current_dir := $(shell 'pwd')
 FLUTTER := $(shell which flutter)
 DART := $(shell which dart)
 
-FLUTTER_VERSION := 3.35.1
+FLUTTER_VERSION := 3.35.4
 
 start-devtools:
 	$(FLUTTER) pub global run devtools
@@ -59,6 +59,14 @@ shorebird_release_ios: update_submodules generate
 		--flutter-version=$(FLUTTER_VERSION)
 
 shorebird_release: shorebird_release_android shorebird_release_ios
+
+shorebird_patch_android:
+	shorebird patch android --flutter-version=$(FLUTTER_VERSION)
+
+shorebird_patch_ios:
+	shorebird patch ios --flutter-version=$(FLUTTER_VERSION)
+
+shorebird_patch: shorebird_patch_android shorebird_patch_ios
 
 generate:
 

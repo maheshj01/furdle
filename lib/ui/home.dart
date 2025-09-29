@@ -15,7 +15,7 @@ import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/settings.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:furdle/utils/extensions.dart';
-import 'package:furdle/utils/utility.dart' show Utility;
+import 'package:furdle/utils/utility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -83,12 +83,14 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         });
       }
     });
+    _initShakeAnimation();
   }
 
   @override
   void dispose() {
     slideController.dispose();
     gridScaleController.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
@@ -113,6 +115,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             context,
             message: result.friendlyString,
           );
+          shakeFurdle();
         }
       }
     } catch (e) {
@@ -162,8 +165,27 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     } else if (gameState.status == GameStatus.lose) {
       // Handle lose scenario
       // You can show a lose dialog, update UI, etc.
-      _showGameOverDialog("Game Over! The word was:", gameState);
+      _showGameOverDialog("Game Over!", gameState);
     }
+  }
+
+  void _initShakeAnimation() {
+    _shakeController =
+        AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    _shakeAnimation = Tween(begin: 0.0, end: 24.0)
+        .chain(CurveTween(curve: Curves.elasticIn))
+        .animate(_shakeController)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _shakeController.reverse();
+        }
+      });
+  }
+
+  void shakeFurdle() {
+    HapticFeedback.heavyImpact();
+    _shakeController.reset();
+    _shakeController.forward();
   }
 
   void restartGame() {
@@ -182,7 +204,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
     final nextGameDate = gameState.nextGameDate;
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return ResponsiveGameOverDialog(
           title: title,
@@ -192,12 +214,28 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
           onClose: () {
             Navigator.of(context).pop();
           },
+          onShare: () async {
+            if (!gameState.isGameOver) {
+              SettingsSnackBar.showError(context, message: Constants.shareIncomplete);
+              return;
+            }
+            final result = Utility.generateFurdleGrid(gameState);
+            final furdleScoreShareMessage = 'FURDLE $result';
+            if (!kIsWeb) {
+              await SharePlus.instance.share(ShareParams(text: furdleScoreShareMessage));
+            } else {
+              await Clipboard.setData(ClipboardData(text: furdleScoreShareMessage));
+              SettingsSnackBar.showInfo(context, message: Constants.scoreCopiedToClipboard);
+            }
+          },
           onTimerComplete: restartGame,
         );
       },
     );
   }
 
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeAnimation;
   @override
   Widget build(BuildContext context) {
     // Show dialog for completed game if needed
@@ -214,7 +252,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         }
       });
     }
-
+    final gameState = ref.watch(gameStateProvider);
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -224,12 +262,22 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
+                  SizedBox(height: 50),
                   Expanded(
-                    child: ScaleTransition(
-                      scale: gridScaleAnimation,
-                      child: GridBoard(),
-                    ),
-                  ),
+                      child: AnimatedBuilder(
+                          animation: _shakeAnimation,
+                          builder: (BuildContext context, Widget? child) {
+                            final bool isAnimating = _shakeController.isAnimating;
+                            final padding = isAnimating ? 24 : 0;
+                            return Container(
+                                padding: EdgeInsets.only(
+                                    left: _shakeAnimation.value + padding,
+                                    right: padding - _shakeAnimation.value),
+                                child: ScaleTransition(
+                                  scale: gridScaleAnimation,
+                                  child: GridBoard(),
+                                ));
+                          })),
                   Padding(
                     padding: EdgeInsets.only(bottom: 50),
                     child: SlideTransition(
@@ -269,26 +317,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                     },
                     icon: const Icon(Icons.help)),
                 actions: [
-                  IconButton(
-                      onPressed: () async {
-                        final gameState = ref.read(gameStateProvider);
-                        if (gameState.status == GameStatus.inprogress) {
-                          Utility.showMessage(
-                              context, "You can't share a furdle that hasn't been solved yet!");
-                          return;
-                        }
-                        final result = Utility.generateFurdleGrid(gameState);
-                        final furdleScoreShareMessage = 'FURDLE ${result}';
-
-                        if (!kIsWeb) {
-                          await SharePlus.instance
-                              .share(ShareParams(text: furdleScoreShareMessage));
-                        } else {
-                          await Clipboard.setData(ClipboardData(text: furdleScoreShareMessage));
-                          Utility.showMessage(context, "Score copied to clipboard");
-                        }
-                      },
-                      icon: const Icon(Icons.share)),
                   IconButton(
                       onPressed: () {
                         context.push(SettingsPage.path);

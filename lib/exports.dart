@@ -1,6 +1,7 @@
 /// export pages,widgets,and all the files
 /// that may need to be imported in some part of the app
 /// group the exports according to folder name
+library constants;
 
 export 'constants/constants.dart';
 

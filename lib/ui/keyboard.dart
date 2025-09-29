@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:furdle/constants/colors.dart';
 import 'package:furdle/constants/const.dart';
-import 'package:furdle/provider/game_state_notifier.dart';
+import 'package:furdle/constants/styles.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/provider/settings_notifier.dart';
 import 'package:furdle/state/key_state.dart';
@@ -96,21 +95,27 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
         constraints: BoxConstraints(
           maxWidth: widget.maxWidth ?? context.maxKeyboardWidth(),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _KeyRow(
-              characters: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-            ),
-            _KeyRow(
-              characters: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-            ),
-            _KeyRow(
-              characters: ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace'],
-            ),
-          ],
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: context.width < 400 ? 8.0 : 12.0,
+            vertical: 8.0,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              KeyBoardRow(
+                characters: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+              ),
+              KeyBoardRow(
+                characters: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+              ),
+              KeyBoardRow(
+                characters: ['Enter', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Backspace'],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -134,34 +139,37 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
   }
 }
 
-class _KeyRow extends ConsumerWidget {
+class KeyBoardRow extends ConsumerWidget {
   final List<String> characters;
-  const _KeyRow({required this.characters});
+  const KeyBoardRow({required this.characters});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: characters.map((character) {
         final isSpecial =
             character == Constants.keyboardBackspaceKey || character == Constants.keyboardEnterKey;
 
-        // Use Flexible with different flex values for special keys
-        return Flexible(
-          flex: isSpecial ? 2 : 1, // Special keys get 2x the space
-          child: _Key(character),
+        // Use Expanded with different flex values for special keys
+        // This ensures better distribution of space
+        return Expanded(
+          flex: isSpecial ? 15 : 10, // Special keys get 1.5x the space
+          child: KeyBoardKey(character),
         );
       }).toList(),
     );
   }
 }
 
-class _Key extends ConsumerWidget {
+class KeyBoardKey extends ConsumerWidget {
   final String character;
-  final double? width;
-  final double? height;
-  final double? fontSize;
-  const _Key(this.character, {this.width, this.height, this.fontSize});
+  const KeyBoardKey(this.character);
+
+  Widget backspaceButtonChild(BuildContext context) {
+    return Icon(Icons.backspace, size: context.sp(24));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -172,77 +180,51 @@ class _Key extends ConsumerWidget {
     final isPressed = keyState.event == KeyEventType.keyDown;
     final isSpecial =
         character == Constants.keyboardBackspaceKey || character == Constants.keyboardEnterKey;
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: InkWell(
-        onTapDown: (details) {
-          keyboardNotifier.onKeyPressed(character, KeyEventType.keyDown, false);
-        },
-        onTapUp: (details) {
-          keyboardNotifier.onKeyPressed(character, KeyEventType.keyUp, false);
-        },
-        onTapCancel: () {
-          keyboardNotifier.onKeyPressed(character, KeyEventType.keyCancel, false);
-        },
-        child: Container(
-          width: double.infinity, // Take full width of Flexible parent
-          height: height ?? context.sp(32),
-          decoration: BoxDecoration(
-            color: _getKeyColor(keyState),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: isPressed ? Colors.blue : Colors.grey,
-              width: isPressed ? 2 : 1,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            character,
-            style: TextStyle(
-              fontSize: fontSize ?? context.sp(isSpecial ? 10 : 16),
-              color: _getTextColor(keyState, isDarkMode),
-              fontWeight: isPressed ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
+
+    // Calculate responsive touch target size
+    final screenWidth = context.width;
+    final minTouchTarget = 48.0; // Minimum accessibility requirement
+    final responsiveHeight = context.sp(48).clamp(minTouchTarget, 60.0);
+
+    return GestureDetector(
+      onTapDown: (details) {
+        keyboardNotifier.onKeyPressed(character, KeyEventType.keyDown, false);
+      },
+      onTapUp: (details) {
+        keyboardNotifier.onKeyPressed(character, KeyEventType.keyUp, false);
+      },
+      onTapCancel: () {
+        keyboardNotifier.onKeyPressed(character, KeyEventType.keyCancel, false);
+      },
+      // borderRadius: BorderRadius.circular(8),
+      // highlightColor: Colors.transparent,
+      // hoverColor: Colors.transparent,
+      // splashColor:
+      //     isDarkMode ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+      // highlightColor:
+      //     isDarkMode ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: screenWidth < 400 ? 1.5 : 2.5,
+          vertical: screenWidth < 400 ? 4.0 : 6.0,
         ),
+        width: double.infinity, // Take full width of Flexible parent
+        height: responsiveHeight,
+        decoration:
+            buttonDecoration(isDarkMode, isPressed, colorFromKeyState(keyState, isDarkMode)),
+        alignment: Alignment.center,
+        child: isSpecial && character == Constants.keyboardBackspaceKey
+            ? backspaceButtonChild(context)
+            : Text(
+                character,
+                style: TextStyle(
+                  fontSize: context.sp(isSpecial ? 12 : 18),
+                  color: textColorFromKeyState(keyState, isDarkMode),
+                  fontWeight: isPressed ? FontWeight.w600 : FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+              ),
       ),
     );
-  }
-
-  Color _getKeyColor(KeyState keyState) {
-    if (keyState.event == KeyEventType.keyDown) {
-      return Colors.blue.withValues(alpha: 0.3);
-    }
-
-    switch (keyState.cellType) {
-      case CellType.match:
-        return AppColors.green;
-      case CellType.notExists:
-        return AppColors.black;
-      case CellType.misplaced:
-        return AppColors.yellow;
-      case CellType.empty:
-      default:
-        return Colors.grey.withValues(alpha: 0.1);
-    }
-  }
-
-  Color _getTextColor(KeyState keyState, bool isDarkMode) {
-    if (keyState.event == KeyEventType.keyDown) {
-      return Colors.blue;
-    }
-
-    switch (keyState.cellType) {
-      case CellType.match:
-      case CellType.notExists:
-        return Colors.white;
-      case CellType.unknown:
-      case CellType.empty:
-      default:
-        if (isDarkMode) {
-          return Colors.white;
-        }
-        return Colors.black;
-    }
   }
 }

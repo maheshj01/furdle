@@ -19,6 +19,21 @@ class Constants {
   static const String appSettingsKey = 'app_settings';
   static const String appGameStateKey = 'app_game_state';
 
+  static final String description = """
+  Your goal is to guess a 5 letter word in 6 tries.
+
+  Each guess must be a valid five-letter word. Hit the enter button to submit.
+
+  After submitting each word, the color of the tiles will change to indicate how close your guess was to the word.
+  """;
+
+  static String case1 = 'The letter E is in the word and in the correct spot';
+  static String case2 = 'The letter L is in the word but in the wrong spot.';
+  static String case3 = 'The letter Y is not in the word at any spot';
+
+  static const String shareIncomplete = 'You can\'t share a furdle that hasn\'t been solved yet!';
+
+  static const String scoreCopiedToClipboard = 'Score copied to clipboard';
   // Challenge storage keys
   static const String challengeProgressKey = 'challenge_current_progress';
   static const String challengeCompletedIdsKey = 'challenge_completed_ids';

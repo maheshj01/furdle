@@ -14,7 +14,7 @@ class SoundSettingsWidget extends ConsumerWidget {
     final screenSize = MediaQuery.of(context).size;
     final isDesktop = screenSize.width > 600;
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         width: isDesktop ? 600 : screenSize.width,
         padding: const EdgeInsets.all(16),
@@ -69,7 +69,6 @@ class SoundSettingsWidget extends ConsumerWidget {
                     // Show feedback to user
                     SettingsSnackBar.showSoundChanged(context, value);
                   },
-                  activeThumbColor: Theme.of(context).primaryColor,
                 ),
               ],
             ),

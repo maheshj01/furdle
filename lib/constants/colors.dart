@@ -15,7 +15,7 @@ class AppColors {
   // Based on Material Design 3 and modern accessibility guidelines
 
   // Primary colors - Modern blue with slight purple tint
-  static const Color primaryDark = Color(0xFF6750A4); // Modern purple-blue
+  static const Color primaryDark = Color.fromARGB(255, 153, 116, 255); // Modern purple-blue
   static const Color primaryVariantDark = Color(0xFF7C67D6); // Lighter variant
 
   // Surface colors - Avoid pure black, use dark grays

@@ -1,4 +1,4 @@
-/// The list of furdle words, ~2334 words in total
+// The list of furdle words, ~2334 words in total
 
 const List<String> furdleList = [
   'aback',

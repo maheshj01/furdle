@@ -16,7 +16,7 @@ class NotificationSettingsWidget extends ConsumerWidget {
     final isDesktop = screenSize.width > 600;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         width: isDesktop ? 600 : screenSize.width,
         padding: const EdgeInsets.all(16),
@@ -70,7 +70,7 @@ class NotificationSettingsWidget extends ConsumerWidget {
                     // Show feedback to user
                     SettingsSnackBar.showNotificationsChanged(context, value);
                   },
-                  activeColor: Theme.of(context).primaryColor,
+                  activeThumbColor: Theme.of(context).primaryColor,
                 ),
               ],
             ),

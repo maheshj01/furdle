@@ -109,7 +109,6 @@ class _GridCellState extends ConsumerState<GridCell> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final cellState = widget.cellState;
     final isDarkMode = ref.watch(settingsNotifierProvider).isDarkMode;
-    final colorScheme = Theme.of(context).colorScheme;
     return AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
@@ -120,7 +119,7 @@ class _GridCellState extends ConsumerState<GridCell> with SingleTickerProviderSt
               alignment: Alignment.center,
               decoration: BoxDecoration(
                   border: Border.all(
-                    color: colorScheme.onSurface,
+                    color: Colors.grey.withValues(alpha: isDarkMode ? 0.8 : 0.15),
                     width: 2,
                   ),
                   color: stateToColor(cellState.cellType, isDarkMode),

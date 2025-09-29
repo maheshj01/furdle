@@ -121,6 +121,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
       id: challenge.number,
       status: GameStatus.inprogress,
       targetWord: challenge.word,
+      gameType: GameType.daily,
       startTime: DateTime.now(),
       nextGameDate: challenge.nextRun,
     );
@@ -140,6 +141,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     state = GameState.instance().copyWith(
         id: newId,
         status: GameStatus.inprogress,
+        gameType: GameType.random,
         targetWord: targetWord,
         startTime: DateTime.now(),
         nextGameDate: nextGameDate);
@@ -401,6 +403,14 @@ enum Difficulty {
   easy, // 7 attempts, 5 letters
   medium, // 6 attempts, 5 letters
   hard, // 5 attempts, 5 letters
+}
+
+enum GameType {
+  /// Daily challenge
+  daily,
+
+  /// Random local game
+  random,
 }
 
 enum SubmitWordResult {
