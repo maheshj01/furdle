@@ -18,16 +18,19 @@ class SettingsPage extends StatelessWidget {
       body: Container(
         alignment: Alignment.center,
         padding: EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            SizedBox(height: 16),
-            ThemeSettingsWidget(),
-            // SoundSettingsWidget(),
-            NotificationSettingsWidget(),
-            TwitterSettingsWidget(),
-            // Add more settings widgets here as needed
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: const [
+              SizedBox(height: 16),
+              ThemeSettingsWidget(),
+              // SoundSettingsWidget(),
+              NotificationSettingsWidget(),
+              TwitterSettingsWidget(),
+              SizedBox(height: 50),
+              // Add more settings widgets here as needed
+            ],
+          ),
         ),
       ),
     );
