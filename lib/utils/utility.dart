@@ -26,7 +26,8 @@ class Utility {
       currentRow += '\n';
       generatedFurdle += currentRow;
     }
-    generatedFurdle += '\n${Constants.gameUrl}';
+    generatedFurdle += '\n Can you solve the today\'s puzzle?';
+    generatedFurdle += '\n Play Furdle at ${Constants.gameUrl}';
     return generatedFurdle;
   }
 
