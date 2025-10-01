@@ -262,7 +262,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
               alignment: Alignment.bottomCenter,
               child: Column(
                 children: [
-                  SizedBox(height: 50),
+                  SizedBox(height: 60),
                   Expanded(
                       child: AnimatedBuilder(
                           animation: _shakeAnimation,
@@ -309,20 +309,23 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             ),
             Align(
               alignment: Alignment.topCenter,
-              child: TitleBar(
-                title: widget.title,
-                leading: IconButton(
-                    onPressed: () {
-                      context.go(HelpPage.path);
-                    },
-                    icon: const Icon(Icons.help)),
-                actions: [
-                  IconButton(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TitleBar(
+                  title: widget.title,
+                  leading: IconButton(
                       onPressed: () {
-                        context.push(SettingsPage.path);
+                        context.go(HelpPage.path);
                       },
-                      icon: const Icon(Icons.settings)),
-                ],
+                      icon: const Icon(Icons.help)),
+                  actions: [
+                    IconButton(
+                        onPressed: () {
+                          context.push(SettingsPage.path);
+                        },
+                        icon: const Icon(Icons.settings)),
+                  ],
+                ),
               ),
             ),
           ],
