@@ -310,7 +310,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: kIsWeb ? 16 : 0),
                 child: TitleBar(
                   title: widget.title,
                   leading: IconButton(
