@@ -1,9 +1,9 @@
 import * as admin from "firebase-admin";
-import {wordList} from "./word";
-import {onSchedule} from "firebase-functions/scheduler";
-import {onCall} from "firebase-functions/https";
 import {logger} from "firebase-functions";
+import {onCall} from "firebase-functions/https";
+import {onSchedule} from "firebase-functions/scheduler";
 import {TwitterApi} from "twitter-api-v2";
+import {wordList} from "./word";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -11,12 +11,12 @@ admin.initializeApp();
 // Global topic for all Furdle users
 const GLOBAL_TOPIC = "daily_challenge";
 
-// Twitter client configuration
-const getTwitterClient = () => {
-  const appKey = process.env.TWITTER_API_KEY;
-  const appSecret = process.env.TWITTER_API_SECRET;
-  const accessToken = process.env.TWITTER_ACCESS_TOKEN;
-  const accessSecret = process.env.TWITTER_ACCESS_TOKEN_SECRET;
+// X client configuration
+const getXClient = () => {
+  const appKey = process.env.X_API_KEY;
+  const appSecret = process.env.X_API_SECRET;
+  const accessToken = process.env.X_ACCESS_TOKEN;
+  const accessSecret = process.env.X_ACCESS_TOKEN_SECRET;
 
   if (!appKey || !appSecret || !accessToken || !accessSecret) {
     throw new Error("Twitter API credentials not configured");
@@ -97,7 +97,7 @@ async function postFirstCompletionTweet(
   twitterUsername?: string
 ): Promise<void> {
   try {
-    const twitterClient = getTwitterClient();
+    const xClient = getXClient();
 
     let tweetText = `🎉 FIRST COMPLETION ALERT! 🧩\n\nFurdle Challenge #${challengeNumber} has been cracked in ${attempts} attempt${attempts === 1 ? "" : "s"}! `;
 
@@ -110,7 +110,7 @@ async function postFirstCompletionTweet(
     tweetText +=
       "Think you can beat that? Play now at https://furdle.web.app/\n\n#Furdle #WordPuzzle #FirstToSolve";
 
-    const tweet = await twitterClient.v2.tweet(tweetText);
+    const tweet = await xClient.v2.tweet(tweetText);
 
     logger.info("Successfully posted first completion tweet:", {
       challengeNumber,
@@ -239,6 +239,43 @@ export const getCompletionStats = onCall(async request => {
     };
   } catch (error) {
     logger.error("Error in getCompletionStats:", error);
+    throw error;
+  }
+});
+
+// Test function to manually trigger tweet posting
+export const testTweet = onCall(async request => {
+  try {
+    const {challengeNumber, attempts, twitterUsername} = request.data;
+
+    // Default values for testing
+    const testChallengeNumber = challengeNumber || 999;
+    const testAttempts = attempts || 3;
+    const testTwitterUsername = twitterUsername || "testuser";
+
+    logger.info("Testing tweet function with:", {
+      challengeNumber: testChallengeNumber,
+      attempts: testAttempts,
+      twitterUsername: testTwitterUsername,
+    });
+
+    await postFirstCompletionTweet(
+      testChallengeNumber,
+      testAttempts,
+      testTwitterUsername
+    );
+
+    return {
+      success: true,
+      message: "Test tweet posted successfully!",
+      data: {
+        challengeNumber: testChallengeNumber,
+        attempts: testAttempts,
+        twitterUsername: testTwitterUsername,
+      },
+    };
+  } catch (error) {
+    logger.error("Error in testTweet:", error);
     throw error;
   }
 });
