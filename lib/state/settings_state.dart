@@ -8,7 +8,7 @@ class SettingsState {
       {required this.isNotificationsEnabled,
       required this.isSoundEnabled,
       required this.isDarkMode,
-      required this.twitterUsername});
+      this.twitterUsername = ''});
 
   SettingsState copyWith({
     bool? isNotificationsEnabled,

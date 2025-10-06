@@ -195,16 +195,16 @@ class HiveStorageService implements StorageService {
     return null;
   }
 
-  Future<void> markChallengeCompleted(String challengeId) async {
+  Future<void> markChallengeCompleted(int challengeNumber) async {
     await _ensureInitialized();
     try {
-      await _settingsBox?.put('completed_challenge_$challengeId', 'true');
+      await _settingsBox?.put('completed_challenge_$challengeNumber', 'true');
     } catch (e) {
       print('Error marking challenge completed: $e');
     }
   }
 
-  Future<bool> isChallengeCompleted(String challengeId) async {
+  Future<bool> isChallengeCompleted(int challengeId) async {
     await _ensureInitialized();
     final completed = _settingsBox?.get('completed_challenge_$challengeId');
     return completed == 'true';

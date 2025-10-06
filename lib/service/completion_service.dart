@@ -9,19 +9,20 @@ class CompletionService {
   /// Reports a puzzle completion to the server
   /// Returns true if this was the first completion of the day
   Future<CompletionResult> reportCompletion({
-    required String challengeId,
-    required int challengeNumber,
+    required int challengeId,
     required int attempts,
     String? twitterUsername,
+    String? gridState,
   }) async {
     try {
       final callable = _functions.httpsCallable(_reportCompletionFunction);
-      final result = await callable.call({
+      final inputMap = {
         'challengeId': challengeId,
-        'challengeNumber': challengeNumber,
         'attempts': attempts,
-        'twitterUsername': twitterUsername,
-      });
+        'twitterUsername': twitterUsername ?? '',
+        'gridState': gridState ?? '',
+      };
+      final result = await callable.call(inputMap);
 
       final data = result.data as Map<String, dynamic>;
       return CompletionResult(

@@ -5,12 +5,14 @@ class DailyChallenge {
   final DateTime nextRun;
   final int number;
   final String word;
+  final bool solved;
 
   const DailyChallenge({
     required this.date,
     required this.nextRun,
     required this.number,
     required this.word,
+    required this.solved,
   });
 
   factory DailyChallenge.initialize() {
@@ -19,6 +21,7 @@ class DailyChallenge {
       nextRun: DateTime.now().add(const Duration(days: 1)),
       number: 0,
       word: '',
+      solved: false,
     );
   }
 
@@ -28,6 +31,7 @@ class DailyChallenge {
       nextRun: (data['nextRun'] as Timestamp).toDate(),
       number: data['number'] as int,
       word: data['word'] as String,
+      solved: data['solved'] as bool,
     );
   }
 
@@ -37,6 +41,7 @@ class DailyChallenge {
       'nextRun': nextRun.millisecondsSinceEpoch,
       'number': number,
       'word': word,
+      'solved': solved,
     };
   }
 
@@ -46,11 +51,9 @@ class DailyChallenge {
       nextRun: DateTime.fromMillisecondsSinceEpoch(json['nextRun'] as int),
       number: json['number'] as int,
       word: json['word'] as String,
+      solved: json['solved'] as bool,
     );
   }
-
-  // Helper method to get a unique identifier for this challenge
-  String get challengeId => 'challenge_${number}_${date.year}_${date.month}_${date.day}';
 
   @override
   String toString() {

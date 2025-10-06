@@ -57,41 +57,22 @@ npm run deploy        # Deploy to Firebase
 
 ### Twitter API Setup
 
-To enable Twitter functionality, configure these environment variables for Firebase Functions:
+To enable Twitter functionality, configure secrets for Firebase Functions:
 
 ```bash
 # Set Twitter API credentials
-firebase functions:config:set twitter.api_key="your_api_key"
-firebase functions:config:set twitter.api_secret="your_api_secret"
-firebase functions:config:set twitter.access_token="your_access_token"
-firebase functions:config:set twitter.access_token_secret="your_access_token_secret"
+firebase functions:secrets:set X_API_KEY
+firebase functions:secrets:set X_API_SECRET
+firebase functions:secrets:set X_ACCESS_TOKEN
+firebase functions:secrets:set X_ACCESS_TOKEN_SECRET
 ```
 
-**Required Twitter API permissions:**
-- Read and Write tweets
-- App-only authentication
+_Test posting a tweet_
 
-**Getting Twitter API credentials:**
-1. Apply for Twitter Developer account at https://developer.twitter.com/
-2. Create a new app in the Twitter Developer Portal
-3. Generate API keys and access tokens
-4. Set the credentials using the commands above
-
-## Code Quality
-
-This project uses:
-
-- **ESLint** with Google style guide for linting
-- **Prettier** for consistent code formatting
-- **TypeScript** for type safety
-- **Auto-formatting** on save (when using VS Code)
-
-### VS Code Setup
-
-The `.vscode/` directory contains:
-
-- `settings.json` - Auto-format on save configuration
-- `extensions.json` - Recommended extensions
+```bash
+firebase functions:shell
+firebase> testTweet({data: {challengeNumber: 123, attempts: 2, twitterUsername: 'testuser'}})
+```
 
 ### Pre-commit Checks
 

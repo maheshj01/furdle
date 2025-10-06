@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
 import {logger} from "firebase-functions";
-import {onCall} from "firebase-functions/https";
-import {onSchedule} from "firebase-functions/scheduler";
+import {onCall} from "firebase-functions/v2/https";
+import {onSchedule} from "firebase-functions/v2/scheduler";
 import {TwitterApi} from "twitter-api-v2";
 import {wordList} from "./word";
 
@@ -17,7 +17,6 @@ const getXClient = () => {
   const appSecret = process.env.X_API_SECRET;
   const accessToken = process.env.X_ACCESS_TOKEN;
   const accessSecret = process.env.X_ACCESS_TOKEN_SECRET;
-
   if (!appKey || !appSecret || !accessToken || !accessSecret) {
     throw new Error("Twitter API credentials not configured");
   }
@@ -94,15 +93,20 @@ async function sendNotificationToTopic(
 async function postFirstCompletionTweet(
   challengeNumber: number,
   attempts: number,
-  twitterUsername?: string
+  twitterUsername?: string,
+  gridState?: string
 ): Promise<void> {
   try {
     const xClient = getXClient();
 
-    let tweetText = `🎉 FIRST COMPLETION ALERT! 🧩\n\nFurdle Challenge #${challengeNumber} has been cracked in ${attempts} attempt${attempts === 1 ? "" : "s"}! `;
+    let tweetText = `Furdle Challenge #${challengeNumber}\nToday's word has been cracked in ${attempts} attempt${attempts === 1 ? "" : "s"}!`;
+
+    if (gridState && gridState.trim()) {
+      tweetText += `\n\n${gridState}`;
+    }
 
     if (twitterUsername && twitterUsername.trim()) {
-      tweetText += `Congratulations @${twitterUsername.replace("@", "")}! 🏆\n\n`;
+      tweetText += `\nCongratulations @${twitterUsername.replace("@", "")}! 🏆\n\n`;
     } else {
       tweetText += "Amazing work! 🏆\n\n";
     }
@@ -110,13 +114,24 @@ async function postFirstCompletionTweet(
     tweetText +=
       "Think you can beat that? Play now at https://furdle.web.app/\n\n#Furdle #WordPuzzle #FirstToSolve";
 
-    const tweet = await xClient.v2.tweet(tweetText);
+    // Try v2 first, fallback to v1.1 if needed
+    let tweet;
+    let tweetId;
+    try {
+      tweet = await xClient.v2.tweet(tweetText);
+      tweetId = tweet.data.id;
+      console.log("tweet published with v2 api", tweet);
+    } catch (v2Error) {
+      logger.warn("v2 tweet failed, trying v1.1:", v2Error);
+      tweet = await xClient.v1.tweet(tweetText);
+      tweetId = tweet.id_str || tweet.id;
+    }
 
     logger.info("Successfully posted first completion tweet:", {
       challengeNumber,
       attempts,
       twitterUsername,
-      tweetId: tweet.data.id,
+      tweetId,
     });
   } catch (error) {
     logger.error("Error posting first completion tweet:", error);
@@ -125,89 +140,105 @@ async function postFirstCompletionTweet(
 }
 
 // Callable function to report puzzle completion
-export const reportCompletion = onCall(async request => {
-  try {
-    const {challengeId, challengeNumber, attempts, twitterUsername} =
-      request.data;
+export const reportCompletion = onCall(
+  {
+    secrets: [
+      "X_API_KEY",
+      "X_API_SECRET",
+      "X_ACCESS_TOKEN",
+      "X_ACCESS_TOKEN_SECRET",
+    ],
+  },
+  async request => {
+    try {
+      const {challengeId, attempts, twitterUsername, gridState} = request.data;
 
-    if (!challengeId || !challengeNumber || !attempts) {
-      throw new Error("Missing required parameters");
-    }
+      if (!challengeId || !attempts) {
+        throw new Error("Missing required parameters");
+      }
 
-    const db = admin.firestore();
-    const completionRef = db.collection("completions").doc(challengeId);
+      const docId = `challenge_${challengeId}`;
 
-    // Use a transaction to check if this is the first completion
-    const result = await db.runTransaction(async transaction => {
-      const completionDoc = await transaction.get(completionRef);
+      const db = admin.firestore();
+      const completionRef = db.collection("completions").doc(docId);
 
-      if (!completionDoc.exists) {
-        // This is the first completion!
-        const completionData = {
+      // Use a transaction to check if this is the first completion
+      const result = await db.runTransaction(async transaction => {
+        const completionDoc = await transaction.get(completionRef);
+
+        if (!completionDoc.exists) {
+          // This is the first completion!
+          const completionData = {
+            challengeId,
+            firstCompletedAt: new Date(),
+            firstCompletionAttempts: attempts,
+            firstCompletionTwitterUsername: twitterUsername || null,
+            firstCompletionGridState: gridState || null,
+            totalCompletions: 1,
+          };
+
+          transaction.set(completionRef, completionData);
+          return {isFirst: true, totalCompletions: 1};
+        } else {
+          // Not the first, just increment the count
+          const currentData = completionDoc.data();
+          transaction.update(completionRef, {
+            totalCompletions: (currentData?.totalCompletions || 0) + 1,
+          });
+
+          const data = completionDoc.data();
+          return {
+            isFirst: false,
+            totalCompletions: (data?.totalCompletions || 0) + 1,
+          };
+        }
+      });
+      console.log(
+        `result after transaction for challenge ${challengeId}`,
+        result
+      );
+      if (result.isFirst) {
+        // Post the first completion tweet
+        await postFirstCompletionTweet(
           challengeId,
-          challengeNumber,
-          firstCompletedAt: admin.firestore.FieldValue.serverTimestamp(),
-          firstCompletionAttempts: attempts,
-          firstCompletionTwitterUsername: twitterUsername || null,
-          totalCompletions: 1,
-        };
+          attempts,
+          twitterUsername,
+          gridState
+        );
 
-        transaction.set(completionRef, completionData);
-        return {isFirst: true, totalCompletions: 1};
-      } else {
-        // Not the first, just increment the count
-        transaction.update(completionRef, {
-          totalCompletions: admin.firestore.FieldValue.increment(1),
+        logger.info("First completion recorded:", {
+          challengeId,
+          attempts,
+          twitterUsername,
+          gridState,
         });
 
-        const data = completionDoc.data();
         return {
-          isFirst: false,
-          totalCompletions: (data?.totalCompletions || 0) + 1,
+          success: true,
+          isFirstCompletion: true,
+          message:
+            "Congratulations! You're the first to complete this challenge!",
+        };
+      } else {
+        logger.info("Completion recorded:", {
+          challengeId,
+          totalCompletions: result.totalCompletions,
+          gridState,
+        });
+
+        return {
+          success: true,
+          isFirstCompletion: false,
+          totalCompletions: result.totalCompletions,
+          message: "Completion recorded successfully!",
         };
       }
-    });
-
-    if (result.isFirst) {
-      // Post the first completion tweet
-      await postFirstCompletionTweet(
-        challengeNumber,
-        attempts,
-        twitterUsername
-      );
-
-      logger.info("First completion recorded:", {
-        challengeId,
-        challengeNumber,
-        attempts,
-        twitterUsername,
-      });
-
-      return {
-        success: true,
-        isFirstCompletion: true,
-        message:
-          "Congratulations! You're the first to complete this challenge!",
-      };
-    } else {
-      logger.info("Completion recorded:", {
-        challengeId,
-        challengeNumber,
-        totalCompletions: result.totalCompletions,
-      });
-
-      return {
-        success: true,
-        isFirstCompletion: false,
-        totalCompletions: result.totalCompletions,
-        message: "Completion recorded successfully!",
-      };
+    } catch (error) {
+      logger.error("Error in reportCompletion:", error);
+      throw error;
     }
-  } catch (error) {
-    logger.error("Error in reportCompletion:", error);
-    throw error;
   }
-});
+);
 
 // Callable function to get completion stats for a challenge
 export const getCompletionStats = onCall(async request => {
@@ -219,7 +250,9 @@ export const getCompletionStats = onCall(async request => {
     }
 
     const db = admin.firestore();
-    const completionRef = db.collection("completions").doc(challengeId);
+    const completionRef = db
+      .collection("completions")
+      .doc(challengeId.toString());
     const completionDoc = await completionRef.get();
 
     if (!completionDoc.exists) {
@@ -244,41 +277,51 @@ export const getCompletionStats = onCall(async request => {
 });
 
 // Test function to manually trigger tweet posting
-export const testTweet = onCall(async request => {
-  try {
-    const {challengeNumber, attempts, twitterUsername} = request.data;
+export const testTweet = onCall(
+  {
+    secrets: [
+      "X_API_KEY",
+      "X_API_SECRET",
+      "X_ACCESS_TOKEN",
+      "X_ACCESS_TOKEN_SECRET",
+    ],
+  },
+  async request => {
+    try {
+      const {challengeNumber, attempts, twitterUsername} = request.data;
 
-    // Default values for testing
-    const testChallengeNumber = challengeNumber || 999;
-    const testAttempts = attempts || 3;
-    const testTwitterUsername = twitterUsername || "testuser";
+      // Default values for testing
+      const testChallengeNumber = challengeNumber || 999;
+      const testAttempts = attempts || 3;
+      const testTwitterUsername = twitterUsername || "testuser";
 
-    logger.info("Testing tweet function with:", {
-      challengeNumber: testChallengeNumber,
-      attempts: testAttempts,
-      twitterUsername: testTwitterUsername,
-    });
-
-    await postFirstCompletionTweet(
-      testChallengeNumber,
-      testAttempts,
-      testTwitterUsername
-    );
-
-    return {
-      success: true,
-      message: "Test tweet posted successfully!",
-      data: {
+      logger.info("Testing tweet function with:", {
         challengeNumber: testChallengeNumber,
         attempts: testAttempts,
         twitterUsername: testTwitterUsername,
-      },
-    };
-  } catch (error) {
-    logger.error("Error in testTweet:", error);
-    throw error;
+      });
+
+      await postFirstCompletionTweet(
+        testChallengeNumber,
+        testAttempts,
+        testTwitterUsername
+      );
+
+      return {
+        success: true,
+        message: "Test tweet posted successfully!",
+        data: {
+          challengeNumber: testChallengeNumber,
+          attempts: testAttempts,
+          twitterUsername: testTwitterUsername,
+        },
+      };
+    } catch (error) {
+      logger.error("Error in testTweet:", error);
+      throw error;
+    }
   }
-});
+);
 
 // Runs every 24 hours UTC
 export const publishChallenge = onSchedule(
@@ -286,6 +329,12 @@ export const publishChallenge = onSchedule(
     // runs every day at midnight UTC
     schedule: "0 0 * * *",
     timeZone: "UTC",
+    secrets: [
+      "X_API_KEY",
+      "X_API_SECRET",
+      "X_ACCESS_TOKEN",
+      "X_ACCESS_TOKEN_SECRET",
+    ],
   },
   async event => {
     try {

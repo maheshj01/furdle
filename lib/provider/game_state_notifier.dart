@@ -5,10 +5,11 @@ import 'package:furdle/models/daily_challenge.dart';
 import 'package:furdle/provider/hive_storage_provider.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/provider/settings_notifier.dart';
+import 'package:furdle/service/completion_service.dart';
 import 'package:furdle/service/firebase_challenge_service.dart';
 import 'package:furdle/service/hive_storage_service.dart';
-import 'package:furdle/service/completion_service.dart';
 import 'package:furdle/state/game_state.dart';
+import 'package:furdle/utils/utility.dart';
 import 'package:furdle/utils/word.dart';
 
 class GameStateNotifier extends StateNotifier<GameState> {
@@ -80,7 +81,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     // First, try to get the daily challenge from Firebase
     final dailyChallenge = await challengeService.getCurrentChallenge();
     // Check if user has already completed this challenge
-    final hasCompleted = await storageService.isChallengeCompleted(dailyChallenge!.challengeId);
+    final hasCompleted = await storageService.isChallengeCompleted(dailyChallenge!.number);
     if (!hasCompleted && challengeService.isChallengeValid(dailyChallenge)) {
       // Check if we have an ongoing game for this challenge
       final savedChallenge = await storageService.getCurrentChallenge();
@@ -208,15 +209,17 @@ class GameStateNotifier extends StateNotifier<GameState> {
     } else if (containsWord(currentWord, 0, furdleList.length - 1)) {
       updateCells(currentWord);
       final submittedWordsList = [...state.submittedWords, currentWord];
+      print('target word: ${state.targetWord}, current word: $currentWord');
       if (currentWord == state.targetWord) {
         state = state.copyWith(
             status: GameStatus.win, submittedWords: submittedWordsList, endTime: DateTime.now());
 
         // Mark challenge as completed if this is a daily challenge
+        // TODO: Only report completion if this is a daily challenge
         final savedChallenge = await storageService.getCurrentChallenge();
         if (savedChallenge != null) {
-          await storageService.markChallengeCompleted(savedChallenge.challengeId);
-          
+          await storageService.markChallengeCompleted(savedChallenge.number);
+
           // Report completion to the server for first completion tracking
           _reportCompletionToServer(savedChallenge, submittedWordsList.length);
         }
@@ -338,15 +341,22 @@ class GameStateNotifier extends StateNotifier<GameState> {
     try {
       // Get Twitter username from settings
       final settings = ref.read(settingsNotifierProvider);
-      final twitterUsername = settings.twitterUsername.trim().isEmpty ? null : settings.twitterUsername.trim();
-      
+      String twitterUsername = '';
+
+      if (settings.twitterUsername != null) {
+        twitterUsername = settings.twitterUsername!.trim();
+      }
+      final gridState = Utility.generateFurdleGrid(state);
+      print('gridState when reporting completion: $gridState, username: $twitterUsername');
       // This should be async and not block the game completion
-      completionService.reportCompletion(
-        challengeId: challenge.challengeId,
-        challengeNumber: challenge.number,
+      completionService
+          .reportCompletion(
+        challengeId: challenge.number,
         attempts: attempts,
         twitterUsername: twitterUsername,
-      ).then((result) {
+        gridState: gridState,
+      )
+          .then((result) {
         if (result.isFirstCompletion) {
           print('🎉 Congratulations! You were the first to complete this challenge!');
         }

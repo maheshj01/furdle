@@ -30,6 +30,12 @@ class FirebaseChallengeService {
     }
   }
 
+  Future<void> markChallengeSolved(DailyChallenge challenge) async {
+    await _firestore.collection(_collectionName).doc(_documentName).update({
+      'solved': true,
+    });
+  }
+
   /// Checks if the current challenge is still valid (not expired)
   bool isChallengeValid(DailyChallenge challenge) {
     final now = DateTime.now();
