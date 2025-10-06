@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,7 +54,11 @@ class _FurdleKeyboardState extends ConsumerState<FurdleKeyboard> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      FocusScope.of(context).requestFocus(_focusNode);
+      // If we are using desktop, request focus on the keyboard
+      final screenSize = MediaQuery.of(context).size;
+      if (!(Platform.isAndroid || Platform.isIOS) && (screenSize.width > 600)) {
+        FocusScope.of(context).requestFocus(_focusNode);
+      }
     });
     final keyboardNotifier = ref.read(keyboardProvider.notifier);
 

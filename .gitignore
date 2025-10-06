@@ -104,3 +104,4 @@ ios/Flutter/Release.xcconfig
 
 functions/node_modules
 lib/firebase_options.dart
+functions/.env

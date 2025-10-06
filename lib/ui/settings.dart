@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:furdle/ui/notification_settings.dart';
 import 'package:furdle/ui/theme_settings.dart';
+import 'package:furdle/ui/twitter_settings.dart';
 
 /// Simple settings page that includes notification settings
 class SettingsPage extends StatelessWidget {
@@ -17,15 +18,19 @@ class SettingsPage extends StatelessWidget {
       body: Container(
         alignment: Alignment.center,
         padding: EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            SizedBox(height: 16),
-            ThemeSettingsWidget(),
-            // SoundSettingsWidget(),
-            NotificationSettingsWidget(),
-            // Add more settings widgets here as needed
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: const [
+              SizedBox(height: 16),
+              ThemeSettingsWidget(),
+              // SoundSettingsWidget(),
+              NotificationSettingsWidget(),
+              TwitterSettingsWidget(),
+              SizedBox(height: 50),
+              // Add more settings widgets here as needed
+            ],
+          ),
         ),
       ),
     );

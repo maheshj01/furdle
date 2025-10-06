@@ -13,6 +13,26 @@ This directory contains Firebase Cloud Functions for the Furdle word puzzle game
   - Sends push notifications to all subscribed users via FCM topics
   - Removes used words from the word list
   - Tracks challenge numbers and timing
+  - Initializes completion tracking for the new challenge
+
+### reportCompletion
+
+- **Trigger**: HTTPS Callable
+- **Purpose**: Reports puzzle completion and handles first completion detection
+- **Features**:
+  - Tracks first completion of each daily challenge
+  - Posts celebratory tweet when someone is first to solve
+  - Optionally mentions user's Twitter handle
+  - Maintains completion statistics
+
+### getCompletionStats
+
+- **Trigger**: HTTPS Callable
+- **Purpose**: Retrieves completion statistics for a challenge
+- **Features**:
+  - Returns total completion count
+  - Indicates if first completion has occurred
+  - Provides first completion attempt count
 
 ## Development
 
@@ -33,21 +53,26 @@ npm run serve         # Start Firebase emulator
 npm run deploy        # Deploy to Firebase
 ```
 
-## Code Quality
+## Environment Configuration
 
-This project uses:
+### Twitter API Setup
 
-- **ESLint** with Google style guide for linting
-- **Prettier** for consistent code formatting
-- **TypeScript** for type safety
-- **Auto-formatting** on save (when using VS Code)
+To enable Twitter functionality, configure secrets for Firebase Functions:
 
-### VS Code Setup
+```bash
+# Set Twitter API credentials
+firebase functions:secrets:set X_API_KEY
+firebase functions:secrets:set X_API_SECRET
+firebase functions:secrets:set X_ACCESS_TOKEN
+firebase functions:secrets:set X_ACCESS_TOKEN_SECRET
+```
 
-The `.vscode/` directory contains:
+_Test posting a tweet_
 
-- `settings.json` - Auto-format on save configuration
-- `extensions.json` - Recommended extensions
+```bash
+firebase functions:shell
+firebase> testTweet({data: {challengeNumber: 123, attempts: 2, twitterUsername: 'testuser'}})
+```
 
 ### Pre-commit Checks
 

@@ -24,6 +24,9 @@
     "functions": {
       "port": 5101
     },
+    "firestore": {
+      "port": 8080
+    },
     "hosting": {
       "port": 5100
     },

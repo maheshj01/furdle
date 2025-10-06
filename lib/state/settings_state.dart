@@ -2,21 +2,25 @@ class SettingsState {
   final bool isNotificationsEnabled;
   final bool isSoundEnabled;
   final bool isDarkMode;
+  final String twitterUsername;
 
   SettingsState(
       {required this.isNotificationsEnabled,
       required this.isSoundEnabled,
-      required this.isDarkMode});
+      required this.isDarkMode,
+      this.twitterUsername = ''});
 
   SettingsState copyWith({
     bool? isNotificationsEnabled,
     bool? isSoundEnabled,
     bool? isDarkMode,
+    String? twitterUsername,
   }) {
     return SettingsState(
       isNotificationsEnabled: isNotificationsEnabled ?? this.isNotificationsEnabled,
       isSoundEnabled: isSoundEnabled ?? this.isSoundEnabled,
       isDarkMode: isDarkMode ?? this.isDarkMode,
+      twitterUsername: twitterUsername ?? this.twitterUsername,
     );
   }
 
@@ -25,6 +29,7 @@ class SettingsState {
       isNotificationsEnabled: true,
       isSoundEnabled: true,
       isDarkMode: false,
+      twitterUsername: '',
     );
   }
 
@@ -33,6 +38,7 @@ class SettingsState {
       isNotificationsEnabled: json['isNotificationsEnabled'],
       isSoundEnabled: json['isSoundEnabled'],
       isDarkMode: json['isDarkMode'],
+      twitterUsername: json['twitterUsername'] ?? '',
     );
   }
 
@@ -41,6 +47,7 @@ class SettingsState {
       'isNotificationsEnabled': isNotificationsEnabled,
       'isSoundEnabled': isSoundEnabled,
       'isDarkMode': isDarkMode,
+      'twitterUsername': twitterUsername,
     };
   }
 }
