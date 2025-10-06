@@ -1,6 +1,7 @@
 ### v0.4.2+16 (Unpublished)
 
 - Make Keyboard taps more accurate
+- Add Game Stats Page
 
 ### v0.4.2+16 Sep 27, 2025
 
