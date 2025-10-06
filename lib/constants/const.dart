@@ -19,6 +19,9 @@ class Constants {
   static const String appSettingsKey = 'app_settings';
   static const String appGameStateKey = 'app_game_state';
 
+  static const String currentChallenge = 'current_challenge';
+  static const String completedStatesKey = 'completed_states';
+
   static final String description = """
   Your goal is to guess a 5 letter word in 6 tries.
 

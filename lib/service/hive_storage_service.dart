@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:furdle/constants/const.dart';
 import 'package:furdle/models/daily_challenge.dart';
 import 'package:furdle/service/storage_service.dart';
 import 'package:furdle/state/game_state.dart' show GameState;
@@ -174,7 +175,7 @@ class HiveStorageService implements StorageService {
     await _ensureInitialized();
     try {
       final jsonString = jsonEncode(challenge.toJson());
-      await _settingsBox?.put('current_challenge', jsonString);
+      await _settingsBox?.put(Constants.currentChallenge, jsonString);
     } catch (e) {
       print('Error saving current challenge: $e');
     }
@@ -182,7 +183,7 @@ class HiveStorageService implements StorageService {
 
   Future<DailyChallenge?> getCurrentChallenge() async {
     await _ensureInitialized();
-    final jsonString = _settingsBox?.get('current_challenge');
+    final jsonString = _settingsBox?.get(Constants.currentChallenge);
     if (jsonString != null) {
       try {
         final json = jsonDecode(jsonString);

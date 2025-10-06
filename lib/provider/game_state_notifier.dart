@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:furdle/models/daily_challenge.dart';
+import 'package:furdle/provider/games_provider.dart';
 import 'package:furdle/provider/hive_storage_provider.dart';
 import 'package:furdle/provider/keyboard_notifier.dart';
 import 'package:furdle/service/firebase_challenge_service.dart';
@@ -13,6 +15,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
   final KeyboardNotifier keyboardNotifier;
   final HiveStorageService storageService;
   final FirebaseChallengeService challengeService;
+  final GamesProvider gamesProvider;
   // Count occurrences of each letter in target word
   final targetLetterCounts = <String, int>{};
 
@@ -20,6 +23,7 @@ class GameStateNotifier extends StateNotifier<GameState> {
     required this.keyboardNotifier,
     required this.storageService,
     required this.challengeService,
+    required this.gamesProvider,
   }) : super(GameState.instance());
 
   Future<void> _saveGameState() async {
@@ -197,6 +201,9 @@ class GameStateNotifier extends StateNotifier<GameState> {
 
   Future<SubmitWordResult> submitWord() async {
     final currentWord = getCurrentWord();
+    if (kDebugMode) {
+      print('Current word: $currentWord == Target word: ${state.targetWord}');
+    }
     if (currentWord.length != state.size.width) {
       return SubmitWordResult.incomplete;
     } else if (containsWord(currentWord, 0, furdleList.length - 1)) {
@@ -207,9 +214,12 @@ class GameStateNotifier extends StateNotifier<GameState> {
             status: GameStatus.win, submittedWords: submittedWordsList, endTime: DateTime.now());
 
         // Mark challenge as completed if this is a daily challenge
-        final savedChallenge = await storageService.getCurrentChallenge();
-        if (savedChallenge != null) {
-          await storageService.markChallengeCompleted(savedChallenge.challengeId);
+        final currentDailyChallenge = await storageService.getCurrentChallenge();
+        if (currentDailyChallenge != null) {
+          await storageService.markChallengeCompleted(currentDailyChallenge.challengeId);
+        }
+        if (state.gameType == GameType.daily) {
+          await gamesProvider.saveCompletedGame(state);
         }
 
         _saveGameState();
@@ -442,9 +452,10 @@ enum CellType {
 final gameStateProvider = StateNotifierProvider<GameStateNotifier, GameState>((ref) {
   final keyboardNotifier = ref.watch(keyboardProvider.notifier);
   final storageService = ref.watch(hiveStorageServiceProvider);
+  final gamesProviderInstance = ref.watch(gamesProvider.notifier);
   return GameStateNotifier(
-    keyboardNotifier: keyboardNotifier,
-    storageService: storageService,
-    challengeService: FirebaseChallengeService(),
-  );
+      keyboardNotifier: keyboardNotifier,
+      storageService: storageService,
+      challengeService: FirebaseChallengeService(),
+      gamesProvider: gamesProviderInstance);
 });

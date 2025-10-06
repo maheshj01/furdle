@@ -3,6 +3,7 @@ import 'package:furdle/constants/strings.dart';
 import 'package:furdle/ui/help.dart';
 import 'package:furdle/ui/home.dart';
 import 'package:furdle/ui/settings.dart';
+import 'package:furdle/ui/streak.dart';
 import 'package:furdle/ui/webview.dart';
 import 'package:go_router/go_router.dart';
 
@@ -49,6 +50,13 @@ final router = GoRouter(
               pageBuilder: (context, state) => MaterialPage<void>(
                     key: state.pageKey,
                     child: SettingsPage(),
+                  )),
+          GoRoute(
+              path: '${StreakPage.path}',
+              name: 'streak',
+              pageBuilder: (context, state) => MaterialPage<void>(
+                    key: state.pageKey,
+                    child: StreakPage(),
                   )),
           GoRoute(
               path: '${WebViewPage.routeName}',

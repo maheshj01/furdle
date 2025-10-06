@@ -13,6 +13,7 @@ import 'package:furdle/ui/grid_board.dart';
 import 'package:furdle/ui/help.dart';
 import 'package:furdle/ui/keyboard.dart';
 import 'package:furdle/ui/settings.dart';
+import 'package:furdle/ui/streak.dart';
 import 'package:furdle/ui/title_bar.dart';
 import 'package:furdle/utils/extensions.dart';
 import 'package:furdle/utils/utility.dart';
@@ -319,6 +320,12 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                       },
                       icon: const Icon(Icons.help)),
                   actions: [
+                    //leaderboard
+                    IconButton(
+                        onPressed: () {
+                          context.push(StreakPage.path);
+                        },
+                        icon: const Icon(Icons.leaderboard)),
                     IconButton(
                         onPressed: () {
                           context.push(SettingsPage.path);

@@ -31,6 +31,19 @@ class Utility {
     return generatedFurdle;
   }
 
+  static String generateGridFromState(GameState state) {
+    String generatedFurdle = '';
+    for (int i = 0; i < state.size.height; i++) {
+      String currentRow = '';
+      for (int j = 0; j < state.size.width; j++) {
+        currentRow += stateToGrid(state.cells[i][j].cellType);
+      }
+      currentRow += '\n';
+      generatedFurdle += currentRow;
+    }
+    return generatedFurdle;
+  }
+
   static String stateToGrid(CellType cell) {
     switch (cell) {
       case CellType.empty:
