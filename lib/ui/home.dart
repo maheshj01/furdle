@@ -153,9 +153,6 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
             gameStateNotifier.addLetter(character);
           }
       }
-
-      // print(
-      //     "key pressed: $character, event: ${event.name}  physicalKey: $physicalKey");
     }
   }
 

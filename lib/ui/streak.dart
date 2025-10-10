@@ -84,15 +84,6 @@ class GameTile extends StatelessWidget {
     }
   }
 
-  String _getGameTypeText(GameType gameType) {
-    switch (gameType) {
-      case GameType.daily:
-        return 'Daily Challenge';
-      case GameType.random:
-        return 'Random Game';
-    }
-  }
-
   Widget _buildStatRow(IconData icon, String label, String value, {Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -128,13 +119,6 @@ class GameTile extends StatelessWidget {
     }
     return Column(
       children: [
-        // Game type
-        _buildStatRow(
-          _getGameTypeIcon(game.gameType),
-          'Type',
-          _getGameTypeText(game.gameType),
-        ),
-
         // Attempts
         if (game.submittedWords.isNotEmpty)
           _buildStatRow(
@@ -143,13 +127,13 @@ class GameTile extends StatelessWidget {
             '${game.submittedWords.length}/${game.size.height}',
           ),
 
-        // Difficulty
-        if (game.difficulty != null)
-          _buildStatRow(
-            Icons.speed,
-            'Difficulty',
-            game.difficulty!.name.toUpperCase(),
-          ),
+        // // Difficulty
+        // if (game.difficulty != null)
+        //   _buildStatRow(
+        //     Icons.speed,
+        //     'Difficulty',
+        //     game.difficulty!.name.toUpperCase(),
+        //   ),
 
         // Hints used
         if (game.hintsUsed > 0)
