@@ -127,7 +127,8 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   void handleKeyPress(String character, KeyEventType event, bool physicalKey) {
     final gameStateNotifier = ref.read(gameStateProvider.notifier);
     final gameState = ref.read(gameStateProvider);
-    if (gameState.status == GameStatus.win || gameState.status == GameStatus.lose) {
+    if ((gameState.status == GameStatus.win || gameState.status == GameStatus.lose) &&
+        character.isLetter) {
       _handleGameOver(gameState);
       return;
     }
