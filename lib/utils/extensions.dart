@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:furdle/constants/const.dart';
+import 'package:intl/intl.dart';
 
 class _DeviceSize {
   final double maxWidth;
@@ -98,5 +100,78 @@ extension StringExtension on String {
             this.codeUnitAt(0) >= 65 &&
             this.codeUnitAt(0) <= 90 ||
         this.codeUnitAt(0) >= 97 && this.codeUnitAt(0) <= 122;
+  }
+}
+
+extension DurationExtension on Duration {
+  /// format the duration like this:
+  /// 1h 30m 0s
+  String formatDuration() {
+    if (this == Duration.zero) return 'N/A';
+
+    final hours = inHours;
+    final minutes = inMinutes.remainder(60);
+    final seconds = inSeconds.remainder(60);
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m ${seconds}s';
+    } else if (minutes > 0) {
+      return '${minutes}m ${seconds}s';
+    } else {
+      return '${seconds}s';
+    }
+  }
+}
+
+extension DateHelper on DateTime {
+  /// format the date in this format:
+  /// October 09, 2025
+  String formatDate() {
+    final now = DateTime.now();
+    final differenceInDays = getDifferenceInDaysWithNow();
+
+    if (isSameDate(now)) {
+      return 'Today';
+    } else if (differenceInDays == 1) {
+      return 'Yesterday';
+    } else {
+      final formatter = DateFormat(Constants.dateFormatter);
+      return formatter.format(this);
+    }
+  }
+
+  /// format the date time like this:
+  /// October 09, 2025 12:00 PM
+  String formatDateTime() {
+    final formatter = DateFormat(Constants.dateTimeFormatter2);
+    return formatter.format(this);
+  }
+
+  bool isSameDate(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
+  }
+
+  int getDifferenceInDaysWithNow() {
+    final now = DateTime.now();
+    return now.difference(this).inDays;
+  }
+
+  String standardTime() {
+    final formatter = DateFormat(Constants.timeFormatter);
+    return formatter.format(this);
+  }
+
+  String standardDate() {
+    final formatter = DateFormat(Constants.dateFormatter);
+    return formatter.format(this);
+  }
+
+  String standardDateTime() {
+    final formatter = DateFormat(Constants.dateTimeFormatter);
+    return formatter.format(this);
+  }
+
+  int daysInAMonth() {
+    return DateUtils.getDaysInMonth(year, month);
   }
 }
