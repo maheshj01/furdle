@@ -37,6 +37,14 @@ class GamesProvider extends AsyncNotifier<List<GameState>> {
       return [];
     }
     final List<dynamic> jsonArray = jsonDecode(completedStates as String);
+    // exclude inprogress games
+    // final filteredJsonArray = jsonArray
+    //     .where((json) => GameStatus.values[json['status'] as int] != GameStatus.inprogress)
+    //     .toList();
+
+    // print('filteredJsonArray: $filteredJsonArray');
+    // print("value: ${GameStatus.values}");
+    // return filteredJsonArray.map((json) => GameState.fromJson(json)).toList();
     return jsonArray.map((json) => GameState.fromJson(json)).toList();
   }
 

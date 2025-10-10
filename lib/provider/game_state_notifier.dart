@@ -228,6 +228,12 @@ class GameStateNotifier extends StateNotifier<GameState> {
         GameStatus status = GameStatus.inprogress;
         if (state.row == state.size.height - 1) {
           status = GameStatus.lose;
+          final updatedState = state.copyWith(
+              row: state.row + 1, column: 0, submittedWords: submittedWordsList, status: status);
+          // if (state.gameType == GameType.daily && state.status == GameStatus.lose) {
+
+          await gamesProvider.saveCompletedGame(updatedState);
+          // }
         }
         state = state.copyWith(
             row: state.row + 1, column: 0, submittedWords: submittedWordsList, status: status);

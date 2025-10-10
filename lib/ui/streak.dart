@@ -25,16 +25,19 @@ class _StreakPageState extends ConsumerState<StreakPage> {
         title: Text('All Games'),
       ),
       body: allGames.when(
-        data: (games) => Container(
-          alignment: Alignment.center,
-          child: SizedBox(
-            width: isDesktop ? 600 : screenSize.width,
-            child: ListView.builder(
-              itemCount: games.length,
-              itemBuilder: (context, index) => GameTile(game: games[index]),
+        data: (games) {
+          final reversedGames = games.reversed.toList();
+          return Container(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: isDesktop ? 600 : screenSize.width,
+              child: ListView.builder(
+                itemCount: reversedGames.length,
+                itemBuilder: (context, index) => GameTile(game: reversedGames[index]),
+              ),
             ),
-          ),
-        ),
+          );
+        },
         error: (error, stackTrace) => Text('Error: $error'),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
