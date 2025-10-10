@@ -20,9 +20,6 @@ class GameState {
   /// The target word/puzzle to solve
   final String targetWord;
 
-  /// Current word being typed (for validation)
-  final String currentWord;
-
   /// List of all words submitted so far
   final List<String> submittedWords;
 
@@ -31,12 +28,6 @@ class GameState {
 
   /// Game difficulty level
   final Difficulty? difficulty;
-
-  /// Whether the current word is valid
-  final bool isCurrentWordValid;
-
-  /// Last submitted word result
-  final SubmitWordResult? lastSubmitResult;
 
   /// Game start time
   final DateTime? startTime;
@@ -60,12 +51,9 @@ class GameState {
     required this.column,
     required this.status,
     required this.targetWord,
-    this.currentWord = '',
     this.submittedWords = const [],
     required this.cells,
     this.difficulty = Difficulty.medium,
-    this.isCurrentWordValid = false,
-    this.lastSubmitResult,
     this.startTime,
     this.endTime,
     this.hintsUsed = 0,
@@ -100,12 +88,9 @@ class GameState {
       targetWord: targetWord ?? this.targetWord,
       cells: cells ?? this.cells,
       difficulty: difficulty ?? this.difficulty,
-      isCurrentWordValid: isCurrentWordValid ?? this.isCurrentWordValid,
-      lastSubmitResult: lastSubmitResult,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       hintsUsed: hintsUsed ?? this.hintsUsed,
-      currentWord: currentWord ?? this.currentWord,
       submittedWords: submittedWords ?? this.submittedWords,
       size: size ?? this.size,
       nextGameDate: nextGameDate ?? this.nextGameDate,
@@ -123,8 +108,6 @@ class GameState {
       targetWord: '',
       cells: defaultGrid(),
       difficulty: Difficulty.medium,
-      isCurrentWordValid: false,
-      lastSubmitResult: null,
       startTime: null,
       endTime: null,
       hintsUsed: 0,
@@ -144,7 +127,6 @@ class GameState {
   bool get isGameOver => status == GameStatus.win || status == GameStatus.lose;
   bool get isGameWon => status == GameStatus.win;
   bool get isGameLost => status == GameStatus.lose;
-  bool get canSubmit => currentWord.length == size.width && isCurrentWordValid;
 
   // JSON serialization
   Map<String, dynamic> toJson() {
@@ -156,12 +138,9 @@ class GameState {
       'column': column,
       'status': status.index,
       'targetWord': targetWord,
-      'currentWord': currentWord,
       'submittedWords': submittedWords,
       'cells': cells.map((row) => row.map((cell) => cell.toJson()).toList()).toList(),
       'difficulty': difficulty?.index,
-      'isCurrentWordValid': isCurrentWordValid,
-      'lastSubmitResult': lastSubmitResult?.index,
       'startTime': startTime?.millisecondsSinceEpoch,
       'endTime': endTime?.millisecondsSinceEpoch,
       'hintsUsed': hintsUsed,
@@ -183,7 +162,6 @@ class GameState {
       gameType: GameType.values[json['gameType'] as int],
       status: GameStatus.values[json['status'] as int],
       targetWord: json['targetWord'] as String,
-      currentWord: json['currentWord'] as String? ?? '',
       submittedWords: List<String>.from(json['submittedWords'] as List? ?? []),
       cells: (json['cells'] as List)
           .map((row) => (row as List)
@@ -191,10 +169,6 @@ class GameState {
               .toList())
           .toList(),
       difficulty: json['difficulty'] != null ? Difficulty.values[json['difficulty'] as int] : null,
-      isCurrentWordValid: json['isCurrentWordValid'] as bool? ?? false,
-      lastSubmitResult: json['lastSubmitResult'] != null
-          ? SubmitWordResult.values[json['lastSubmitResult'] as int]
-          : null,
       startTime: json['startTime'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['startTime'] as int)
           : null,

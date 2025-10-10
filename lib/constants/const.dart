@@ -6,8 +6,10 @@ class Constants {
   static const String appVersion = '0.3.9+13';
 
   static const String dateFormatter = 'MMM dd, y';
+
   /// October 09, 2025 12:00 PM
   static const String dateTimeFormatter = 'MMMM dd, y hh:mm a';
+
   ///
   /// Oct 09, 2025 12:00 PM
   static const String dateTimeFormatter2 = 'MMM dd, y hh:mm a';
