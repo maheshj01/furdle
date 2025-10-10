@@ -61,7 +61,7 @@ shorebird_release_ios: update_submodules generate
 shorebird_release: shorebird_release_android shorebird_release_ios
 
 shorebird_patch_android:
-	shorebird patch android --flutter-version=$(FLUTTER_VERSION)
+	shorebird patch android
 
 shorebird_patch_ios:
 	shorebird patch ios --flutter-version=$(FLUTTER_VERSION)
