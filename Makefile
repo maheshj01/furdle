@@ -63,7 +63,7 @@ shorebird_release: shorebird_release_android shorebird_release_ios
 shorebird_patch_android:
 	shorebird patch android
 
-shorebird_patch_ios:
+shorebird_patch_ios:ee
 	shorebird patch ios --flutter-version=$(FLUTTER_VERSION)
 
 shorebird_patch: shorebird_patch_android shorebird_patch_ios

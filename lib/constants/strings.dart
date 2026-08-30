@@ -14,7 +14,6 @@ final String kDeviceIdKey = 'kDeviceIdKey';
 const String kDifficultyKey = 'kDifficultyKey';
 const String kGameState = 'kGameState';
 
-
 const String copiedToClipBoard = 'Score copied to clipboard';
 const String gameAlreadyPlayed = 'You have already played the puzzle';
 const String furdleCracked = 'You cracked the Furdle of the Day!\n\nNext Furdle in';
