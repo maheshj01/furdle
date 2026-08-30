@@ -38,7 +38,7 @@ update_version:
 	@echo "  - lib/constants/const.dart"
 
 # make release VERSION=3.36.8+360636
-release: $(if $(VERSION),update_version,) release_ios release_android
+release: $(if $(VERSION),update_version,) release_android
 
 release_ios:
 	$(FLUTTER) build ipa
