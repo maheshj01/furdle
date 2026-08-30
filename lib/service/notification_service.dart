@@ -42,11 +42,7 @@ class NotificationService {
       playSound: true,
       enableVibration: true,
     ),
-    iOS: DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    ),
+    iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentSound: true),
   );
 
   // When a notification is sent with this action
@@ -104,7 +100,8 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
-      permissionGranted = settings.authorizationStatus == AuthorizationStatus.authorized ||
+      permissionGranted =
+          settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional;
       print('iOS notification permission status: ${settings.authorizationStatus}');
     }
@@ -235,8 +232,9 @@ class NotificationService {
     _onMessageSubscription = FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
     // Handle messages when app is in background but not terminated
-    _onMessageOpenedAppSubscription =
-        FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
+    _onMessageOpenedAppSubscription = FirebaseMessaging.onMessageOpenedApp.listen(
+      _handleMessageOpenedApp,
+    );
   }
 
   /// Handle messages when app is in foreground
@@ -288,10 +286,7 @@ class NotificationService {
       final Uri playStoreUri = Uri.parse(playStoreUrl);
 
       if (await canLaunchUrl(playStoreUri)) {
-        await launchUrl(
-          playStoreUri,
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(playStoreUri, mode: LaunchMode.externalApplication);
       } else {
         print('❌ Could not launch Play Store URL: $playStoreUrl');
       }
@@ -378,10 +373,7 @@ class NotificationService {
       await _showLocalNotification(
         RemoteMessage(
           messageId: 'update_${DateTime.now().millisecondsSinceEpoch}',
-          notification: RemoteNotification(
-            title: title,
-            body: body,
-          ),
+          notification: RemoteNotification(title: title, body: body),
           data: {'action': 'app_update'},
         ),
       );
@@ -453,10 +445,7 @@ class NotificationService {
       await _showLocalNotification(
         RemoteMessage(
           messageId: 'manual_update_${DateTime.now().millisecondsSinceEpoch}',
-          notification: RemoteNotification(
-            title: title,
-            body: body,
-          ),
+          notification: RemoteNotification(title: title, body: body),
           data: {
             'action': 'app_update',
             'version': version,
