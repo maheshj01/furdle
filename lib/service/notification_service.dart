@@ -100,8 +100,7 @@ class NotificationService {
         provisional: false,
         sound: true,
       );
-      permissionGranted =
-          settings.authorizationStatus == AuthorizationStatus.authorized ||
+      permissionGranted = settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional;
       print('iOS notification permission status: ${settings.authorizationStatus}');
     }
