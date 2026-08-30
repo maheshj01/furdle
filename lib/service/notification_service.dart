@@ -24,6 +24,31 @@ class NotificationService {
   // Key to store subscription status in SharedPreferences
   static const String _subscriptionStatusKey = 'fcm_topic_subscribed';
 
+  // Fixed id for the "notifications enabled" confirmation ping, so toggling
+  // the setting replaces the previous confirmation rather than stacking them.
+  static const int _enabledConfirmationId = 1001;
+
+  // Shared presentation for every local notification (same Android channel and
+  // iOS options), reused by the challenge alerts and the enable confirmation.
+  static const NotificationDetails _channelSpecifics = NotificationDetails(
+    android: AndroidNotificationDetails(
+      'furdle_notifications',
+      'Furdle Notifications',
+      channelDescription: 'Notifications for new Furdle challenges',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_notification',
+      color: Color(0xFF6200EE),
+      playSound: true,
+      enableVibration: true,
+    ),
+    iOS: DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    ),
+  );
+
   // When a notification is sent with this action
   // {action: app_update}: This will redirect to the Play Store
   static const String kAppUpdateAction = 'app_update';
@@ -241,34 +266,11 @@ class NotificationService {
 
   /// Show local notification
   Future<void> _showLocalNotification(RemoteMessage message) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'furdle_notifications',
-      'Furdle Notifications',
-      channelDescription: 'Notifications for new Furdle challenges',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_notification',
-      color: Color(0xFF6200EE),
-      playSound: true,
-      enableVibration: true,
-    );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
     await _localNotifications.show(
       message.hashCode,
       message.notification?.title ?? 'Furdle',
       message.notification?.body ?? 'New challenge available!',
-      platformChannelSpecifics,
+      _channelSpecifics,
       payload: json.encode(message.data),
     );
   }
@@ -405,9 +407,26 @@ class NotificationService {
     return false;
   }
 
-  /// Enable notifications by subscribing to the global topic
+  /// Enable notifications by subscribing to the global topic, then fire a local
+  /// notification so the player can see an alert land the moment they opt in.
   Future<void> enableNotifications() async {
     await _subscribeToGlobalTopic();
+    await showEnabledConfirmation();
+  }
+
+  /// Show a local notification confirming daily-challenge alerts are on.
+  Future<void> showEnabledConfirmation() async {
+    try {
+      await _localNotifications.show(
+        _enabledConfirmationId,
+        'Notifications on 🔔',
+        "You're all set — we'll ping you when a new daily word drops.",
+        _channelSpecifics,
+        payload: json.encode({'action': kNewChallengeAction}),
+      );
+    } catch (e) {
+      print('❌ Error showing enable confirmation: $e');
+    }
   }
 
   /// Disable notifications by unsubscribing from the global topic

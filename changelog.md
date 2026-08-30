@@ -1,6 +1,7 @@
 ### v0.4.4+18 (Unpublished)
 
--
+- Update Android compile and target sdk version to 36
+- Minor fix to settings UI
 
 ### v0.4.3+17 Oct 09, 2025
 

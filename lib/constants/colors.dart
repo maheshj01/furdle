@@ -11,6 +11,13 @@ class AppColors {
   static const Color grey = Colors.grey;
   static Color yellow = Colors.yellow[800]!;
 
+  /// Canonical word-tile palette used for the game's feedback language.
+  /// Reused in the UI (e.g. the settings wordmark) so the app reads as a
+  /// word game the moment a tile appears.
+  static const Color tileGreen = Color(0xFF6AAA64); // correct letter, right spot
+  static const Color tileYellow = Color(0xFFC9B458); // correct letter, wrong spot
+  static const Color tileAbsent = Color(0xFF787C7E); // letter not in the word
+
   /// Dark Mode - Modern Design Standards 2024
   // Based on Material Design 3 and modern accessibility guidelines
 
