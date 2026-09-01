@@ -42,10 +42,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    slideController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
+    slideController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     slideAnimation = Tween<double>(begin: 0, end: 1).animate(slideController);
 
     // Grid scale animation with spring effect
@@ -53,12 +50,10 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    gridScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: gridScaleController,
-        curve: Curves.elasticOut,
-      ),
-    );
+    gridScaleAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: gridScaleController, curve: Curves.elasticOut));
 
     // Start animations
     slideController.forward();
@@ -112,10 +107,7 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
         _handleGameOver(updatedGameState);
       } else {
         if (result == SubmitWordResult.incomplete || result == SubmitWordResult.invalid) {
-          SettingsSnackBar.showError(
-            context,
-            message: result.friendlyString,
-          );
+          SettingsSnackBar.showError(context, message: result.friendlyString);
           shakeFurdle();
         }
       }
@@ -169,16 +161,20 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
   }
 
   void _initShakeAnimation() {
-    _shakeController =
-        AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
-    _shakeAnimation = Tween(begin: 0.0, end: 24.0)
-        .chain(CurveTween(curve: Curves.elasticIn))
-        .animate(_shakeController)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _shakeController.reverse();
-        }
-      });
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _shakeAnimation =
+        Tween(
+            begin: 0.0,
+            end: 24.0,
+          ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController)
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              _shakeController.reverse();
+            }
+          });
   }
 
   void shakeFurdle() {
@@ -263,25 +259,28 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                 children: [
                   SizedBox(height: 60),
                   Expanded(
-                      child: AnimatedBuilder(
-                          animation: _shakeAnimation,
-                          builder: (BuildContext context, Widget? child) {
-                            final bool isAnimating = _shakeController.isAnimating;
-                            final padding = isAnimating ? 24 : 0;
-                            return Container(
-                                padding: EdgeInsets.only(
-                                    left: _shakeAnimation.value + padding,
-                                    right: padding - _shakeAnimation.value),
-                                child: ScaleTransition(
-                                  scale: gridScaleAnimation,
-                                  child: GridBoard(),
-                                ));
-                          })),
+                    child: AnimatedBuilder(
+                      animation: _shakeAnimation,
+                      builder: (BuildContext context, Widget? child) {
+                        final bool isAnimating = _shakeController.isAnimating;
+                        final padding = isAnimating ? 24 : 0;
+                        return Container(
+                          padding: EdgeInsets.only(
+                            left: _shakeAnimation.value + padding,
+                            right: padding - _shakeAnimation.value,
+                          ),
+                          child: ScaleTransition(scale: gridScaleAnimation, child: GridBoard()),
+                        );
+                      },
+                    ),
+                  ),
                   Padding(
                     padding: EdgeInsets.only(bottom: 50),
                     child: SlideTransition(
-                      position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-                          .animate(slideController),
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 1),
+                        end: Offset.zero,
+                      ).animate(slideController),
                       child: FurdleKeyboard(
                         onKeyPressed: (String character, KeyEventType event, bool physicalKey) {
                           handleKeyPress(character, event, physicalKey);
@@ -313,22 +312,25 @@ class _HomeState extends ConsumerState<Home> with TickerProviderStateMixin {
                 child: TitleBar(
                   title: widget.title,
                   leading: IconButton(
-                      onPressed: () {
-                        context.go(HelpPage.path);
-                      },
-                      icon: const Icon(Icons.help)),
+                    onPressed: () {
+                      context.go(HelpPage.path);
+                    },
+                    icon: const Icon(Icons.help),
+                  ),
                   actions: [
                     //leaderboard
                     IconButton(
-                        onPressed: () {
-                          context.push(StreakPage.path);
-                        },
-                        icon: const Icon(Icons.leaderboard)),
+                      onPressed: () {
+                        context.push(StreakPage.path);
+                      },
+                      icon: const Icon(Icons.leaderboard),
+                    ),
                     IconButton(
-                        onPressed: () {
-                          context.push(SettingsPage.path);
-                        },
-                        icon: const Icon(Icons.settings)),
+                      onPressed: () {
+                        context.push(SettingsPage.path);
+                      },
+                      icon: const Icon(Icons.settings),
+                    ),
                   ],
                 ),
               ),
