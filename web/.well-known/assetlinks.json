@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.wml.furdle",
+      "sha256_cert_fingerprints": [
+        "85:6D:7A:8C:2A:E5:B3:68:0B:01:EB:79:61:76:67:F9:4E:87:D9:C2:B5:53:85:91:CA:A1:7E:3A:31:9E:85:DC"
+      ]
+    }
+  }
+]
