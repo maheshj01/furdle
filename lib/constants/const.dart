@@ -3,7 +3,7 @@ class Constants {
 
   static const String gameUrl = 'https://furdle.web.app';
 
-  static const String appVersion = '0.4.4+18';
+  static const String appVersion = '0.4.4+19';
 
   static const String dateFormatter = 'MMM dd, y';
 
